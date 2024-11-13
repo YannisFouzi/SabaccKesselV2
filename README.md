@@ -1,75 +1,55 @@
-
 # Sabacc de Kessel
 
-**Deploy with Vercel**: [https://sabacc.fouzi-dev.fr/](https://sabacc.fouzi-dev.fr/)
+Un jeu de cartes inspiré du Sabacc, implémenté avec React.
 
-## Description
+## Technologies utilisées
 
-Sabacc de Kessel est un jeu de cartes en ligne inspiré de l'univers de Star Wars. Ce projet est développé en React et utilise Vercel pour le déploiement continu. Le but du jeu est de réduire la valeur de votre main pour obtenir une paire parfaite de Sabacc, ou avoir la meilleure main après trois tours.
-
-## Fonctionnalités
-
-- **Multi-joueurs** : Le jeu peut être joué par 4 joueurs, avec 3 joueurs simulés par l'ordinateur. (Pour le moment aucun jeu n'est caché)
-- **Gestion des jetons** : Les joueurs misent des jetons pour piocher des cartes et améliorer leurs mains. (Pour le moment les jetons sont fixés à 6)
-- **Différents types de cartes** : Sable, sang, imposteur, et sylop.
-- **Déploiement continu** : Déployé automatiquement sur Vercel à chaque modification.
-
-## Fonctionnalités à venir
-
-- Mise à jour de la fonctionnalité de l'imposteur (dés)
-- Choix du nombre de jetons
-- Cacher le jeu des joueurs qui ne jouent pas
-- Ajout d'un mode solo où il jouera contre 3 bots
-- Ajout de jokers
-
-## Aperçu
-
-![Capture d'écran du jeu](https://image.noelshack.com/fichiers/2024/35/6/1725099402-capture-ecran-sabacc-kessel.png)
+- React
+- Tailwind CSS
+- shadcn/ui
 
 ## Installation
 
-Pour exécuter ce projet localement, suivez ces étapes :
+1. Clonez le repository
+```bash
+git clone [URL de votre repository]
+```
 
-1. Clonez le dépôt :
-   ```bash
-   git clone https://github.com/YannisFouzi/SabaccKessel.git
-   ```
+2. Installez les dépendances
+```bash
+npm install
+```
 
-2. Accédez au répertoire du projet :
-   ```bash
-   cd SabaccKessel
-   ```
+3. Lancez l'application en mode développement
+```bash
+npm start
+```
 
-3. Installez les dépendances :
-   ```bash
-   npm install
-   ```
+## Règles du jeu
 
-4. Exécutez l'application en mode développement :
-   ```bash
-   npm start
-   ```
+### Base du jeu
+- 3 à 4 joueurs
+- Chaque joueur commence avec un nombre défini de jetons
+- Deux familles de cartes : Sable et Sang
+- Chaque joueur doit avoir une carte de chaque famille
 
-   Ouvrez [http://localhost:3000](http://localhost:3000) pour voir l'application dans votre navigateur.
+### Types de cartes
+- Cartes normales (valeurs de 1 à 6)
+- Sylops (adoptent la valeur de l'autre carte)
+- Imposteurs (valeur déterminée par un lancer de dés)
 
-## Déploiement
+### Déroulement
+1. Une manche se joue en 3 tours
+2. À chaque tour, un joueur peut :
+   - Piocher une carte (coûte 1 jeton)
+   - Passer son tour
+3. La manche se termine quand :
+   - Les 3 tours sont terminés
+   - Tous les joueurs passent consécutivement
 
-Ce projet est déployé en continu sur [Vercel](https://vercel.com). Chaque commit poussé sur la branche `master` déclenche un nouveau déploiement.
-
-## Technologies Utilisées
-
-- **React** - Pour la construction de l'interface utilisateur.
-- **Vercel** - Pour le déploiement et l'hébergement.
-- **GitHub** - Pour la gestion du code source.
-
-## Contribuer
-
-Les contributions sont les bienvenues ! Si vous souhaitez améliorer ce projet ou corriger des bugs, n'hésitez pas à soumettre une pull request.
-
-## Auteur
-
-- **Yannis Fouzi** - [GitHub](https://github.com/YannisFouzi)
-
-## Licence
-
-Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+### Score
+- L'objectif est d'avoir la plus petite paire de cartes
+- Une paire de Sylops est la meilleure main possible
+- Les perdants perdent des jetons selon leur main :
+  - 1 jeton pour une paire
+  - X jetons pour une différence de X
