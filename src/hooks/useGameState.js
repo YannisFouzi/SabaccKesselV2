@@ -1,0 +1,609 @@
+import { useEffect, useState } from "react";
+import {
+  CARD_FAMILIES,
+  CARD_TYPES,
+  DECK_STRUCTURE,
+  GAME_STATES,
+} from "../constants/gameConstants";
+
+const useGameState = (initialPlayerCount, initialTokenCount) => {
+  // États du jeu
+  const [gameState, setGameState] = useState(GAME_STATES.SETUP);
+  const [players, setPlayers] = useState([]);
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+  const [round, setRound] = useState(1);
+  const [turn, setTurn] = useState(1);
+  const [consecutivePasses, setConsecutivePasses] = useState(0);
+  const [diceResults, setDiceResults] = useState(null);
+  const [winners, setWinners] = useState([]);
+  const [pendingDrawnCard, setPendingDrawnCard] = useState(null);
+  const [pendingImpostors, setPendingImpostors] = useState([]);
+  const [currentImpostorIndex, setCurrentImpostorIndex] = useState(0);
+
+  // État des pioches
+  const [sandDecks, setSandDecks] = useState({
+    visible: [],
+    hidden: [],
+  });
+
+  const [bloodDecks, setBloodDecks] = useState({
+    visible: [],
+    hidden: [],
+  });
+
+  // Initialisation du jeu et nouvelle manche
+  useEffect(() => {
+    if (gameState === GAME_STATES.SETUP) {
+      initializeGame();
+    }
+  }, [gameState]); // On écoute les changements de gameState
+
+  // Création et mélange des paquets
+  const createAndShuffleDecks = () => {
+    const createDeck = (family) => {
+      const deck = [];
+      const structure = DECK_STRUCTURE[family];
+
+      // Ajout des cartes normales
+      structure.normalCards.forEach((value) => {
+        deck.push({
+          id: `${family}-normal-${value}-${Date.now()}`, // Ajout de timestamp pour l'unicité
+          type: CARD_TYPES.NORMAL,
+          family,
+          value,
+        });
+      });
+
+      // Ajout des sylops
+      for (let i = 0; i < structure.sylopCount; i++) {
+        deck.push({
+          id: `${family}-sylop-${i}-${Date.now()}`,
+          type: CARD_TYPES.SYLOP,
+          family,
+          value: null,
+        });
+      }
+
+      // Ajout des imposteurs
+      for (let i = 0; i < structure.impostorCount; i++) {
+        deck.push({
+          id: `${family}-impostor-${i}-${Date.now()}`,
+          type: CARD_TYPES.IMPOSTOR,
+          family,
+          value: null,
+        });
+      }
+
+      // Mélange du paquet
+      return deck.sort(() => Math.random() - 0.5);
+    };
+
+    return {
+      sandDeck: createDeck(CARD_FAMILIES.SAND),
+      bloodDeck: createDeck(CARD_FAMILIES.BLOOD),
+    };
+  };
+
+  // Fonction utilitaire pour tirer une carte d'un paquet
+  const drawCardFromDeck = (deck) => {
+    if (!deck || deck.length === 0) return null;
+    return deck.shift();
+  };
+
+  // Initialisation du jeu et nouvelle manche
+  const initializeGame = () => {
+    // Création ou récupération des joueurs
+    const newPlayers =
+      players.length > 0
+        ? [...players]
+        : Array(initialPlayerCount)
+            .fill(null)
+            .map((_, index) => ({
+              id: index + 1,
+              name: `Joueur ${index + 1}`,
+              tokens: initialTokenCount,
+            }));
+
+    // Création et mélange des paquets
+    const { sandDeck, bloodDeck } = createAndShuffleDecks();
+
+    // Distribution des nouvelles cartes
+    newPlayers.forEach((player) => {
+      player.hand = [drawCardFromDeck(sandDeck), drawCardFromDeck(bloodDeck)];
+    });
+
+    // Mise en place des pioches visibles
+    setSandDecks({
+      visible: [drawCardFromDeck(sandDeck)],
+      hidden: sandDeck,
+    });
+
+    setBloodDecks({
+      visible: [drawCardFromDeck(bloodDeck)],
+      hidden: bloodDeck,
+    });
+
+    // Réinitialisation de tous les états nécessaires
+    setPendingDrawnCard(null);
+    setDiceResults(null);
+    setConsecutivePasses(0);
+    setCurrentPlayerIndex(0);
+    setTurn(1);
+    setPlayers(newPlayers);
+
+    // Passer à l'état PLAYER_TURN
+    setGameState(GAME_STATES.PLAYER_TURN);
+  };
+
+  // Passer au joueur suivant
+  const nextPlayer = () => {
+    const nextIndex = (currentPlayerIndex + 1) % players.length;
+
+    if (nextIndex === 0) {
+      // Si on a fait le tour complet
+      if (turn >= 3) {
+        // Vérifier d'abord les imposteurs avant de passer à la révélation
+        if (checkForImpostors()) {
+          // Si il y a des imposteurs, la phase de dés sera déclenchée
+          // et la révélation viendra après
+          return;
+        }
+        setGameState(GAME_STATES.REVEAL);
+      } else {
+        // Incrémenter le tour avant de changer de joueur
+        setTurn((prevTurn) => prevTurn + 1);
+      }
+    }
+
+    setCurrentPlayerIndex(nextIndex);
+  };
+
+  // Pioche d'une carte
+  const drawCard = (family, isVisible, card = null) => {
+    const currentPlayer = players[currentPlayerIndex];
+
+    // Vérifications préalables
+    if (pendingDrawnCard) return false;
+    if (currentPlayer.tokens < 1) return false;
+    if (gameState !== GAME_STATES.PLAYER_TURN) return false;
+
+    let drawnCard = card;
+
+    if (isVisible) {
+      if (family === CARD_FAMILIES.SAND) {
+        setSandDecks((prev) => ({
+          ...prev,
+          visible: [],
+        }));
+      } else {
+        setBloodDecks((prev) => ({
+          ...prev,
+          visible: [],
+        }));
+      }
+    } else {
+      const sourceDeck =
+        family === CARD_FAMILIES.SAND ? sandDecks.hidden : bloodDecks.hidden;
+      if (sourceDeck.length === 0) return false;
+
+      drawnCard = sourceDeck[0];
+      if (family === CARD_FAMILIES.SAND) {
+        setSandDecks((prev) => ({
+          ...prev,
+          hidden: prev.hidden.slice(1),
+        }));
+      } else {
+        setBloodDecks((prev) => ({
+          ...prev,
+          hidden: prev.hidden.slice(1),
+        }));
+      }
+    }
+
+    // Déduire le jeton
+    setPlayers(
+      players.map((player) =>
+        player.id === currentPlayer.id
+          ? { ...player, tokens: player.tokens - 1 }
+          : player
+      )
+    );
+
+    setPendingDrawnCard(drawnCard);
+    setConsecutivePasses(0);
+    return true;
+  };
+
+  // Gestion de la défausse
+  const handleDiscard = (cardToDiscard) => {
+    if (!pendingDrawnCard || !cardToDiscard) return false;
+
+    const currentPlayer = players[currentPlayerIndex];
+
+    // Si on défausse la carte piochée
+    if (cardToDiscard.id === pendingDrawnCard.id) {
+      // Mettre la carte dans la pioche visible correspondante
+      if (cardToDiscard.family === CARD_FAMILIES.SAND) {
+        setSandDecks((prev) => ({
+          ...prev,
+          visible: [cardToDiscard],
+        }));
+      } else {
+        setBloodDecks((prev) => ({
+          ...prev,
+          visible: [cardToDiscard],
+        }));
+      }
+    }
+    // Si on défausse une carte de la main
+    else {
+      // Remplacer la carte défaussée par la carte piochée
+      const updatedHand = currentPlayer.hand.map((card) =>
+        card.id === cardToDiscard.id ? pendingDrawnCard : card
+      );
+
+      // Mettre la carte défaussée dans la pioche visible
+      if (cardToDiscard.family === CARD_FAMILIES.SAND) {
+        setSandDecks((prev) => ({
+          ...prev,
+          visible: [cardToDiscard],
+        }));
+      } else {
+        setBloodDecks((prev) => ({
+          ...prev,
+          visible: [cardToDiscard],
+        }));
+      }
+
+      setPlayers(
+        players.map((player) =>
+          player.id === currentPlayer.id
+            ? { ...player, hand: updatedHand }
+            : player
+        )
+      );
+    }
+
+    setPendingDrawnCard(null);
+    nextPlayer();
+    return true;
+  };
+
+  // Passer son tour
+  // Passer son tour
+  const passTurn = () => {
+    // On vérifie uniquement qu'il n'y a pas de carte en attente
+    // et qu'on est dans la bonne phase du jeu
+    if (pendingDrawnCard) return false;
+    if (gameState !== GAME_STATES.PLAYER_TURN) return false;
+
+    setConsecutivePasses((prev) => {
+      const newCount = prev + 1;
+      // Si tous les joueurs ont passé
+      if (newCount === players.length) {
+        // Vérifier les imposteurs avant la révélation
+        if (checkForImpostors()) {
+          return 0;
+        }
+        setGameState(GAME_STATES.REVEAL);
+        return 0;
+      }
+      return newCount;
+    });
+
+    nextPlayer();
+    return true;
+  };
+
+  // Lancer les dés
+  const rollDice = () => {
+    if (gameState !== GAME_STATES.DICE_ROLL) return false;
+
+    const dice1 = Math.floor(Math.random() * 6) + 1;
+    const dice2 = Math.floor(Math.random() * 6) + 1;
+    setDiceResults([dice1, dice2]);
+    return true;
+  };
+
+  // Sélectionner la valeur d'un imposteur
+  const selectImpostorValue = (cardId, value) => {
+    if (!diceResults || !diceResults.includes(value)) return false;
+
+    setPlayers(
+      players.map((player) => ({
+        ...player,
+        hand: player.hand.map((card) =>
+          card.id === cardId ? { ...card, value } : card
+        ),
+      }))
+    );
+
+    return true;
+  };
+
+  const checkForImpostors = () => {
+    const impostorsToHandle = [];
+
+    players.forEach((player) => {
+      player.hand.forEach((card) => {
+        if (card.type === CARD_TYPES.IMPOSTOR && !card.value) {
+          impostorsToHandle.push({
+            playerId: player.id,
+            cardId: card.id,
+            family: card.family,
+          });
+        }
+      });
+    });
+
+    if (impostorsToHandle.length > 0) {
+      setPendingImpostors(impostorsToHandle);
+      setCurrentImpostorIndex(0);
+      setGameState(GAME_STATES.DICE_ROLL);
+      return true;
+    }
+
+    return false;
+  };
+
+  // Gérer la sélection de la valeur pour un imposteur
+  // Gérer la sélection de la valeur pour un imposteur
+  const handleImpostorValue = (value) => {
+    if (!pendingImpostors[currentImpostorIndex]) return false;
+
+    const { playerId, cardId } = pendingImpostors[currentImpostorIndex];
+
+    // Mettre à jour la valeur de l'imposteur
+    setPlayers(
+      players.map((player) => {
+        if (player.id === playerId) {
+          return {
+            ...player,
+            hand: player.hand.map((card) =>
+              card.id === cardId ? { ...card, value } : card
+            ),
+          };
+        }
+        return player;
+      })
+    );
+
+    // Passer à l'imposteur suivant ou terminer
+    if (currentImpostorIndex + 1 < pendingImpostors.length) {
+      setCurrentImpostorIndex((prev) => prev + 1);
+      setDiceResults(null); // Réinitialiser les dés pour le prochain lancer
+    } else {
+      // Ajouter un petit délai avant de passer à la révélation
+      setTimeout(() => {
+        setGameState(GAME_STATES.REVEAL);
+        setPendingImpostors([]);
+        setCurrentImpostorIndex(0);
+        setDiceResults(null);
+      }, 1000);
+    }
+
+    return true;
+  };
+
+  // Calculer la valeur d'une main
+  const calculateHandValue = (hand) => {
+    if (hand.length !== 2) return Infinity;
+
+    const [card1, card2] = hand;
+
+    // Pour les sylops
+    if (card1.type === CARD_TYPES.SYLOP && card2.type === CARD_TYPES.SYLOP) {
+      return 0; // Sabacc pur
+    }
+    if (card1.type === CARD_TYPES.SYLOP || card2.type === CARD_TYPES.SYLOP) {
+      return 0; // Le sylop prend la valeur de l'autre carte
+    }
+
+    // Pour les imposteurs
+    if (
+      (card1.type === CARD_TYPES.IMPOSTOR && !card1.value) ||
+      (card2.type === CARD_TYPES.IMPOSTOR && !card2.value)
+    ) {
+      return null; // Valeur non encore déterminée
+    }
+
+    return Math.abs(card1.value - card2.value);
+  };
+
+  // Types de résultats possibles pour une main
+  const HAND_TYPES = {
+    PURE_SABACC: "PURE_SABACC", // Paire de Sylops
+    PAIR: "PAIR", // Paire normale ou Sylop + carte
+    DIFFERENCE: "DIFFERENCE", // Main avec différence
+  };
+
+  // Détermine si une carte est un Sylop
+  const isSylop = (card) => card.type === CARD_TYPES.SYLOP;
+
+  // Détermine la valeur finale d'une main
+  const getHandValue = (hand) => {
+    const [card1, card2] = hand;
+
+    // Cas 1: Paire de Sylops (meilleure main possible)
+    if (isSylop(card1) && isSylop(card2)) {
+      return {
+        type: HAND_TYPES.PURE_SABACC,
+        value: 0,
+        pairValue: 0,
+      };
+    }
+
+    // Cas 2: Main avec un Sylop
+    if (isSylop(card1)) {
+      return {
+        type: HAND_TYPES.PAIR,
+        value: 0,
+        pairValue: card2.value,
+      };
+    }
+    if (isSylop(card2)) {
+      return {
+        type: HAND_TYPES.PAIR,
+        value: 0,
+        pairValue: card1.value,
+      };
+    }
+
+    // Cas 3: Paire naturelle
+    if (card1.value === card2.value) {
+      return {
+        type: HAND_TYPES.PAIR,
+        value: 0,
+        pairValue: card1.value,
+      };
+    }
+
+    // Cas 4: Main avec différence
+    return {
+      type: HAND_TYPES.DIFFERENCE,
+      value: Math.abs(card1.value - card2.value),
+      pairValue: null,
+    };
+  };
+
+  // Compare deux mains
+  const compareHands = (hand1, hand2) => {
+    const value1 = getHandValue(hand1);
+    const value2 = getHandValue(hand2);
+
+    // Si les types sont différents
+    if (value1.type !== value2.type) {
+      // PURE_SABACC > PAIR > DIFFERENCE
+      const typeOrder = [
+        HAND_TYPES.PURE_SABACC,
+        HAND_TYPES.PAIR,
+        HAND_TYPES.DIFFERENCE,
+      ];
+      return typeOrder.indexOf(value2.type) - typeOrder.indexOf(value1.type);
+    }
+
+    // Si même type
+    switch (value1.type) {
+      case HAND_TYPES.PURE_SABACC:
+        return 0; // Égalité
+
+      case HAND_TYPES.PAIR:
+        // Plus petite paire gagne
+        if (value1.pairValue < value2.pairValue) return 1;
+        if (value1.pairValue > value2.pairValue) return -1;
+        return 0; // Égalité si même valeur de paire
+
+      case HAND_TYPES.DIFFERENCE:
+        // Plus petite différence gagne
+        if (value1.value < value2.value) return 1;
+        if (value1.value > value2.value) return -1;
+        return 0;
+
+      default:
+        return 0;
+    }
+  };
+
+  // Modification de la fonction endRound
+  const endRound = () => {
+    // Calculer les valeurs finales des mains
+    const playerResults = players.map((player) => ({
+      ...player,
+      handValue: getHandValue(player.hand),
+      tokensBet: initialTokenCount - player.tokens,
+    }));
+
+    // Trouver la meilleure main
+    let bestHand = playerResults[0];
+    playerResults.slice(1).forEach((player) => {
+      const comparison = compareHands(player.hand, bestHand.hand);
+      if (comparison > 0) {
+        bestHand = player;
+      }
+    });
+
+    // Trouver tous les gagnants (peut y avoir égalité)
+    const winners = playerResults.filter(
+      (player) => compareHands(player.hand, bestHand.hand) === 0
+    );
+
+    // Appliquer les pertes de jetons et restituer les mises aux gagnants
+    const updatedPlayers = playerResults.map((player) => {
+      const isWinner = winners.some((w) => w.id === player.id);
+
+      if (isWinner) {
+        // Les gagnants récupèrent leurs jetons misés
+        return {
+          ...player,
+          tokens: player.tokens + player.tokensBet,
+        };
+      } else {
+        // Les perdants :
+        // 1. Ne récupèrent pas leurs jetons misés
+        // 2. Perdent des jetons de pénalité selon leur main
+        let penaltyTokens = 0;
+
+        if (player.handValue.type === HAND_TYPES.PAIR) {
+          // Si le perdant a une paire, il perd 1 jeton
+          penaltyTokens = 1;
+        } else if (player.handValue.type === HAND_TYPES.DIFFERENCE) {
+          // Si le perdant a une différence, il perd sa différence
+          penaltyTokens = player.handValue.value;
+        }
+
+        return {
+          ...player,
+          tokens: Math.max(0, player.tokens - penaltyTokens),
+        };
+      }
+    });
+
+    // Éliminer les joueurs sans jetons
+    const remainingPlayers = updatedPlayers.filter(
+      (player) => player.tokens > 0
+    );
+
+    if (remainingPlayers.length <= 1) {
+      setGameState(GAME_STATES.GAME_OVER);
+      setWinners(remainingPlayers);
+    } else {
+      setPlayers(remainingPlayers);
+      setRound((prev) => prev + 1);
+      setGameState(GAME_STATES.SETUP);
+    }
+  };
+
+  return {
+    // État du jeu
+    gameState,
+    setGameState,
+    players,
+    currentPlayerIndex,
+    round,
+    turn,
+    consecutivePasses,
+    diceResults,
+    winners,
+    pendingDrawnCard,
+    sandDecks,
+    bloodDecks,
+    pendingImpostors,
+    handleImpostorValue,
+    currentImpostorIndex,
+    calculateHandValue,
+
+    // Actions du jeu
+    drawCard,
+    handleDiscard,
+    passTurn,
+    rollDice,
+    selectImpostorValue,
+    endRound,
+    compareHands,
+
+    // État de la partie
+    isGameOver: gameState === GAME_STATES.GAME_OVER,
+  };
+};
+
+export default useGameState;
