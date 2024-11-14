@@ -176,15 +176,64 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
                 <>
                   <div>Phase des Imposteurs</div>
                   <div className="text-sm text-gray-600 mt-1">
-                    {getCurrentImpostorPlayer()?.name} -
+                    {/* Montrer toujours le joueur actuel qui doit choisir un imposteur */}
+                    {
+                      players.find(
+                        (p) =>
+                          p.id ===
+                          pendingImpostors[currentImpostorIndex]?.playerId
+                      )?.name
+                    }{" "}
+                    -
                     {pendingImpostors[currentImpostorIndex]?.family ===
                     CARD_FAMILIES.SAND
-                      ? "Imposteur de Sable"
-                      : "Imposteur de Sang"}
+                      ? " Imposteur de Sable"
+                      : " Imposteur de Sang"}
                   </div>
                 </>
               )}
             </h3>
+
+            <div className="space-y-4 mb-4">
+              {players
+                .sort((a, b) => a.id - b.id) // Afficher les joueurs dans l'ordre
+                .map((player) => (
+                  <div
+                    key={player.id}
+                    className={`
+              p-4 rounded-lg border 
+              ${
+                player.id === pendingImpostors[currentImpostorIndex]?.playerId
+                  ? "border-purple-500 bg-purple-50"
+                  : "border-gray-200"
+              }
+            `}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{player.name}</span>
+                      <div className="flex space-x-2">
+                        {player.hand.map((card) => (
+                          <div
+                            key={card.id}
+                            className={`
+                        w-12 h-16 border rounded flex items-center justify-center
+                        ${
+                          card.family === CARD_FAMILIES.SAND
+                            ? "bg-yellow-100 border-yellow-800"
+                            : "bg-red-100 border-red-800"
+                        }
+                      `}
+                          >
+                            {card.type === CARD_TYPES.IMPOSTOR && !card.value
+                              ? "I"
+                              : card.value || "?"}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
 
             {diceResults ? (
               <div className="flex flex-col items-center">

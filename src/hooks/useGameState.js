@@ -338,17 +338,20 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   const checkForImpostors = () => {
     const impostorsToHandle = [];
 
-    players.forEach((player) => {
-      player.hand.forEach((card) => {
-        if (card.type === CARD_TYPES.IMPOSTOR && !card.value) {
-          impostorsToHandle.push({
-            playerId: player.id,
-            cardId: card.id,
-            family: card.family,
-          });
-        }
+    // Scanner les joueurs dans l'ordre (1, 2, 3...)
+    players
+      .sort((a, b) => a.id - b.id) // Trier les joueurs par ID
+      .forEach((player) => {
+        player.hand.forEach((card) => {
+          if (card.type === CARD_TYPES.IMPOSTOR && !card.value) {
+            impostorsToHandle.push({
+              playerId: player.id,
+              cardId: card.id,
+              family: card.family,
+            });
+          }
+        });
       });
-    });
 
     if (impostorsToHandle.length > 0) {
       setPendingImpostors(impostorsToHandle);
