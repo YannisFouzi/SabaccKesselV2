@@ -121,49 +121,33 @@ export const compareHands = (hand1, hand2) => {
       HAND_TYPES.PAIR,
       HAND_TYPES.DIFFERENCE,
     ];
-    const index1 = typeOrder.indexOf(value1.type);
-    const index2 = typeOrder.indexOf(value2.type);
-    if (index1 < index2) return 1;
-    if (index1 > index2) return -1;
+    return typeOrder.indexOf(value2.type) - typeOrder.indexOf(value1.type);
   }
 
   // Si même type
   switch (value1.type) {
     case HAND_TYPES.PURE_SABACC:
-      return 0; // Égalité pour deux paires de Sylops
+      return 0; // Égalité
 
     case HAND_TYPES.PAIR:
-      // Plus petite paire gagne TOUJOURS
-      if (value1.pairValue < value2.pairValue) return 1; // hand1 gagne
-      if (value1.pairValue > value2.pairValue) return -1; // hand2 gagne
-      return 0; // égalité si même valeur
+      // Plus petite paire gagne
+      if (value1.pairValue < value2.pairValue) return 1;
+      if (value1.pairValue > value2.pairValue) return -1;
+      return 0; // Égalité si même valeur de paire
 
     case HAND_TYPES.DIFFERENCE:
       // D'abord comparer les différences
       if (value1.value < value2.value) return 1;
       if (value1.value > value2.value) return -1;
 
-      // Si même différence, comparer les plus petites cartes
-      const minCard1 = Math.min(
-        hand1[0].value || Infinity,
-        hand1[1].value || Infinity
-      );
-      const minCard2 = Math.min(
-        hand2[0].value || Infinity,
-        hand2[1].value || Infinity
-      );
+      // Si même différence, comparer les sommes
+      const sum1 = (hand1[0].value || 0) + (hand1[1].value || 0);
+      const sum2 = (hand2[0].value || 0) + (hand2[1].value || 0);
 
-      if (minCard1 < minCard2) return 1;
-      if (minCard1 > minCard2) return -1;
+      if (sum1 < sum2) return 1; // hand1 gagne car somme plus petite
+      if (sum1 > sum2) return -1; // hand2 gagne car somme plus petite
 
-      // Si même petite carte, comparer les grandes cartes
-      const maxCard1 = Math.max(hand1[0].value || 0, hand1[1].value || 0);
-      const maxCard2 = Math.max(hand2[0].value || 0, hand2[1].value || 0);
-
-      if (maxCard1 < maxCard2) return 1;
-      if (maxCard1 > maxCard2) return -1;
-
-      return 0;
+      return 0; // Égalité parfaite (même différence et même somme)
 
     default:
       return 0;

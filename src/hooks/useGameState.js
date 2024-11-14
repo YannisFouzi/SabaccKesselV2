@@ -4,6 +4,9 @@ import {
   CARD_TYPES,
   DECK_STRUCTURE,
   GAME_STATES,
+  HAND_TYPES,
+  compareHands,
+  getHandValue,
 } from "../constants/gameConstants";
 
 const useGameState = (initialPlayerCount, initialTokenCount) => {
@@ -419,100 +422,6 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     }
 
     return Math.abs(card1.value - card2.value);
-  };
-
-  // Types de résultats possibles pour une main
-  const HAND_TYPES = {
-    PURE_SABACC: "PURE_SABACC", // Paire de Sylops
-    PAIR: "PAIR", // Paire normale ou Sylop + carte
-    DIFFERENCE: "DIFFERENCE", // Main avec différence
-  };
-
-  // Détermine si une carte est un Sylop
-  const isSylop = (card) => card.type === CARD_TYPES.SYLOP;
-
-  // Détermine la valeur finale d'une main
-  const getHandValue = (hand) => {
-    const [card1, card2] = hand;
-
-    // Cas 1: Paire de Sylops (meilleure main possible)
-    if (isSylop(card1) && isSylop(card2)) {
-      return {
-        type: HAND_TYPES.PURE_SABACC,
-        value: 0,
-        pairValue: 0,
-      };
-    }
-
-    // Cas 2: Main avec un Sylop
-    if (isSylop(card1)) {
-      return {
-        type: HAND_TYPES.PAIR,
-        value: 0,
-        pairValue: card2.value,
-      };
-    }
-    if (isSylop(card2)) {
-      return {
-        type: HAND_TYPES.PAIR,
-        value: 0,
-        pairValue: card1.value,
-      };
-    }
-
-    // Cas 3: Paire naturelle
-    if (card1.value === card2.value) {
-      return {
-        type: HAND_TYPES.PAIR,
-        value: 0,
-        pairValue: card1.value,
-      };
-    }
-
-    // Cas 4: Main avec différence
-    return {
-      type: HAND_TYPES.DIFFERENCE,
-      value: Math.abs(card1.value - card2.value),
-      pairValue: null,
-    };
-  };
-
-  // Compare deux mains
-  const compareHands = (hand1, hand2) => {
-    const value1 = getHandValue(hand1);
-    const value2 = getHandValue(hand2);
-
-    // Si les types sont différents
-    if (value1.type !== value2.type) {
-      // PURE_SABACC > PAIR > DIFFERENCE
-      const typeOrder = [
-        HAND_TYPES.PURE_SABACC,
-        HAND_TYPES.PAIR,
-        HAND_TYPES.DIFFERENCE,
-      ];
-      return typeOrder.indexOf(value2.type) - typeOrder.indexOf(value1.type);
-    }
-
-    // Si même type
-    switch (value1.type) {
-      case HAND_TYPES.PURE_SABACC:
-        return 0; // Égalité
-
-      case HAND_TYPES.PAIR:
-        // Plus petite paire gagne
-        if (value1.pairValue < value2.pairValue) return 1;
-        if (value1.pairValue > value2.pairValue) return -1;
-        return 0; // Égalité si même valeur de paire
-
-      case HAND_TYPES.DIFFERENCE:
-        // Plus petite différence gagne
-        if (value1.value < value2.value) return 1;
-        if (value1.value > value2.value) return -1;
-        return 0;
-
-      default:
-        return 0;
-    }
   };
 
   // Modification de la fonction endRound
