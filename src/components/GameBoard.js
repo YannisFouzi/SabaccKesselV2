@@ -19,22 +19,27 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
     turn,
     consecutivePasses,
     diceResults,
+    winners,
+    pendingDrawnCard,
     sandDecks,
     bloodDecks,
-    pendingDrawnCard,
+    pendingImpostors,
+    handleImpostorValue,
+    currentImpostorIndex,
+    calculateHandValue,
     drawCard,
     handleDiscard,
     passTurn,
     rollDice,
     selectImpostorValue,
-    isGameOver,
-    winners,
     endRound,
-    pendingImpostors,
-    handleImpostorValue,
-    currentImpostorIndex,
-    calculateHandValue,
+    isGameOver,
+    // Ajout des nouvelles props
+    getHandValue,
+    HAND_TYPES,
     compareHands,
+    startingTokens,
+    initialTokenCount,
   } = useGameState(playerCount, tokenCount);
 
   const getCurrentImpostorPlayer = () => {
@@ -221,88 +226,94 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
               Révélation des cartes
             </h2>
             <div className="space-y-4">
-              {players.map((player) => {
-                // Calculer si c'est un gagnant
-                const isWinner =
-                  compareHands(player.hand, players[currentPlayerIndex].hand) >=
-                  0;
+              {(() => {
+                // Trouver la meilleure main
+                let bestHand = players[0].hand;
+                players.slice(1).forEach((p) => {
+                  if (compareHands(p.hand, bestHand) > 0) {
+                    bestHand = p.hand;
+                  }
+                });
 
-                return (
-                  <div
-                    key={player.id}
-                    className={`flex flex-col p-4 rounded transition-colors
+                return players.map((player) => {
+                  const isWinner = compareHands(player.hand, bestHand) === 0;
+
+                  return (
+                    <div
+                      key={player.id}
+                      className={`flex flex-col p-4 rounded transition-colors
                 ${
                   isWinner
                     ? "bg-green-50 border-2 border-green-500"
                     : "bg-gray-50"
-                }
-              `}
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="font-medium flex items-center gap-2">
-                        {player.name}
-                        {isWinner && (
-                          <span className="text-green-600 text-sm font-bold">
-                            Gagnant
-                          </span>
-                        )}
+                }`}
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="font-medium flex items-center gap-2">
+                          {player.name}
+                          {isWinner && (
+                            <span className="text-green-600 text-sm font-bold">
+                              Gagnant
+                            </span>
+                          )}
+                        </div>
+                        <div>Jetons: {player.tokens}</div>
                       </div>
-                      <div>Jetons: {player.tokens}</div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="flex space-x-2">
-                        {player.hand.map((card) => (
-                          <div
-                            key={card.id}
-                            className={`
-                        w-16 h-24 border rounded-lg flex flex-col items-center justify-center p-1
-                        ${
-                          card.family === CARD_FAMILIES.SAND
-                            ? "bg-yellow-100 border-yellow-800"
-                            : "bg-red-100 border-red-800"
-                        }
-                        ${isWinner ? "ring-2 ring-green-500" : ""}
-                      `}
-                          >
-                            <div className="text-lg font-bold">
-                              {card.type === CARD_TYPES.SYLOP
-                                ? "S"
-                                : card.type === CARD_TYPES.IMPOSTOR
-                                ? card.value
-                                : card.value}
+                      <div className="flex items-center space-x-4">
+                        <div className="flex space-x-2">
+                          {player.hand.map((card) => (
+                            <div
+                              key={card.id}
+                              className={`
+                          w-16 h-24 border rounded-lg flex flex-col items-center justify-center p-1
+                          ${
+                            card.family === CARD_FAMILIES.SAND
+                              ? "bg-yellow-100 border-yellow-800"
+                              : "bg-red-100 border-red-800"
+                          }
+                          ${isWinner ? "ring-2 ring-green-500" : ""}
+                        `}
+                            >
+                              <div className="text-lg font-bold">
+                                {card.type === CARD_TYPES.SYLOP
+                                  ? "S"
+                                  : card.type === CARD_TYPES.IMPOSTOR
+                                  ? card.value
+                                  : card.value}
+                              </div>
+                              <div className="text-xs mt-1">
+                                {card.type === CARD_TYPES.SYLOP
+                                  ? "Sylop"
+                                  : card.type === CARD_TYPES.IMPOSTOR
+                                  ? "Imposteur"
+                                  : card.family === CARD_FAMILIES.SAND
+                                  ? "Sable"
+                                  : "Sang"}
+                              </div>
                             </div>
-                            <div className="text-xs mt-1">
-                              {card.type === CARD_TYPES.SYLOP
-                                ? "Sylop"
-                                : card.type === CARD_TYPES.IMPOSTOR
-                                ? "Imposteur"
-                                : card.family === CARD_FAMILIES.SAND
-                                ? "Sable"
-                                : "Sang"}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div
-                        className={`text-sm ${
-                          isWinner ? "text-green-600 font-bold" : ""
-                        }`}
-                      >
-                        {calculateHandValue(player.hand) === 0
-                          ? "Sabacc!"
-                          : `Différence: ${calculateHandValue(player.hand)}`}
+                          ))}
+                        </div>
+                        <div
+                          className={`text-sm ${
+                            isWinner ? "text-green-600 font-bold" : ""
+                          }`}
+                        >
+                          {calculateHandValue(player.hand) === 0
+                            ? "Sabacc!"
+                            : `Différence: ${calculateHandValue(player.hand)}`}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
             </div>
             <div className="mt-6 text-center">
               <button
                 className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
                 onClick={() => setGameState(GAME_STATES.END_ROUND)}
               >
-                Continuer
+                Voir les résultats
               </button>
             </div>
           </div>
@@ -317,25 +328,128 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
               Fin de la manche {round}
             </h2>
             <div className="space-y-4">
-              {players.map((player) => (
-                <div
-                  key={player.id}
-                  className="flex justify-between items-center p-4 bg-gray-50 rounded"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="font-medium">{player.name}</div>
-                    <div className="text-sm text-gray-600">
-                      {calculateHandValue(player.hand) === 0
-                        ? "Sabacc!"
-                        : `Différence: ${calculateHandValue(player.hand)}`}
+              {(() => {
+                // Trouver la meilleure main
+                let bestHand = players[0].hand;
+                players.slice(1).forEach((p) => {
+                  if (compareHands(p.hand, bestHand) > 0) {
+                    bestHand = p.hand;
+                  }
+                });
+
+                return players.map((player) => {
+                  const handValue = getHandValue(player.hand);
+                  const isWinner = compareHands(player.hand, bestHand) === 0;
+
+                  const tokensBet = startingTokens[player.id] - player.tokens;
+                  let penaltyTokens = 0;
+
+                  if (!isWinner) {
+                    if (handValue.type === HAND_TYPES.PAIR) {
+                      penaltyTokens = 1;
+                    } else if (handValue.type === HAND_TYPES.DIFFERENCE) {
+                      penaltyTokens = handValue.value;
+                    }
+                  }
+
+                  const finalTokens = isWinner
+                    ? player.tokens + tokensBet
+                    : Math.max(0, player.tokens - penaltyTokens);
+
+                  const isEliminated = finalTokens === 0;
+
+                  return (
+                    <div
+                      key={player.id}
+                      className={`
+                  p-4 rounded-lg border-2
+                  ${
+                    isWinner
+                      ? "bg-green-50 border-green-500"
+                      : isEliminated
+                      ? "bg-red-50 border-red-500"
+                      : "bg-gray-50 border-gray-200"
+                  }
+                `}
+                    >
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex justify-between items-center">
+                          <div className="font-bold text-lg flex items-center gap-2">
+                            {player.name}
+                            {isWinner && (
+                              <span className="text-green-600 text-sm">
+                                Gagnant
+                              </span>
+                            )}
+                            {isEliminated && (
+                              <span className="text-red-600 text-sm">
+                                Éliminé
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center space-x-2 text-sm">
+                          <span className="font-medium">Jetons au début:</span>
+                          <span>{startingTokens[player.id]}</span>
+                        </div>
+
+                        <div className="flex flex-col space-y-1 text-sm">
+                          {tokensBet > 0 && (
+                            <div className="flex items-center space-x-2">
+                              <span className="text-amber-600">
+                                Jetons misés:
+                              </span>
+                              <span className="text-amber-600">
+                                -{tokensBet}
+                              </span>
+                            </div>
+                          )}
+
+                          {isWinner
+                            ? tokensBet > 0 && (
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-green-600">
+                                    Jetons récupérés:
+                                  </span>
+                                  <span className="text-green-600">
+                                    +{tokensBet}
+                                  </span>
+                                </div>
+                              )
+                            : penaltyTokens > 0 && (
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-red-600">
+                                    Pénalité:
+                                  </span>
+                                  <span className="text-red-600">
+                                    -{penaltyTokens}
+                                  </span>
+                                </div>
+                              )}
+                        </div>
+
+                        <div className="flex items-center space-x-2 font-bold mt-2">
+                          <span>Jetons finaux:</span>
+                          <span
+                            className={
+                              isEliminated
+                                ? "text-red-600"
+                                : isWinner
+                                ? "text-green-600"
+                                : ""
+                            }
+                          >
+                            {finalTokens}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-sm font-medium">
-                    Jetons restants: {player.tokens}
-                  </div>
-                </div>
-              ))}
+                  );
+                });
+              })()}
             </div>
+
             <div className="mt-6 text-center">
               <button
                 className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg"

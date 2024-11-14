@@ -19,6 +19,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   const [pendingDrawnCard, setPendingDrawnCard] = useState(null);
   const [pendingImpostors, setPendingImpostors] = useState([]);
   const [currentImpostorIndex, setCurrentImpostorIndex] = useState(0);
+  const [startingTokens, setStartingTokens] = useState({});
 
   // État des pioches
   const [sandDecks, setSandDecks] = useState({
@@ -92,10 +93,13 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
 
   // Initialisation du jeu et nouvelle manche
   const initializeGame = () => {
-    // Création ou récupération des joueurs
+    // Création ou récupération des joueurs avec copie profonde
     const newPlayers =
       players.length > 0
-        ? [...players]
+        ? players.map((player) => ({
+            ...player,
+            tokens: player.tokens, // Conserver les jetons actuels
+          }))
         : Array(initialPlayerCount)
             .fill(null)
             .map((_, index) => ({
@@ -104,7 +108,14 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
               tokens: initialTokenCount,
             }));
 
-    // Création et mélange des paquets
+    // Stocker les jetons de début de manche
+    const newStartingTokens = {};
+    newPlayers.forEach((player) => {
+      newStartingTokens[player.id] = player.tokens;
+    });
+    setStartingTokens(newStartingTokens);
+
+    // Distribution des nouvelles cartes
     const { sandDeck, bloodDeck } = createAndShuffleDecks();
 
     // Distribution des nouvelles cartes
@@ -510,14 +521,14 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     const playerResults = players.map((player) => ({
       ...player,
       handValue: getHandValue(player.hand),
-      tokensBet: initialTokenCount - player.tokens,
+      initialTokens: startingTokens[player.id],
+      tokensBet: startingTokens[player.id] - player.tokens,
     }));
 
     // Trouver la meilleure main
     let bestHand = playerResults[0];
     playerResults.slice(1).forEach((player) => {
-      const comparison = compareHands(player.hand, bestHand.hand);
-      if (comparison > 0) {
+      if (compareHands(player.hand, bestHand.hand) > 0) {
         bestHand = player;
       }
     });
@@ -531,31 +542,31 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     const updatedPlayers = playerResults.map((player) => {
       const isWinner = winners.some((w) => w.id === player.id);
 
+      // On part des jetons de début de manche
+      let finalTokens = player.initialTokens;
+
       if (isWinner) {
-        // Les gagnants récupèrent leurs jetons misés
-        return {
-          ...player,
-          tokens: player.tokens + player.tokensBet,
-        };
+        // Les gagnants gardent tous leurs jetons (pas de perte de mise)
+        finalTokens = player.initialTokens;
       } else {
         // Les perdants :
-        // 1. Ne récupèrent pas leurs jetons misés
-        // 2. Perdent des jetons de pénalité selon leur main
-        let penaltyTokens = 0;
+        // 1. Perdent leurs mises
+        finalTokens -= player.tokensBet;
 
+        // 2. Perdent des jetons de pénalité
+        let penaltyTokens = 0;
         if (player.handValue.type === HAND_TYPES.PAIR) {
-          // Si le perdant a une paire, il perd 1 jeton
           penaltyTokens = 1;
         } else if (player.handValue.type === HAND_TYPES.DIFFERENCE) {
-          // Si le perdant a une différence, il perd sa différence
           penaltyTokens = player.handValue.value;
         }
-
-        return {
-          ...player,
-          tokens: Math.max(0, player.tokens - penaltyTokens),
-        };
+        finalTokens = Math.max(0, finalTokens - penaltyTokens);
       }
+
+      return {
+        ...player,
+        tokens: finalTokens,
+      };
     });
 
     // Éliminer les joueurs sans jetons
@@ -591,6 +602,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     handleImpostorValue,
     currentImpostorIndex,
     calculateHandValue,
+    startingTokens,
 
     // Actions du jeu
     drawCard,
@@ -599,7 +611,10 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     rollDice,
     selectImpostorValue,
     endRound,
+    getHandValue,
+    HAND_TYPES,
     compareHands,
+    initialTokenCount,
 
     // État de la partie
     isGameOver: gameState === GAME_STATES.GAME_OVER,

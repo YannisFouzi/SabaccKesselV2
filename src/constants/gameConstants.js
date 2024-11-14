@@ -11,6 +11,13 @@ export const CARD_FAMILIES = {
   BLOOD: "BLOOD",
 };
 
+// Types de résultats possibles pour une main
+export const HAND_TYPES = {
+  PURE_SABACC: "PURE_SABACC", // Paire de Sylops
+  PAIR: "PAIR", // Paire normale ou Sylop + carte
+  DIFFERENCE: "DIFFERENCE", // Main avec différence
+};
+
 // Configuration du jeu
 export const GAME_CONFIG = {
   MIN_PLAYERS: 3,
@@ -24,14 +31,14 @@ export const GAME_CONFIG = {
 // Structure des cartes du jeu
 export const DECK_STRUCTURE = {
   [CARD_FAMILIES.SAND]: {
-    normalCards: [1, 2, 3, 4, 5, 6], // Cartes normales de 1 à 6
-    sylopCount: 1, // Un sylop par famille
-    impostorCount: 3, // Trois imposteurs par famille
+    normalCards: [1, 2, 3, 4, 5, 6],
+    sylopCount: 1,
+    impostorCount: 3,
   },
   [CARD_FAMILIES.BLOOD]: {
-    normalCards: [1, 2, 3, 4, 5, 6], // Cartes normales de 1 à 6
-    sylopCount: 1, // Un sylop par famille
-    impostorCount: 3, // Trois imposteurs par famille
+    normalCards: [1, 2, 3, 4, 5, 6],
+    sylopCount: 1,
+    impostorCount: 3,
   },
 };
 
@@ -52,74 +59,113 @@ export const PLAYER_ACTIONS = {
   PASS: "PASS",
 };
 
-// Fonction pour calculer la différence entre deux cartes
-export const calculateHandValue = (card1, card2) => {
-  // Pour les sylops, la valeur est la même que l'autre carte
-  if (card1.type === CARD_TYPES.SYLOP) {
-    return 0; // Une paire parfaite
-  }
-  if (card2.type === CARD_TYPES.SYLOP) {
-    return 0; // Une paire parfaite
-  }
+// Détermine si une carte est un Sylop
+const isSylop = (card) => card.type === CARD_TYPES.SYLOP;
 
-  // Pour les imposteurs, la valeur sera déterminée par les dés
-  // pendant la phase de révélation
-  if (
-    card1.type === CARD_TYPES.IMPOSTOR ||
-    card2.type === CARD_TYPES.IMPOSTOR
-  ) {
-    return null; // La valeur sera déterminée plus tard
+// Détermine la valeur finale d'une main
+export const getHandValue = (hand) => {
+  const [card1, card2] = hand;
+
+  // Cas 1: Paire de Sylops (meilleure main possible)
+  if (isSylop(card1) && isSylop(card2)) {
+    return {
+      type: HAND_TYPES.PURE_SABACC,
+      value: 0,
+      pairValue: 0,
+    };
   }
 
-  return Math.abs(card1.value - card2.value);
-};
-
-// Fonction pour vérifier si une main est un Sabacc
-export const isSabacc = (card1, card2) => {
-  // Si l'une des cartes est un imposteur, on ne peut pas encore savoir
-  if (
-    card1.type === CARD_TYPES.IMPOSTOR ||
-    card2.type === CARD_TYPES.IMPOSTOR
-  ) {
-    return null;
+  // Cas 2: Main avec un Sylop
+  if (isSylop(card1)) {
+    return {
+      type: HAND_TYPES.PAIR,
+      value: 0,
+      pairValue: card2.value,
+    };
+  }
+  if (isSylop(card2)) {
+    return {
+      type: HAND_TYPES.PAIR,
+      value: 0,
+      pairValue: card1.value,
+    };
   }
 
-  // Un Sabacc pur est une paire de sylops
-  if (card1.type === CARD_TYPES.SYLOP && card2.type === CARD_TYPES.SYLOP) {
-    return "PURE";
+  // Cas 3: Paire naturelle
+  if (card1.value === card2.value) {
+    return {
+      type: HAND_TYPES.PAIR,
+      value: 0,
+      pairValue: card1.value,
+    };
   }
 
-  // Un Sabacc normal est quand la différence est de 0
-  return calculateHandValue(card1, card2) === 0;
+  // Cas 4: Main avec différence
+  return {
+    type: HAND_TYPES.DIFFERENCE,
+    value: Math.abs(card1.value - card2.value),
+    pairValue: null,
+  };
 };
 
 // Fonction pour comparer deux mains
 export const compareHands = (hand1, hand2) => {
-  const value1 = calculateHandValue(hand1.card1, hand1.card2);
-  const value2 = calculateHandValue(hand2.card1, hand2.card2);
+  const value1 = getHandValue(hand1);
+  const value2 = getHandValue(hand2);
 
-  // Si les deux mains sont des Sabaccs
-  if (
-    isSabacc(hand1.card1, hand1.card2) &&
-    isSabacc(hand2.card1, hand2.card2)
-  ) {
-    // Le Sabacc pur gagne toujours
-    if (isSabacc(hand1.card1, hand1.card2) === "PURE") return 1;
-    if (isSabacc(hand2.card1, hand2.card2) === "PURE") return -1;
-    return 0; // Égalité pour les Sabaccs normaux
+  // Si les types sont différents
+  if (value1.type !== value2.type) {
+    // PURE_SABACC > PAIR > DIFFERENCE
+    const typeOrder = [
+      HAND_TYPES.PURE_SABACC,
+      HAND_TYPES.PAIR,
+      HAND_TYPES.DIFFERENCE,
+    ];
+    const index1 = typeOrder.indexOf(value1.type);
+    const index2 = typeOrder.indexOf(value2.type);
+    if (index1 < index2) return 1;
+    if (index1 > index2) return -1;
   }
 
-  // Si une seule main est un Sabacc
-  if (isSabacc(hand1.card1, hand1.card2)) return 1;
-  if (isSabacc(hand2.card1, hand2.card2)) return -1;
+  // Si même type
+  switch (value1.type) {
+    case HAND_TYPES.PURE_SABACC:
+      return 0; // Égalité pour deux paires de Sylops
 
-  // Sinon, on compare les différences
-  if (value1 < value2) return 1;
-  if (value1 > value2) return -1;
+    case HAND_TYPES.PAIR:
+      // Plus petite paire gagne TOUJOURS
+      if (value1.pairValue < value2.pairValue) return 1; // hand1 gagne
+      if (value1.pairValue > value2.pairValue) return -1; // hand2 gagne
+      return 0; // égalité si même valeur
 
-  // En cas d'égalité de différence, on compare les valeurs des cartes
-  const minHand1 = Math.min(hand1.card1.value, hand1.card2.value);
-  const minHand2 = Math.min(hand2.card1.value, hand2.card2.value);
+    case HAND_TYPES.DIFFERENCE:
+      // D'abord comparer les différences
+      if (value1.value < value2.value) return 1;
+      if (value1.value > value2.value) return -1;
 
-  return minHand1 < minHand2 ? 1 : minHand1 > minHand2 ? -1 : 0;
+      // Si même différence, comparer les plus petites cartes
+      const minCard1 = Math.min(
+        hand1[0].value || Infinity,
+        hand1[1].value || Infinity
+      );
+      const minCard2 = Math.min(
+        hand2[0].value || Infinity,
+        hand2[1].value || Infinity
+      );
+
+      if (minCard1 < minCard2) return 1;
+      if (minCard1 > minCard2) return -1;
+
+      // Si même petite carte, comparer les grandes cartes
+      const maxCard1 = Math.max(hand1[0].value || 0, hand1[1].value || 0);
+      const maxCard2 = Math.max(hand2[0].value || 0, hand2[1].value || 0);
+
+      if (maxCard1 < maxCard2) return 1;
+      if (maxCard1 > maxCard2) return -1;
+
+      return 0;
+
+    default:
+      return 0;
+  }
 };
