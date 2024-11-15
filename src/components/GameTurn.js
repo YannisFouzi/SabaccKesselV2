@@ -19,21 +19,47 @@ const GameTurn = ({
   diceResults,
   onRollDice,
   currentPlayerTokens,
+  playerOrder,
 }) => {
   // Vérification de sécurité pour les props requises
   if (!players?.length || !currentPlayer) {
     return null;
   }
 
+  // Nouvelle fonction pour afficher l'ordre des joueurs
+  const renderPlayerOrder = () => (
+    <div className="text-sm text-gray-600 mb-2">
+      <div className="flex justify-center items-center space-x-2 flex-wrap">
+        {playerOrder.map((playerId, index) => {
+          const player = players.find((p) => p.id === playerId);
+          const isCurrentTurn = player.id === currentPlayer.id;
+          return (
+            <div
+              key={playerId}
+              className={`flex items-center ${
+                isCurrentTurn ? "text-blue-600 font-bold" : ""
+              }`}
+            >
+              {index > 0 && <span className="mx-1">→</span>}
+              <span>{player.name}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   // Rendu des informations de la manche
   const renderRoundInfo = () => (
     <div className="text-center mb-4">
       <div className="flex justify-between items-center px-4">
         <div className="text-lg font-bold">Manche {roundNumber}</div>
-        <div className="text-sm text-gray-600">
-          Tour {turnNumber}/3 {/* Affiche clairement le numéro du tour */}
-        </div>
+        <div className="text-sm text-gray-600">Tour {turnNumber}/3</div>
       </div>
+
+      {/* Ajout de l'ordre des joueurs */}
+      {renderPlayerOrder()}
+
       {consecutivePasses > 0 && (
         <div className="text-sm text-amber-600 mt-2">
           {consecutivePasses}{" "}
@@ -208,6 +234,15 @@ const GameTurn = ({
       );
     }
 
+    // Trouver le prochain joueur dans l'ordre
+    const currentPlayerIndex = playerOrder.findIndex(
+      (id) => id === currentPlayer.id
+    );
+    const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    const nextPlayer = players.find(
+      (p) => p.id === playerOrder[nextPlayerIndex]
+    );
+
     return (
       <div className="text-center mb-4">
         <div className="text-xl font-bold mb-3">
@@ -233,13 +268,18 @@ const GameTurn = ({
               </p>
             )}
 
-            {/* Le bouton de passe est toujours actif, même sans jetons */}
+            {/* Le bouton de passe est toujours actif */}
             <button
               onClick={onPass}
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
             >
               Passer le tour
             </button>
+
+            {/* Indication du prochain joueur */}
+            <div className="text-sm text-gray-600 mt-2">
+              Prochain joueur : {nextPlayer.name}
+            </div>
           </div>
         )}
       </div>

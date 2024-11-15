@@ -100,24 +100,22 @@ const PlayerHand = ({
       </div>
 
       <div className="flex justify-center space-x-4">
-        {/* Trier les cartes : Sable à gauche, Sang à droite */}
-        {hand
-          .sort((a, b) => {
-            if (
-              a.family === CARD_FAMILIES.SAND &&
-              b.family === CARD_FAMILIES.BLOOD
-            )
-              return -1;
-            if (
-              a.family === CARD_FAMILIES.BLOOD &&
-              b.family === CARD_FAMILIES.SAND
-            )
-              return 1;
-            return 0;
-          })
-          .map((card) => (
-            <Card key={card.id} card={card} />
-          ))}
+        {hand &&
+          hand
+            .sort((a, b) => {
+              if (
+                a.family === CARD_FAMILIES.SAND &&
+                b.family === CARD_FAMILIES.BLOOD
+              )
+                return -1;
+              if (
+                a.family === CARD_FAMILIES.BLOOD &&
+                b.family === CARD_FAMILIES.SAND
+              )
+                return 1;
+              return 0;
+            })
+            .map((card) => <Card key={card.id} card={card} />)}
       </div>
     </div>
   );

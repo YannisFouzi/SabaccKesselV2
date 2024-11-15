@@ -3,7 +3,6 @@ import GameBoard from "./components/GameBoard";
 import { GAME_CONFIG } from "./constants/gameConstants";
 
 const App = () => {
-  // États pour la configuration et le statut du jeu
   const [gameStarted, setGameStarted] = useState(false);
   const [playerCount, setPlayerCount] = useState(null);
   const [tokenCount, setTokenCount] = useState(null);

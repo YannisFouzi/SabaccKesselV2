@@ -44,12 +44,20 @@ export const DECK_STRUCTURE = {
 
 // États possibles du jeu
 export const GAME_STATES = {
+  INITIAL_DICE_ROLL: "INITIAL_DICE_ROLL",
   SETUP: "SETUP",
   PLAYER_TURN: "PLAYER_TURN",
   DICE_ROLL: "DICE_ROLL",
   REVEAL: "REVEAL",
   END_ROUND: "END_ROUND",
   GAME_OVER: "GAME_OVER",
+};
+
+export const INITIAL_DICE_STATES = {
+  WAITING: "WAITING", // En attente du lancer de dés
+  ROLLING: "ROLLING", // Lancer de dés en cours
+  REROLL_NEEDED: "REROLL_NEEDED", // Égalité détectée, relance nécessaire
+  COMPLETED: "COMPLETED", // Lancer de dés terminé, ordre déterminé
 };
 
 // Actions possibles pendant le tour d'un joueur

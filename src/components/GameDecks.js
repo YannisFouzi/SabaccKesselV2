@@ -4,7 +4,7 @@ import { CARD_FAMILIES, CARD_TYPES } from "../constants/gameConstants";
 const GameDecks = ({
   visibleSandCard,
   visibleBloodCard,
-  onDrawCard, // Cette fonction sera appelée avec (family, isVisible, card)
+  onDrawCard,
   currentPlayerTokens,
   isCurrentPlayerTurn,
 }) => {

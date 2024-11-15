@@ -5,15 +5,29 @@ import {
   DECK_STRUCTURE,
   GAME_STATES,
   HAND_TYPES,
+  INITIAL_DICE_STATES,
   compareHands,
   getHandValue,
 } from "../constants/gameConstants";
 
 const useGameState = (initialPlayerCount, initialTokenCount) => {
-  // États du jeu
-  const [gameState, setGameState] = useState(GAME_STATES.SETUP);
-  const [players, setPlayers] = useState([]);
+  const [gameState, setGameState] = useState(GAME_STATES.INITIAL_DICE_ROLL);
+  const [players, setPlayers] = useState(
+    Array(initialPlayerCount)
+      .fill(null)
+      .map((_, index) => ({
+        id: index + 1,
+        name: `Joueur ${index + 1}`,
+        tokens: initialTokenCount,
+      }))
+  );
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+  const [initialDiceState, setInitialDiceState] = useState(
+    INITIAL_DICE_STATES.WAITING
+  );
+  const [initialDiceResults, setInitialDiceResults] = useState({});
+  const [playersToReroll, setPlayersToReroll] = useState([]);
+  const [playerOrder, setPlayerOrder] = useState([]);
   const [round, setRound] = useState(1);
   const [turn, setTurn] = useState(1);
   const [consecutivePasses, setConsecutivePasses] = useState(0);
@@ -23,6 +37,122 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   const [pendingImpostors, setPendingImpostors] = useState([]);
   const [currentImpostorIndex, setCurrentImpostorIndex] = useState(0);
   const [startingTokens, setStartingTokens] = useState({});
+  const [rerollResults, setRerollResults] = useState({});
+
+  // lancer les dés initiaux
+  const rollInitialDice = (playerId) => {
+    if (gameState !== GAME_STATES.INITIAL_DICE_ROLL) return false;
+
+    const dice1 = Math.floor(Math.random() * 6) + 1;
+    const dice2 = Math.floor(Math.random() * 6) + 1;
+    const sum = dice1 + dice2;
+
+    // Différencier entre premier lancer et relance
+    if (initialDiceState === INITIAL_DICE_STATES.REROLL_NEEDED) {
+      setRerollResults((prev) => ({
+        ...prev,
+        [playerId]: { dice1, dice2, sum },
+      }));
+    } else {
+      setInitialDiceResults((prev) => ({
+        ...prev,
+        [playerId]: { dice1, dice2, sum },
+      }));
+    }
+
+    // Vérifier si tous les joueurs ont lancé
+    if (initialDiceState !== INITIAL_DICE_STATES.REROLL_NEEDED) {
+      const updatedResults = {
+        ...initialDiceResults,
+        [playerId]: { dice1, dice2, sum },
+      };
+
+      if (Object.keys(updatedResults).length === players.length) {
+        checkForTies(updatedResults);
+      }
+    } else {
+      // Vérifier si tous les joueurs qui devaient relancer l'ont fait
+      const updatedRerolls = {
+        ...rerollResults,
+        [playerId]: { dice1, dice2, sum },
+      };
+
+      if (Object.keys(updatedRerolls).length === playersToReroll.length) {
+        // Comparer uniquement les nouveaux résultats
+        const newSums = Object.entries(updatedRerolls).map(([id, roll]) => ({
+          playerId: parseInt(id),
+          sum: roll.sum,
+        }));
+
+        // Trouver le plus petit nouveau score
+        const minSum = Math.min(...newSums.map((s) => s.sum));
+        const winners = newSums
+          .filter((s) => s.sum === minSum)
+          .map((s) => s.playerId);
+
+        if (winners.length === 1) {
+          finalizeTurnOrder(winners[0], initialDiceResults); // gardons les résultats initiaux pour l'affichage
+        } else {
+          // Nouvelle égalité, on recommence avec ces joueurs
+          setPlayersToReroll(winners);
+          setRerollResults({}); // réinitialiser les relances
+        }
+      }
+    }
+
+    return true;
+  };
+
+  // Fonction pour vérifier les égalités
+  const checkForTies = (results) => {
+    const sums = Object.entries(results).map(([id, roll]) => ({
+      playerId: parseInt(id),
+      sum: roll.sum,
+    }));
+
+    // Trouver le plus petit score
+    const minSum = Math.min(...sums.map((s) => s.sum));
+
+    // Trouver tous les joueurs ayant ce score
+    const playersWithMinSum = sums
+      .filter((s) => s.sum === minSum)
+      .map((s) => s.playerId);
+
+    if (playersWithMinSum.length === 1) {
+      // Un seul gagnant, on peut définir l'ordre
+      finalizeTurnOrder(playersWithMinSum[0], results);
+    } else {
+      // Égalité, on prépare la relance
+      setPlayersToReroll(playersWithMinSum);
+      setInitialDiceState(INITIAL_DICE_STATES.REROLL_NEEDED);
+      // Garder les résultats existants et juste retirer les valeurs des joueurs qui doivent relancer
+      const newResults = { ...results };
+      // Ne pas supprimer les résultats, juste marquer les joueurs qui doivent relancer
+      setInitialDiceResults(newResults);
+    }
+  };
+
+  // Fonction pour finaliser l'ordre des tours
+  const finalizeTurnOrder = (firstPlayerId, results) => {
+    // Ajout du paramètre results
+    const playerCount = players.length;
+    const order = [];
+
+    // Créer l'ordre en commençant par le gagnant
+    for (let i = 0; i < playerCount; i++) {
+      const nextPlayerId = ((firstPlayerId - 1 + i) % playerCount) + 1; // +1 car les IDs commencent à 1
+      order.push(nextPlayerId);
+    }
+
+    setPlayerOrder(order);
+    setInitialDiceState(INITIAL_DICE_STATES.COMPLETED);
+    setInitialDiceResults(results); // Garder les résultats finaux
+
+    // Passer à la phase suivante après un court délai
+    setTimeout(() => {
+      setGameState(GAME_STATES.SETUP);
+    }, 2000);
+  };
 
   // État des pioches
   const [sandDecks, setSandDecks] = useState({
@@ -110,6 +240,17 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
               name: `Joueur ${index + 1}`,
               tokens: initialTokenCount,
             }));
+
+    // Si on a un ordre de joueurs établi, réorganiser les joueurs
+    if (playerOrder.length > 0) {
+      const orderedPlayers = playerOrder.map((id) =>
+        newPlayers.find((p) => p.id === id)
+      );
+
+      // Mise à jour des newPlayers avec l'ordre établi
+      newPlayers.length = 0;
+      newPlayers.push(...orderedPlayers);
+    }
 
     // Stocker les jetons de début de manche
     const newStartingTokens = {};
@@ -284,7 +425,6 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   };
 
   // Passer son tour
-  // Passer son tour
   const passTurn = () => {
     // On vérifie uniquement qu'il n'y a pas de carte en attente
     // et qu'on est dans la bonne phase du jeu
@@ -363,7 +503,6 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     return false;
   };
 
-  // Gérer la sélection de la valeur pour un imposteur
   // Gérer la sélection de la valeur pour un imposteur
   const handleImpostorValue = (value) => {
     if (!pendingImpostors[currentImpostorIndex]) return false;
@@ -499,7 +638,6 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   return {
     // État du jeu
     gameState,
-    setGameState,
     players,
     currentPlayerIndex,
     round,
@@ -511,10 +649,15 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     sandDecks,
     bloodDecks,
     pendingImpostors,
-    handleImpostorValue,
+    HAND_TYPES,
     currentImpostorIndex,
-    calculateHandValue,
+    initialTokenCount,
     startingTokens,
+    initialDiceState,
+    initialDiceResults,
+    playersToReroll,
+    playerOrder,
+    rerollResults,
 
     // Actions du jeu
     drawCard,
@@ -524,9 +667,11 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     selectImpostorValue,
     endRound,
     getHandValue,
-    HAND_TYPES,
+    calculateHandValue,
+    handleImpostorValue,
+    setGameState,
     compareHands,
-    initialTokenCount,
+    rollInitialDice,
 
     // État de la partie
     isGameOver: gameState === GAME_STATES.GAME_OVER,
