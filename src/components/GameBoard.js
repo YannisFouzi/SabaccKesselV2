@@ -45,6 +45,7 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
     playerOrder,
     rollInitialDice,
     rerollResults,
+    roundStartPlayer,
   } = useGameState(playerCount, tokenCount);
 
   // Vérification que le jeu est correctement initialisé
@@ -251,7 +252,13 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
                 return (
                   <div key={playerId} className="flex items-center">
                     {index > 0 && <span className="mx-1">→</span>}
-                    <span className="font-medium">{player?.name}</span>
+                    <span
+                      className={`font-medium ${
+                        playerId === roundStartPlayer ? "text-blue-600" : ""
+                      }`}
+                    >
+                      {player?.name}
+                    </span>
                   </div>
                 );
               })}
@@ -290,6 +297,7 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
           onRollDice={rollDice}
           currentPlayerTokens={players[currentPlayerIndex]?.tokens || 0}
           playerOrder={playerOrder}
+          roundStartPlayer={roundStartPlayer}
         />
       </div>
 
@@ -657,6 +665,13 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
                 });
               })()}
             </div>
+            {players.length > 1 && (
+              <div className="mt-4 text-center text-blue-600">
+                {`${
+                  players.find((p) => p.id === roundStartPlayer)?.name
+                } commencera la prochaine manche`}
+              </div>
+            )}
 
             <div className="mt-6 text-center">
               <button

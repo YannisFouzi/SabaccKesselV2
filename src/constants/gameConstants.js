@@ -51,6 +51,7 @@ export const GAME_STATES = {
   REVEAL: "REVEAL",
   END_ROUND: "END_ROUND",
   GAME_OVER: "GAME_OVER",
+  ROUND_START: "ROUND_START",
 };
 
 export const INITIAL_DICE_STATES = {

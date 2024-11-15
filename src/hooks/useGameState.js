@@ -132,23 +132,24 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     }
   };
 
+  // Suivre le joueur qui commence la manche
+  const [roundStartPlayer, setRoundStartPlayer] = useState(null);
+
   // Fonction pour finaliser l'ordre des tours
   const finalizeTurnOrder = (firstPlayerId, results) => {
-    // Ajout du paramètre results
     const playerCount = players.length;
     const order = [];
 
-    // Créer l'ordre en commençant par le gagnant
     for (let i = 0; i < playerCount; i++) {
-      const nextPlayerId = ((firstPlayerId - 1 + i) % playerCount) + 1; // +1 car les IDs commencent à 1
+      const nextPlayerId = ((firstPlayerId - 1 + i) % playerCount) + 1;
       order.push(nextPlayerId);
     }
 
     setPlayerOrder(order);
+    setRoundStartPlayer(firstPlayerId); // On initialise le premier joueur
     setInitialDiceState(INITIAL_DICE_STATES.COMPLETED);
-    setInitialDiceResults(results); // Garder les résultats finaux
+    setInitialDiceResults(results);
 
-    // Passer à la phase suivante après un court délai
     setTimeout(() => {
       setGameState(GAME_STATES.SETUP);
     }, 2000);
@@ -278,11 +279,21 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       hidden: bloodDeck,
     });
 
+    if (round > 1) {
+      // Utiliser le roundStartPlayer déjà défini dans endRound
+      setCurrentPlayerIndex(
+        newPlayers.findIndex((p) => p.id === roundStartPlayer)
+      );
+    } else {
+      // Première manche : le joueur qui a eu le plus petit score aux dés commence
+      setCurrentPlayerIndex(0);
+      setRoundStartPlayer(playerOrder[0]);
+    }
+
     // Réinitialisation de tous les états nécessaires
     setPendingDrawnCard(null);
     setDiceResults(null);
     setConsecutivePasses(0);
-    setCurrentPlayerIndex(0);
     setTurn(1);
     setPlayers(newPlayers);
 
@@ -629,6 +640,22 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       setGameState(GAME_STATES.GAME_OVER);
       setWinners(remainingPlayers);
     } else {
+      // Mettre à jour l'ordre des joueurs en retirant les joueurs éliminés
+      const newPlayerOrder = playerOrder.filter((playerId) =>
+        remainingPlayers.some((player) => player.id === playerId)
+      );
+
+      // Celui qui a commencé cette manche est dans roundStartPlayer
+      // On cherche le joueur qui doit commencer la prochaine manche
+      const startingPlayerIndex = newPlayerOrder.findIndex(
+        (id) => id === roundStartPlayer
+      );
+      const nextStarterIndex =
+        (startingPlayerIndex + 1) % newPlayerOrder.length;
+      const nextStarter = newPlayerOrder[nextStarterIndex];
+
+      setPlayerOrder(newPlayerOrder);
+      setRoundStartPlayer(nextStarter);
       setPlayers(remainingPlayers);
       setRound((prev) => prev + 1);
       setGameState(GAME_STATES.SETUP);
@@ -658,6 +685,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     playersToReroll,
     playerOrder,
     rerollResults,
+    roundStartPlayer,
 
     // Actions du jeu
     drawCard,
