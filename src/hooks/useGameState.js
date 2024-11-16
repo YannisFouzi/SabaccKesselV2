@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  CARD_FAMILIES,
   CARD_TYPES,
-  DECK_STRUCTURE,
   GAME_STATES,
   HAND_TYPES,
   INITIAL_DICE_STATES,
@@ -11,6 +9,10 @@ import {
 } from "../constants/gameConstants";
 import checkForTiesFn from "./checkForTies";
 import createAndShuffleDecksFn from "./createAndShuffleDecks";
+import drawCardFn from "./drawCard";
+import endRoundFn from "./endRound";
+import handleDiscardFn from "./handleDiscard";
+import handleImpostorValueFn from "./handleImpostorValue";
 import initializeGameFn from "./initializeGame";
 import rollInitialDiceFn from "./rollInitialDice";
 
@@ -109,52 +111,6 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     }
   }, [gameState]); // On écoute les changements de gameState
 
-  // Création et mélange des paquets
-  const createAndShuffleDecks = () => {
-    const createDeck = (family) => {
-      const deck = [];
-      const structure = DECK_STRUCTURE[family];
-
-      // Ajout des cartes normales
-      structure.normalCards.forEach((value) => {
-        deck.push({
-          id: `${family}-normal-${value}-${Date.now()}`, // Ajout de timestamp pour l'unicité
-          type: CARD_TYPES.NORMAL,
-          family,
-          value,
-        });
-      });
-
-      // Ajout des sylops
-      for (let i = 0; i < structure.sylopCount; i++) {
-        deck.push({
-          id: `${family}-sylop-${i}-${Date.now()}`,
-          type: CARD_TYPES.SYLOP,
-          family,
-          value: null,
-        });
-      }
-
-      // Ajout des imposteurs
-      for (let i = 0; i < structure.impostorCount; i++) {
-        deck.push({
-          id: `${family}-impostor-${i}-${Date.now()}`,
-          type: CARD_TYPES.IMPOSTOR,
-          family,
-          value: null,
-        });
-      }
-
-      // Mélange du paquet
-      return deck.sort(() => Math.random() - 0.5);
-    };
-
-    return {
-      sandDeck: createDeck(CARD_FAMILIES.SAND),
-      bloodDeck: createDeck(CARD_FAMILIES.BLOOD),
-    };
-  };
-
   // Fonction utilitaire pour tirer une carte d'un paquet
   const drawCardFromDeck = (deck) => {
     if (!deck || deck.length === 0) return null;
@@ -211,115 +167,37 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   };
 
   // Pioche d'une carte
-  const drawCard = (family, isVisible, card = null) => {
-    const currentPlayer = players[currentPlayerIndex];
-
-    // Vérifications préalables
-    if (pendingDrawnCard) return false;
-    if (currentPlayer.tokens < 1) return false;
-    if (gameState !== GAME_STATES.PLAYER_TURN) return false;
-
-    let drawnCard = card;
-
-    if (isVisible) {
-      if (family === CARD_FAMILIES.SAND) {
-        setSandDecks((prev) => ({
-          ...prev,
-          visible: [],
-        }));
-      } else {
-        setBloodDecks((prev) => ({
-          ...prev,
-          visible: [],
-        }));
-      }
-    } else {
-      const sourceDeck =
-        family === CARD_FAMILIES.SAND ? sandDecks.hidden : bloodDecks.hidden;
-      if (sourceDeck.length === 0) return false;
-
-      drawnCard = sourceDeck[0];
-      if (family === CARD_FAMILIES.SAND) {
-        setSandDecks((prev) => ({
-          ...prev,
-          hidden: prev.hidden.slice(1),
-        }));
-      } else {
-        setBloodDecks((prev) => ({
-          ...prev,
-          hidden: prev.hidden.slice(1),
-        }));
-      }
-    }
-
-    // Déduire le jeton
-    setPlayers(
-      players.map((player) =>
-        player.id === currentPlayer.id
-          ? { ...player, tokens: player.tokens - 1 }
-          : player
-      )
-    );
-
-    setPendingDrawnCard(drawnCard);
-    setConsecutivePasses(0);
-    return true;
-  };
+  const drawCard = (family, isVisible, card = null) =>
+    drawCardFn({
+      family,
+      isVisible,
+      card,
+      pendingDrawnCard,
+      currentPlayerIndex,
+      players,
+      sandDecks,
+      bloodDecks,
+      setPlayers,
+      setPendingDrawnCard,
+      setConsecutivePasses,
+      setSandDecks,
+      setBloodDecks,
+      gameState,
+    });
 
   // Gestion de la défausse
-  const handleDiscard = (cardToDiscard) => {
-    if (!pendingDrawnCard || !cardToDiscard) return false;
-
-    const currentPlayer = players[currentPlayerIndex];
-
-    // Si on défausse la carte piochée
-    if (cardToDiscard.id === pendingDrawnCard.id) {
-      // Mettre la carte dans la pioche visible correspondante
-      if (cardToDiscard.family === CARD_FAMILIES.SAND) {
-        setSandDecks((prev) => ({
-          ...prev,
-          visible: [cardToDiscard],
-        }));
-      } else {
-        setBloodDecks((prev) => ({
-          ...prev,
-          visible: [cardToDiscard],
-        }));
-      }
-    }
-    // Si on défausse une carte de la main
-    else {
-      // Remplacer la carte défaussée par la carte piochée
-      const updatedHand = currentPlayer.hand.map((card) =>
-        card.id === cardToDiscard.id ? pendingDrawnCard : card
-      );
-
-      // Mettre la carte défaussée dans la pioche visible
-      if (cardToDiscard.family === CARD_FAMILIES.SAND) {
-        setSandDecks((prev) => ({
-          ...prev,
-          visible: [cardToDiscard],
-        }));
-      } else {
-        setBloodDecks((prev) => ({
-          ...prev,
-          visible: [cardToDiscard],
-        }));
-      }
-
-      setPlayers(
-        players.map((player) =>
-          player.id === currentPlayer.id
-            ? { ...player, hand: updatedHand }
-            : player
-        )
-      );
-    }
-
-    setPendingDrawnCard(null);
-    nextPlayer();
-    return true;
-  };
+  const handleDiscard = (cardToDiscard) =>
+    handleDiscardFn({
+      cardToDiscard,
+      pendingDrawnCard,
+      players,
+      currentPlayerIndex,
+      setPlayers,
+      setSandDecks,
+      setBloodDecks,
+      setPendingDrawnCard,
+      nextPlayer,
+    });
 
   // Passer son tour
   const passTurn = () => {
@@ -401,42 +279,19 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   };
 
   // Gérer la sélection de la valeur pour un imposteur
-  const handleImpostorValue = (value) => {
-    if (!pendingImpostors[currentImpostorIndex]) return false;
-
-    const { playerId, cardId } = pendingImpostors[currentImpostorIndex];
-
-    // Mettre à jour la valeur de l'imposteur
-    setPlayers(
-      players.map((player) => {
-        if (player.id === playerId) {
-          return {
-            ...player,
-            hand: player.hand.map((card) =>
-              card.id === cardId ? { ...card, value } : card
-            ),
-          };
-        }
-        return player;
-      })
-    );
-
-    // Passer à l'imposteur suivant ou terminer
-    if (currentImpostorIndex + 1 < pendingImpostors.length) {
-      setCurrentImpostorIndex((prev) => prev + 1);
-      setDiceResults(null); // Réinitialiser les dés pour le prochain lancer
-    } else {
-      // Ajouter un petit délai avant de passer à la révélation
-      setTimeout(() => {
-        setGameState(GAME_STATES.REVEAL);
-        setPendingImpostors([]);
-        setCurrentImpostorIndex(0);
-        setDiceResults(null);
-      }, 1000);
-    }
-
-    return true;
-  };
+  const handleImpostorValue = (value) =>
+    handleImpostorValueFn({
+      value,
+      pendingImpostors,
+      currentImpostorIndex,
+      players,
+      setPlayers,
+      setCurrentImpostorIndex,
+      setPendingImpostors,
+      setGameState,
+      setDiceResults,
+      GAME_STATES,
+    });
 
   // Calculer la valeur d'une main
   const calculateHandValue = (hand) => {
@@ -464,89 +319,21 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   };
 
   // Modification de la fonction endRound
-  const endRound = () => {
-    // Calculer les valeurs finales des mains
-    const playerResults = players.map((player) => ({
-      ...player,
-      handValue: getHandValue(player.hand),
-      initialTokens: startingTokens[player.id],
-      tokensBet: startingTokens[player.id] - player.tokens,
-    }));
-
-    // Trouver la meilleure main
-    let bestHand = playerResults[0];
-    playerResults.slice(1).forEach((player) => {
-      if (compareHands(player.hand, bestHand.hand) > 0) {
-        bestHand = player;
-      }
+  const endRound = () =>
+    endRoundFn({
+      players,
+      startingTokens,
+      setGameState,
+      setWinners,
+      setPlayerOrder,
+      setRoundStartPlayer,
+      setPlayers,
+      setRound,
+      getHandValue,
+      compareHands,
+      playerOrder,
+      roundStartPlayer,
     });
-
-    // Trouver tous les gagnants (peut y avoir égalité)
-    const winners = playerResults.filter(
-      (player) => compareHands(player.hand, bestHand.hand) === 0
-    );
-
-    // Appliquer les pertes de jetons et restituer les mises aux gagnants
-    const updatedPlayers = playerResults.map((player) => {
-      const isWinner = winners.some((w) => w.id === player.id);
-
-      // On part des jetons de début de manche
-      let finalTokens = player.initialTokens;
-
-      if (isWinner) {
-        // Les gagnants gardent tous leurs jetons (pas de perte de mise)
-        finalTokens = player.initialTokens;
-      } else {
-        // Les perdants :
-        // 1. Perdent leurs mises
-        finalTokens -= player.tokensBet;
-
-        // 2. Perdent des jetons de pénalité
-        let penaltyTokens = 0;
-        if (player.handValue.type === HAND_TYPES.PAIR) {
-          penaltyTokens = 1;
-        } else if (player.handValue.type === HAND_TYPES.DIFFERENCE) {
-          penaltyTokens = player.handValue.value;
-        }
-        finalTokens = Math.max(0, finalTokens - penaltyTokens);
-      }
-
-      return {
-        ...player,
-        tokens: finalTokens,
-      };
-    });
-
-    // Éliminer les joueurs sans jetons
-    const remainingPlayers = updatedPlayers.filter(
-      (player) => player.tokens > 0
-    );
-
-    if (remainingPlayers.length <= 1) {
-      setGameState(GAME_STATES.GAME_OVER);
-      setWinners(remainingPlayers);
-    } else {
-      // Mettre à jour l'ordre des joueurs en retirant les joueurs éliminés
-      const newPlayerOrder = playerOrder.filter((playerId) =>
-        remainingPlayers.some((player) => player.id === playerId)
-      );
-
-      // Celui qui a commencé cette manche est dans roundStartPlayer
-      // On cherche le joueur qui doit commencer la prochaine manche
-      const startingPlayerIndex = newPlayerOrder.findIndex(
-        (id) => id === roundStartPlayer
-      );
-      const nextStarterIndex =
-        (startingPlayerIndex + 1) % newPlayerOrder.length;
-      const nextStarter = newPlayerOrder[nextStarterIndex];
-
-      setPlayerOrder(newPlayerOrder);
-      setRoundStartPlayer(nextStarter);
-      setPlayers(remainingPlayers);
-      setRound((prev) => prev + 1);
-      setGameState(GAME_STATES.SETUP);
-    }
-  };
 
   return {
     // État du jeu
