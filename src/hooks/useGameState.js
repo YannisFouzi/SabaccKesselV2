@@ -38,6 +38,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   const [currentImpostorIndex, setCurrentImpostorIndex] = useState(0);
   const [startingTokens, setStartingTokens] = useState({});
   const [rerollResults, setRerollResults] = useState({});
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // lancer les dés initiaux
   const rollInitialDice = (playerId) => {
@@ -303,25 +304,27 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
 
   // Passer au joueur suivant
   const nextPlayer = () => {
+    setIsTransitioning(true); // Activer l'écran de transition avant de changer de joueur
+  };
+
+  // Confirmer la transition
+  const confirmTransition = () => {
     const nextIndex = (currentPlayerIndex + 1) % players.length;
 
     if (nextIndex === 0) {
-      // Si on a fait le tour complet
       if (turn >= 3) {
-        // Vérifier d'abord les imposteurs avant de passer à la révélation
         if (checkForImpostors()) {
-          // Si il y a des imposteurs, la phase de dés sera déclenchée
-          // et la révélation viendra après
+          setIsTransitioning(false);
           return;
         }
         setGameState(GAME_STATES.REVEAL);
       } else {
-        // Incrémenter le tour avant de changer de joueur
         setTurn((prevTurn) => prevTurn + 1);
       }
     }
 
     setCurrentPlayerIndex(nextIndex);
+    setIsTransitioning(false);
   };
 
   // Pioche d'une carte
@@ -686,6 +689,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     playerOrder,
     rerollResults,
     roundStartPlayer,
+    isTransitioning,
 
     // Actions du jeu
     drawCard,
@@ -700,6 +704,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     setGameState,
     compareHands,
     rollInitialDice,
+    confirmTransition,
 
     // État de la partie
     isGameOver: gameState === GAME_STATES.GAME_OVER,

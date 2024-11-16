@@ -9,6 +9,7 @@ const PlayerHand = ({
   onChooseDiscard,
   selectedDiceValue,
   onSelectDiceValue,
+  isTransitioning,
 }) => {
   const { hand, tokens, name } = player;
 
@@ -28,19 +29,25 @@ const PlayerHand = ({
     return (
       <div
         className={`
-          relative w-24 h-36 border-2 rounded-lg flex flex-col items-center justify-between p-2
-          ${
-            isBloodCard
-              ? "bg-red-100 border-red-800"
-              : "bg-yellow-100 border-yellow-800"
-          }
-          ${canInteract ? "cursor-pointer hover:opacity-75" : "cursor-default"}
-          ${!isRevealPhase && !isCurrentPlayer ? "transform rotate-180" : ""}
-        `}
+            relative w-24 h-36 border-2 rounded-lg flex flex-col items-center justify-between p-2
+            ${
+              isBloodCard
+                ? "bg-red-100 border-red-800"
+                : "bg-yellow-100 border-yellow-800"
+            }
+            ${
+              canInteract ? "cursor-pointer hover:opacity-75" : "cursor-default"
+            }
+            ${
+              (!isRevealPhase && !isCurrentPlayer) || isTransitioning
+                ? "transform rotate-180"
+                : ""
+            }
+          `}
         onClick={() => (canInteract ? onChooseDiscard(card) : null)}
       >
         <div className="text-2xl font-bold">
-          {!isRevealPhase && !isCurrentPlayer
+          {(!isRevealPhase && !isCurrentPlayer) || isTransitioning
             ? "?"
             : card.type === CARD_TYPES.SYLOP
             ? "S"
@@ -50,7 +57,7 @@ const PlayerHand = ({
         </div>
 
         <div className="text-xs text-center">
-          {!isRevealPhase && !isCurrentPlayer
+          {(!isRevealPhase && !isCurrentPlayer) || isTransitioning
             ? ""
             : card.type === CARD_TYPES.SYLOP
             ? "Sylop"

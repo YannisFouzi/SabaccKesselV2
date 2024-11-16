@@ -9,6 +9,7 @@ import useGameState from "../hooks/useGameState";
 import GameDecks from "./GameDecks";
 import GameTurn from "./GameTurn";
 import PlayerHand from "./PlayerHand";
+import PlayerTransitionScreen from "./PlayerTransitionScreen";
 
 const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
   const {
@@ -46,6 +47,8 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
     rollInitialDice,
     rerollResults,
     roundStartPlayer,
+    isTransitioning,
+    confirmTransition,
   } = useGameState(playerCount, tokenCount);
 
   // Vérification que le jeu est correctement initialisé
@@ -278,6 +281,11 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
     );
   }
 
+  const getNextPlayer = () => {
+    const nextIndex = (currentPlayerIndex + 1) % players.length;
+    return players[nextIndex];
+  };
+
   return (
     <div className="relative w-full h-screen bg-gray-100 overflow-hidden">
       {/* Zone d'information du tour */}
@@ -330,6 +338,7 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
             onChooseDiscard={handleDiscard}
             selectedDiceValue={player.selectedDiceValue}
             onSelectDiceValue={selectImpostorValue}
+            isTransitioning={isTransitioning}
           />
         </div>
       ))}
@@ -432,6 +441,14 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
             )}
           </div>
         </div>
+      )}
+
+      {/* Ajout de l'écran de transition */}
+      {isTransitioning && (
+        <PlayerTransitionScreen
+          nextPlayer={getNextPlayer()}
+          onReady={confirmTransition}
+        />
       )}
 
       {/* Overlay pour la phase de révélation */}
