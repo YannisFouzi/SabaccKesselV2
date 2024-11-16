@@ -49,12 +49,22 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
     roundStartPlayer,
     isTransitioning,
     confirmTransition,
+    getHistorySinceLastTurn,
   } = useGameState(playerCount, tokenCount);
+
+  const getNextPlayer = () => {
+    if (!players || players.length === 0) return null;
+    const nextIndex = (currentPlayerIndex + 1) % players.length;
+    return players[nextIndex];
+  };
 
   // Vérification que le jeu est correctement initialisé
   if (!players || players.length === 0) {
     return <div>Chargement du jeu...</div>;
   }
+
+  // Obtenir le prochain joueur uniquement si les joueurs sont initialisés
+  const nextPlayer = getNextPlayer();
 
   // Condition pour afficher l'écran de lancer de dés initial
   if (gameState === GAME_STATES.INITIAL_DICE_ROLL) {
@@ -112,11 +122,6 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
       />
     );
   }
-
-  const getNextPlayer = () => {
-    const nextIndex = (currentPlayerIndex + 1) % players.length;
-    return players[nextIndex];
-  };
 
   return (
     <div className="relative w-full h-screen bg-gray-100 overflow-hidden">
@@ -188,10 +193,11 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
       )}
 
       {/* Ajout de l'écran de transition */}
-      {isTransitioning && (
+      {isTransitioning && nextPlayer && (
         <PlayerTransitionScreen
-          nextPlayer={getNextPlayer()}
+          nextPlayer={nextPlayer}
           onReady={confirmTransition}
+          actionHistory={getHistorySinceLastTurn(getNextPlayer()?.id)}
         />
       )}
 

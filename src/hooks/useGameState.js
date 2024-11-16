@@ -47,6 +47,64 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   // Suivre le joueur qui commence la manche
   const [roundStartPlayer, setRoundStartPlayer] = useState(null);
+  const [actionHistory, setActionHistory] = useState([]);
+
+  // Fonction helper pour ajouter une action à l'historique
+
+  // Fonction pour obtenir l'historique depuis le dernier tour d'un joueur
+  const getHistorySinceLastTurn = (playerId) => {
+    // Vérifications de sécurité
+    if (!playerId || !actionHistory || actionHistory.length === 0) return [];
+    if (!players || players.length === 0) return [];
+
+    // Copie du tableau d'historique pour éviter les mutations
+    const history = [...actionHistory];
+
+    // Si c'est la première manche et le premier tour
+    if (round === 1 && turn === 1) {
+      return history.filter((action) => action.playerId !== playerId);
+    }
+
+    // Pour les autres tours
+    const currentPlayerActions = history.filter(
+      (action) => action.playerId === playerId
+    );
+
+    // Si le joueur n'a pas encore joué
+    if (currentPlayerActions.length === 0) {
+      return history.filter((action) => action.playerId !== playerId);
+    }
+
+    // Trouve le dernier index où le joueur a joué
+    const lastActionIndex = history.findIndex(
+      (action) => action.playerId === playerId
+    );
+
+    // Si on ne trouve pas d'action précédente du joueur, retourner tout l'historique sauf ses actions
+    if (lastActionIndex === -1) {
+      return history.filter((action) => action.playerId !== playerId);
+    }
+
+    // Retourne toutes les actions depuis la dernière action du joueur, en excluant ses propres actions
+    return history
+      .slice(lastActionIndex + 1)
+      .filter((action) => action.playerId !== playerId);
+  };
+
+  const addToHistory = (action) => {
+    const currentPlayer = players[currentPlayerIndex];
+    if (!currentPlayer) return;
+
+    setActionHistory((prev) => [
+      ...prev,
+      {
+        ...action,
+        playerName: currentPlayer.name,
+        playerId: currentPlayer.id,
+        timestamp: Date.now(),
+      },
+    ]);
+  };
 
   // Fonction pour vérifier les égalités
   const checkForTies = (results) =>
@@ -118,8 +176,8 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   };
 
   // Initialisation du jeu et nouvelle manche
-  const initializeGame = () =>
-    initializeGameFn({
+  const initializeGame = () => {
+    const result = initializeGameFn({
       players,
       initialPlayerCount,
       initialTokenCount,
@@ -140,6 +198,9 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       drawCardFromDeck,
       roundStartPlayer,
     });
+    setActionHistory([]); // Réinitialiser l'historique
+    return result;
+  };
 
   // Passer au joueur suivant
   const nextPlayer = () => {
@@ -167,8 +228,8 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   };
 
   // Pioche d'une carte
-  const drawCard = (family, isVisible, card = null) =>
-    drawCardFn({
+  const drawCard = (family, isVisible, card = null) => {
+    const result = drawCardFn({
       family,
       isVisible,
       card,
@@ -185,9 +246,19 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       gameState,
     });
 
+    if (result) {
+      addToHistory({
+        type: isVisible ? "DRAW_VISIBLE" : "DRAW_HIDDEN",
+        card: card || { family },
+      });
+    }
+
+    return result;
+  };
+
   // Gestion de la défausse
-  const handleDiscard = (cardToDiscard) =>
-    handleDiscardFn({
+  const handleDiscard = (cardToDiscard) => {
+    const result = handleDiscardFn({
       cardToDiscard,
       pendingDrawnCard,
       players,
@@ -199,29 +270,45 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       nextPlayer,
     });
 
+    if (result) {
+      addToHistory({
+        type: "DISCARD",
+        card: cardToDiscard,
+      });
+    }
+
+    return result;
+  };
+
   // Passer son tour
   const passTurn = () => {
-    // On vérifie uniquement qu'il n'y a pas de carte en attente
-    // et qu'on est dans la bonne phase du jeu
-    if (pendingDrawnCard) return false;
-    if (gameState !== GAME_STATES.PLAYER_TURN) return false;
+    const result = (() => {
+      if (pendingDrawnCard) return false;
+      if (gameState !== GAME_STATES.PLAYER_TURN) return false;
 
-    setConsecutivePasses((prev) => {
-      const newCount = prev + 1;
-      // Si tous les joueurs ont passé
-      if (newCount === players.length) {
-        // Vérifier les imposteurs avant la révélation
-        if (checkForImpostors()) {
+      setConsecutivePasses((prev) => {
+        const newCount = prev + 1;
+        if (newCount === players.length) {
+          if (checkForImpostors()) {
+            return 0;
+          }
+          setGameState(GAME_STATES.REVEAL);
           return 0;
         }
-        setGameState(GAME_STATES.REVEAL);
-        return 0;
-      }
-      return newCount;
-    });
+        return newCount;
+      });
 
-    nextPlayer();
-    return true;
+      nextPlayer();
+      return true;
+    })();
+
+    if (result) {
+      addToHistory({
+        type: "PASS",
+      });
+    }
+
+    return result;
   };
 
   // Lancer les dés
@@ -339,6 +426,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     // État du jeu
     gameState,
     players,
+    actionHistory,
 
     currentPlayerIndex,
     round,
@@ -377,6 +465,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     compareHands,
     rollInitialDice,
     confirmTransition,
+    getHistorySinceLastTurn,
 
     // État de la partie
     isGameOver: gameState === GAME_STATES.GAME_OVER,
