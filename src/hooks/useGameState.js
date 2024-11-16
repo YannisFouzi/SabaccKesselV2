@@ -9,6 +9,10 @@ import {
   compareHands,
   getHandValue,
 } from "../constants/gameConstants";
+import checkForTiesFn from "./checkForTies";
+import createAndShuffleDecksFn from "./createAndShuffleDecks";
+import initializeGameFn from "./initializeGame";
+import rollInitialDiceFn from "./rollInitialDice";
 
 const useGameState = (initialPlayerCount, initialTokenCount) => {
   const [gameState, setGameState] = useState(GAME_STATES.INITIAL_DICE_ROLL);
@@ -39,102 +43,18 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   const [startingTokens, setStartingTokens] = useState({});
   const [rerollResults, setRerollResults] = useState({});
   const [isTransitioning, setIsTransitioning] = useState(false);
-
-  // lancer les dés initiaux
-  const rollInitialDice = (playerId) => {
-    if (gameState !== GAME_STATES.INITIAL_DICE_ROLL) return false;
-
-    const dice1 = Math.floor(Math.random() * 6) + 1;
-    const dice2 = Math.floor(Math.random() * 6) + 1;
-    const sum = dice1 + dice2;
-
-    // Différencier entre premier lancer et relance
-    if (initialDiceState === INITIAL_DICE_STATES.REROLL_NEEDED) {
-      setRerollResults((prev) => ({
-        ...prev,
-        [playerId]: { dice1, dice2, sum },
-      }));
-    } else {
-      setInitialDiceResults((prev) => ({
-        ...prev,
-        [playerId]: { dice1, dice2, sum },
-      }));
-    }
-
-    // Vérifier si tous les joueurs ont lancé
-    if (initialDiceState !== INITIAL_DICE_STATES.REROLL_NEEDED) {
-      const updatedResults = {
-        ...initialDiceResults,
-        [playerId]: { dice1, dice2, sum },
-      };
-
-      if (Object.keys(updatedResults).length === players.length) {
-        checkForTies(updatedResults);
-      }
-    } else {
-      // Vérifier si tous les joueurs qui devaient relancer l'ont fait
-      const updatedRerolls = {
-        ...rerollResults,
-        [playerId]: { dice1, dice2, sum },
-      };
-
-      if (Object.keys(updatedRerolls).length === playersToReroll.length) {
-        // Comparer uniquement les nouveaux résultats
-        const newSums = Object.entries(updatedRerolls).map(([id, roll]) => ({
-          playerId: parseInt(id),
-          sum: roll.sum,
-        }));
-
-        // Trouver le plus petit nouveau score
-        const minSum = Math.min(...newSums.map((s) => s.sum));
-        const winners = newSums
-          .filter((s) => s.sum === minSum)
-          .map((s) => s.playerId);
-
-        if (winners.length === 1) {
-          finalizeTurnOrder(winners[0], initialDiceResults); // gardons les résultats initiaux pour l'affichage
-        } else {
-          // Nouvelle égalité, on recommence avec ces joueurs
-          setPlayersToReroll(winners);
-          setRerollResults({}); // réinitialiser les relances
-        }
-      }
-    }
-
-    return true;
-  };
-
-  // Fonction pour vérifier les égalités
-  const checkForTies = (results) => {
-    const sums = Object.entries(results).map(([id, roll]) => ({
-      playerId: parseInt(id),
-      sum: roll.sum,
-    }));
-
-    // Trouver le plus petit score
-    const minSum = Math.min(...sums.map((s) => s.sum));
-
-    // Trouver tous les joueurs ayant ce score
-    const playersWithMinSum = sums
-      .filter((s) => s.sum === minSum)
-      .map((s) => s.playerId);
-
-    if (playersWithMinSum.length === 1) {
-      // Un seul gagnant, on peut définir l'ordre
-      finalizeTurnOrder(playersWithMinSum[0], results);
-    } else {
-      // Égalité, on prépare la relance
-      setPlayersToReroll(playersWithMinSum);
-      setInitialDiceState(INITIAL_DICE_STATES.REROLL_NEEDED);
-      // Garder les résultats existants et juste retirer les valeurs des joueurs qui doivent relancer
-      const newResults = { ...results };
-      // Ne pas supprimer les résultats, juste marquer les joueurs qui doivent relancer
-      setInitialDiceResults(newResults);
-    }
-  };
-
   // Suivre le joueur qui commence la manche
   const [roundStartPlayer, setRoundStartPlayer] = useState(null);
+
+  // Fonction pour vérifier les égalités
+  const checkForTies = (results) =>
+    checkForTiesFn({
+      results,
+      finalizeTurnOrder,
+      setPlayersToReroll,
+      setInitialDiceState,
+      setInitialDiceResults,
+    });
 
   // Fonction pour finaliser l'ordre des tours
   const finalizeTurnOrder = (firstPlayerId, results) => {
@@ -155,6 +75,21 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       setGameState(GAME_STATES.SETUP);
     }, 2000);
   };
+
+  // lancer les dés initiaux
+  const rollInitialDice = rollInitialDiceFn({
+    gameState,
+    initialDiceState,
+    initialDiceResults,
+    rerollResults,
+    playersToReroll,
+    players,
+    setInitialDiceResults,
+    setRerollResults,
+    checkForTies,
+    setPlayersToReroll,
+    finalizeTurnOrder,
+  });
 
   // État des pioches
   const [sandDecks, setSandDecks] = useState({
@@ -227,80 +162,27 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   };
 
   // Initialisation du jeu et nouvelle manche
-  const initializeGame = () => {
-    // Création ou récupération des joueurs avec copie profonde
-    const newPlayers =
-      players.length > 0
-        ? players.map((player) => ({
-            ...player,
-            tokens: player.tokens, // Conserver les jetons actuels
-          }))
-        : Array(initialPlayerCount)
-            .fill(null)
-            .map((_, index) => ({
-              id: index + 1,
-              name: `Joueur ${index + 1}`,
-              tokens: initialTokenCount,
-            }));
-
-    // Si on a un ordre de joueurs établi, réorganiser les joueurs
-    if (playerOrder.length > 0) {
-      const orderedPlayers = playerOrder.map((id) =>
-        newPlayers.find((p) => p.id === id)
-      );
-
-      // Mise à jour des newPlayers avec l'ordre établi
-      newPlayers.length = 0;
-      newPlayers.push(...orderedPlayers);
-    }
-
-    // Stocker les jetons de début de manche
-    const newStartingTokens = {};
-    newPlayers.forEach((player) => {
-      newStartingTokens[player.id] = player.tokens;
+  const initializeGame = () =>
+    initializeGameFn({
+      players,
+      initialPlayerCount,
+      initialTokenCount,
+      playerOrder,
+      setPlayers,
+      setSandDecks,
+      setBloodDecks,
+      setCurrentPlayerIndex,
+      setRoundStartPlayer,
+      setPendingDrawnCard,
+      setDiceResults,
+      setConsecutivePasses,
+      setTurn,
+      setStartingTokens,
+      setGameState,
+      round,
+      createAndShuffleDecks: createAndShuffleDecksFn,
+      drawCardFromDeck,
     });
-    setStartingTokens(newStartingTokens);
-
-    // Distribution des nouvelles cartes
-    const { sandDeck, bloodDeck } = createAndShuffleDecks();
-
-    // Distribution des nouvelles cartes
-    newPlayers.forEach((player) => {
-      player.hand = [drawCardFromDeck(sandDeck), drawCardFromDeck(bloodDeck)];
-    });
-
-    // Mise en place des pioches visibles
-    setSandDecks({
-      visible: [drawCardFromDeck(sandDeck)],
-      hidden: sandDeck,
-    });
-
-    setBloodDecks({
-      visible: [drawCardFromDeck(bloodDeck)],
-      hidden: bloodDeck,
-    });
-
-    if (round > 1) {
-      // Utiliser le roundStartPlayer déjà défini dans endRound
-      setCurrentPlayerIndex(
-        newPlayers.findIndex((p) => p.id === roundStartPlayer)
-      );
-    } else {
-      // Première manche : le joueur qui a eu le plus petit score aux dés commence
-      setCurrentPlayerIndex(0);
-      setRoundStartPlayer(playerOrder[0]);
-    }
-
-    // Réinitialisation de tous les états nécessaires
-    setPendingDrawnCard(null);
-    setDiceResults(null);
-    setConsecutivePasses(0);
-    setTurn(1);
-    setPlayers(newPlayers);
-
-    // Passer à l'état PLAYER_TURN
-    setGameState(GAME_STATES.PLAYER_TURN);
-  };
 
   // Passer au joueur suivant
   const nextPlayer = () => {
@@ -669,6 +551,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     // État du jeu
     gameState,
     players,
+
     currentPlayerIndex,
     round,
     turn,
@@ -694,6 +577,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     // Actions du jeu
     drawCard,
     handleDiscard,
+    initializeGame,
     passTurn,
     rollDice,
     selectImpostorValue,
