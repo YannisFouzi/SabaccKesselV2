@@ -19,6 +19,7 @@ const initializeGame = ({
   round,
   createAndShuffleDecks,
   drawCardFromDeck,
+  roundStartPlayer,
 }) => {
   // Création ou récupération des joueurs avec copie profonde
   const newPlayers =
@@ -73,7 +74,10 @@ const initializeGame = ({
 
   if (round > 1) {
     // Utiliser le roundStartPlayer défini dans la manche précédente
-    setCurrentPlayerIndex(newPlayers.findIndex((p) => p.id === playerOrder[0]));
+    const startingPlayerIndex = newPlayers.findIndex(
+      (p) => p.id === roundStartPlayer
+    );
+    setCurrentPlayerIndex(startingPlayerIndex);
   } else {
     // Première manche : le joueur ayant obtenu le score le plus bas commence
     setCurrentPlayerIndex(0);

@@ -182,6 +182,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       round,
       createAndShuffleDecks: createAndShuffleDecksFn,
       drawCardFromDeck,
+      roundStartPlayer,
     });
 
   // Passer au joueur suivant
