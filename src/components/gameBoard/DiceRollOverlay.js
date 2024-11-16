@@ -1,5 +1,5 @@
 import React from "react";
-import { CARD_FAMILIES } from "../constants/gameConstants";
+import { CARD_FAMILIES } from "../../constants/gameConstants";
 
 const DiceRollOverlay = ({
   pendingImpostors,

@@ -7,9 +7,7 @@ const EndRoundOverlay = ({
   getHandValue,
   startingTokens,
   HAND_TYPES,
-  setGameState,
   endRound,
-  GAME_STATES,
   roundStartPlayer,
 }) => {
   return (

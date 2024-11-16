@@ -1,5 +1,5 @@
 import React from "react";
-import { CARD_FAMILIES, CARD_TYPES } from "../constants/gameConstants";
+import { CARD_FAMILIES, CARD_TYPES } from "../../constants/gameConstants";
 
 const PlayerHand = ({
   player,

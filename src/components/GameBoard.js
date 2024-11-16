@@ -1,15 +1,15 @@
 import React from "react";
 import { GAME_STATES, INITIAL_DICE_STATES } from "../constants/gameConstants";
 import useGameState from "../hooks/useGameState";
-import DiceRollOverlay from "./DiceRollOverlay";
-import EndRoundOverlay from "./EndRoundOverlay";
-import GameDecks from "./GameDecks";
-import GameOverScreen from "./GameOverScreen";
+import DiceRollOverlay from "./gameBoard/DiceRollOverlay";
+import EndRoundOverlay from "./gameBoard/EndRoundOverlay";
+import GameDecks from "./gameBoard/GameDecks";
+import GameOverScreen from "./gameBoard/GameOverScreen";
+import InitialDiceRoll from "./gameBoard/InitialDiceRoll";
+import PlayerHand from "./gameBoard/PlayerHand";
+import PlayerTransitionScreen from "./gameBoard/PlayerTransitionScreen";
+import RevealPhaseOverlay from "./gameBoard/RevealPhaseOverlay";
 import GameTurn from "./GameTurn";
-import InitialDiceRoll from "./InitialDiceRoll";
-import PlayerHand from "./PlayerHand";
-import PlayerTransitionScreen from "./PlayerTransitionScreen";
-import RevealPhaseOverlay from "./RevealPhaseOverlay";
 
 const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
   const {
