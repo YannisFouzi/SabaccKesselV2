@@ -16,7 +16,7 @@ const FinalRevealOverlay = ({
   setDiceResults,
 }) => {
   const [currentRevealIndex, setCurrentRevealIndex] = useState(0);
-  const [revealPhase, setRevealPhase] = useState(
+  const [setRevealPhase] = useState(
     pendingImpostors.length > 0 ? "IMPOSTORS" : "REVEAL"
   );
 
