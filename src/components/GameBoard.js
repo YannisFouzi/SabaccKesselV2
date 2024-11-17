@@ -45,6 +45,7 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
     confirmTransition,
     getHistorySinceLastTurn,
     setDiceResults,
+    lastPlayerBeforeReveal,
   } = useGameState(playerCount, tokenCount);
 
   // Vérification que le jeu est correctement initialisé
@@ -115,6 +116,7 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
       roundStartPlayer={roundStartPlayer}
       endRound={endRound}
       setDiceResults={setDiceResults}
+      lastPlayerBeforeReveal={lastPlayerBeforeReveal}
     />
   );
 };

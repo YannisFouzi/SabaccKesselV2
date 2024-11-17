@@ -9,6 +9,8 @@ export const passTurn = ({
   nextPlayer,
   addToHistory,
   checkForImpostors,
+  currentPlayerIndex,
+  setLastPlayerBeforeReveal,
 }) => {
   if (pendingDrawnCard) return false;
   if (gameState !== GAME_STATES.PLAYER_TURN) return false;
@@ -17,9 +19,16 @@ export const passTurn = ({
 
   // Si tous les joueurs ont passé
   if (newCount === players.length) {
-    checkForImpostors(); // On vérifie d'abord les imposteurs
-    setGameState(GAME_STATES.REVEAL); // On passe directement à la révélation
-    setConsecutivePasses(0); // On réinitialise le compteur
+    // Stocker l'ID du joueur actuel au lieu de son index
+    setLastPlayerBeforeReveal(players[currentPlayerIndex].id);
+    console.log(
+      "Setting lastPlayerBeforeReveal in passTurn:",
+      players[currentPlayerIndex].id
+    );
+
+    checkForImpostors();
+    setGameState(GAME_STATES.REVEAL);
+    setConsecutivePasses(0);
     return true;
   }
 

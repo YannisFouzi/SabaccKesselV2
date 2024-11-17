@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 const FinalRevealOverlay = ({
   players,
+  lastPlayerBeforeReveal,
+  currentPlayerIndex,
   pendingImpostors,
   currentImpostorIndex,
   diceResults,
@@ -18,6 +20,41 @@ const FinalRevealOverlay = ({
     pendingImpostors.length > 0 ? "IMPOSTORS" : "REVEAL"
   );
 
+  // Réorganiser les joueurs pour commencer par celui qui suit le joueur actuel
+  const orderedPlayers = useMemo(() => {
+    console.log(
+      "Original players:",
+      players.map((p) => `${p.name} (${p.id})`)
+    );
+    console.log("Last player before reveal:", lastPlayerBeforeReveal);
+
+    if (lastPlayerBeforeReveal === null) return players;
+
+    // On cherche le prochain joueur après lastPlayerBeforeReveal
+    const nextPlayerId =
+      lastPlayerBeforeReveal === players.length
+        ? 1
+        : lastPlayerBeforeReveal + 1;
+    const startingPlayerIndex = players.findIndex((p) => p.id === nextPlayerId);
+    console.log("Next player should start at index:", startingPlayerIndex);
+
+    // On réorganise les joueurs en commençant par celui qui suit le dernier
+    const orderedPlayers = [];
+    let currentIndex = startingPlayerIndex;
+
+    // On ajoute les joueurs dans l'ordre en commençant par le startingPlayerIndex
+    for (let i = 0; i < players.length; i++) {
+      orderedPlayers.push(players[currentIndex]);
+      currentIndex = (currentIndex + 1) % players.length;
+    }
+
+    console.log(
+      "Final order:",
+      orderedPlayers.map((p) => `${p.name} (${p.id})`)
+    );
+    return orderedPlayers;
+  }, [players, lastPlayerBeforeReveal]);
+
   // Gestion des imposteurs
   const handleImpostorValueAndNext = (value) => {
     const success = handleImpostorValue(value);
@@ -30,8 +67,8 @@ const FinalRevealOverlay = ({
   const calculateWinner = () => {
     if (currentRevealIndex < players.length) return null;
 
-    let bestHand = players[0].hand;
-    players.slice(1).forEach((p) => {
+    let bestHand = orderedPlayers[0].hand;
+    orderedPlayers.slice(1).forEach((p) => {
       if (compareHands(p.hand, bestHand) > 0) {
         bestHand = p.hand;
       }
@@ -44,9 +81,9 @@ const FinalRevealOverlay = ({
     if (currentRevealIndex >= players.length) return false;
     return pendingImpostors.some(
       (imp) =>
-        imp.playerId === players[currentRevealIndex].id &&
+        imp.playerId === orderedPlayers[currentRevealIndex].id &&
         pendingImpostors[currentImpostorIndex]?.playerId ===
-          players[currentRevealIndex].id
+          orderedPlayers[currentRevealIndex].id
     );
   };
 
@@ -71,8 +108,8 @@ const FinalRevealOverlay = ({
         {currentPlayerHasImpostor() && (
           <div className="mb-6 p-4 bg-yellow-50 rounded-lg">
             <div className="text-lg mb-4">
-              {players[currentRevealIndex].name} doit choisir la valeur de son
-              Imposteur
+              {orderedPlayers[currentRevealIndex].name} doit choisir la valeur
+              de son Imposteur
             </div>
             {!diceResults ? (
               <button
@@ -104,7 +141,7 @@ const FinalRevealOverlay = ({
 
         {/* Affichage des joueurs révélés */}
         <div className="space-y-4">
-          {players.slice(0, currentRevealIndex + 1).map((player) => {
+          {orderedPlayers.slice(0, currentRevealIndex + 1).map((player) => {
             const isWinner =
               bestHand && compareHands(player.hand, bestHand) === 0;
 

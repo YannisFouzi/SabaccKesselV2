@@ -39,6 +39,7 @@ const GameBoardMain = ({
   roundStartPlayer,
   endRound,
   setDiceResults,
+  lastPlayerBeforeReveal,
 }) => {
   const getPlayerPosition = (playerId) => {
     const playerIndex = players.findIndex((p) => p.id === playerId);
@@ -146,6 +147,7 @@ const GameBoardMain = ({
       {gameState === GAME_STATES.REVEAL && (
         <FinalRevealOverlay
           players={players}
+          currentPlayerIndex={currentPlayerIndex}
           pendingImpostors={pendingImpostors}
           currentImpostorIndex={currentImpostorIndex}
           diceResults={diceResults}
@@ -156,6 +158,7 @@ const GameBoardMain = ({
           setGameState={setGameState}
           GAME_STATES={GAME_STATES}
           setDiceResults={setDiceResults}
+          lastPlayerBeforeReveal={lastPlayerBeforeReveal}
         />
       )}
 

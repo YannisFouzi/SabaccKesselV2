@@ -50,6 +50,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [roundStartPlayer, setRoundStartPlayer] = useState(null);
   const [actionHistory, setActionHistory] = useState([]);
+  const [lastPlayerBeforeReveal, setLastPlayerBeforeReveal] = useState(null);
 
   // Fonction pour obtenir l'historique depuis le dernier tour d'un joueur
   const getHistorySinceLastTurn = (playerId) => {
@@ -175,13 +176,22 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
 
   // Passer au joueur suivant
   const nextPlayer = () => {
+    console.log("nextPlayer called", {
+      currentPlayerIndex,
+      gameState,
+      turn,
+    });
+
     if (gameState === GAME_STATES.END_ROUND) {
       return;
     }
 
     const nextIndex = (currentPlayerIndex + 1) % players.length;
+    console.log("nextIndex calculated", nextIndex);
+
     if (nextIndex === 0 && turn >= 3) {
-      // On vérifie s'il y a des imposteurs mais on passe à la phase REVEAL dans tous les cas
+      console.log("Setting lastPlayerBeforeReveal to", currentPlayerIndex);
+      setLastPlayerBeforeReveal(currentPlayerIndex);
       checkForImpostors();
       setGameState(GAME_STATES.REVEAL);
       return;
@@ -276,6 +286,8 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       nextPlayer,
       addToHistory,
       checkForImpostors,
+      currentPlayerIndex,
+      setLastPlayerBeforeReveal,
     });
 
   // Lancer les dés
@@ -368,7 +380,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     gameState,
     players,
     actionHistory,
-
+    lastPlayerBeforeReveal,
     currentPlayerIndex,
     round,
     turn,
