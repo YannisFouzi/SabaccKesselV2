@@ -204,7 +204,26 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
 
   // Passer au joueur suivant
   const nextPlayer = () => {
-    setIsTransitioning(true); // Activer l'écran de transition avant de changer de joueur
+    // Si c'est la fin de la manche (état REVEAL ou END_ROUND), ne pas activer la transition
+    if (
+      gameState === GAME_STATES.REVEAL ||
+      gameState === GAME_STATES.END_ROUND
+    ) {
+      return;
+    }
+
+    // Vérifier si c'est la fin de la manche avant d'activer la transition
+    const nextIndex = (currentPlayerIndex + 1) % players.length;
+    if (nextIndex === 0 && turn >= 3) {
+      if (checkForImpostors()) {
+        return;
+      }
+      setGameState(GAME_STATES.REVEAL);
+      return;
+    }
+
+    // Si ce n'est pas la fin de la manche, activer la transition normalement
+    setIsTransitioning(true);
   };
 
   // Confirmer la transition
@@ -288,17 +307,22 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
 
       setConsecutivePasses((prev) => {
         const newCount = prev + 1;
+        // Si tous les joueurs ont passé
         if (newCount === players.length) {
           if (checkForImpostors()) {
             return 0;
           }
+          // Passer directement à la révélation sans transition
           setGameState(GAME_STATES.REVEAL);
           return 0;
         }
         return newCount;
       });
 
-      nextPlayer();
+      // Appeler nextPlayer seulement si ce n'est pas la fin de la manche
+      if (consecutivePasses + 1 < players.length) {
+        nextPlayer();
+      }
       return true;
     })();
 
