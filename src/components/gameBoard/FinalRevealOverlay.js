@@ -15,10 +15,9 @@ const FinalRevealOverlay = ({
   setDiceResults,
 }) => {
   const [currentRevealIndex, setCurrentRevealIndex] = useState(0);
-  const [setRevealPhase] = useState(
+  const [, setRevealPhase] = useState(
     pendingImpostors.length > 0 ? "IMPOSTORS" : "REVEAL"
   );
-
   // Réorganiser les joueurs pour commencer par celui qui suit le joueur actuel
   const orderedPlayers = useMemo(() => {
     console.log(
