@@ -1,4 +1,3 @@
-// cardDefinitions.js
 export const CARD_TYPES = {
   NORMAL: "NORMAL",
   SYLOP: "SYLOP",

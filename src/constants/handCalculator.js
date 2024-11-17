@@ -1,4 +1,3 @@
-// handCalculator.js
 import { CARD_TYPES, HAND_TYPES } from "./cardDefinitions";
 
 // Détermine si une carte est un Sylop

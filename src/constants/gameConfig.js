@@ -1,4 +1,3 @@
-// gameConfig.js
 export const GAME_CONFIG = {
   MIN_PLAYERS: 3,
   MAX_PLAYERS: 4,
