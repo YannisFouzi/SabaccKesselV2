@@ -11,7 +11,9 @@ const FinalRevealOverlay = ({
   rollDice,
   setGameState,
   GAME_STATES,
+  setDiceResults,
 }) => {
+  const [currentRevealIndex, setCurrentRevealIndex] = useState(0);
   const [revealPhase, setRevealPhase] = useState(
     pendingImpostors.length > 0 ? "IMPOSTORS" : "REVEAL"
   );
@@ -24,8 +26,10 @@ const FinalRevealOverlay = ({
     }
   };
 
-  // Calcul du gagnant
+  // Calcul du gagnant une fois tous les joueurs révélés
   const calculateWinner = () => {
+    if (currentRevealIndex < players.length) return null;
+
     let bestHand = players[0].hand;
     players.slice(1).forEach((p) => {
       if (compareHands(p.hand, bestHand) > 0) {
@@ -35,60 +39,74 @@ const FinalRevealOverlay = ({
     return bestHand;
   };
 
+  // Vérifier si le joueur actuel a un imposteur à résoudre
+  const currentPlayerHasImpostor = () => {
+    if (currentRevealIndex >= players.length) return false;
+    return pendingImpostors.some(
+      (imp) =>
+        imp.playerId === players[currentRevealIndex].id &&
+        pendingImpostors[currentImpostorIndex]?.playerId ===
+          players[currentRevealIndex].id
+    );
+  };
+
+  // Passer au joueur suivant
+  const handleNextPlayer = () => {
+    if (currentRevealIndex < players.length) {
+      setCurrentRevealIndex((prev) => prev + 1);
+      setDiceResults(null); // Réinitialiser les dés pour le prochain joueur
+    }
+  };
+
+  const bestHand = calculateWinner();
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg max-w-4xl w-full">
         <h2 className="text-2xl font-bold mb-6 text-center">
-          {revealPhase === "IMPOSTORS"
-            ? "Résolution des Imposteurs"
-            : "Révélation des mains"}
+          Révélation des mains
         </h2>
 
-        {revealPhase === "IMPOSTORS" &&
-          pendingImpostors[currentImpostorIndex] && (
-            <div className="mb-6">
-              <div className="text-lg mb-4">
-                Au tour de{" "}
-                {
-                  players.find(
-                    (p) =>
-                      p.id === pendingImpostors[currentImpostorIndex].playerId
-                  )?.name
-                }{" "}
-                de choisir la valeur de son Imposteur
-              </div>
-              {!diceResults ? (
-                <button
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                  onClick={rollDice}
-                >
-                  Lancer les dés
-                </button>
-              ) : (
-                <div className="space-y-4">
-                  <div className="text-xl">
-                    Résultats: {diceResults.join(" et ")}
-                  </div>
-                  <div className="flex gap-4">
-                    {diceResults.map((value) => (
-                      <button
-                        key={value}
-                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-                        onClick={() => handleImpostorValueAndNext(value)}
-                      >
-                        Choisir {value}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+        {/* Interface de résolution des imposteurs */}
+        {currentPlayerHasImpostor() && (
+          <div className="mb-6 p-4 bg-yellow-50 rounded-lg">
+            <div className="text-lg mb-4">
+              {players[currentRevealIndex].name} doit choisir la valeur de son
+              Imposteur
             </div>
-          )}
+            {!diceResults ? (
+              <button
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                onClick={rollDice}
+              >
+                Lancer les dés
+              </button>
+            ) : (
+              <div className="space-y-4">
+                <div className="text-xl">
+                  Résultats: {diceResults.join(" et ")}
+                </div>
+                <div className="flex gap-4">
+                  {diceResults.map((value) => (
+                    <button
+                      key={value}
+                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                      onClick={() => handleImpostorValueAndNext(value)}
+                    >
+                      Choisir {value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
+        {/* Affichage des joueurs révélés */}
         <div className="space-y-4">
-          {players.map((player) => {
-            const bestHand = calculateWinner();
-            const isWinner = compareHands(player.hand, bestHand) === 0;
+          {players.slice(0, currentRevealIndex + 1).map((player) => {
+            const isWinner =
+              bestHand && compareHands(player.hand, bestHand) === 0;
 
             return (
               <div
@@ -102,7 +120,7 @@ const FinalRevealOverlay = ({
                 <div className="flex justify-between items-center mb-2">
                   <div className="font-medium flex items-center gap-2">
                     {player.name}
-                    {isWinner && revealPhase === "REVEAL" && (
+                    {isWinner && currentRevealIndex >= players.length && (
                       <span className="text-green-600 text-sm font-bold">
                         Gagnant
                       </span>
@@ -120,7 +138,7 @@ const FinalRevealOverlay = ({
                             ? "bg-yellow-100 border-yellow-800"
                             : "bg-red-100 border-red-800"
                         } ${
-                          isWinner && revealPhase === "REVEAL"
+                          isWinner && currentRevealIndex >= players.length
                             ? "ring-2 ring-green-500"
                             : ""
                         }`}
@@ -146,7 +164,7 @@ const FinalRevealOverlay = ({
                   </div>
                   <div
                     className={`text-sm ${
-                      isWinner && revealPhase === "REVEAL"
+                      isWinner && currentRevealIndex >= players.length
                         ? "text-green-600 font-bold"
                         : ""
                     }`}
@@ -161,16 +179,33 @@ const FinalRevealOverlay = ({
           })}
         </div>
 
-        {revealPhase === "REVEAL" && (
-          <div className="mt-6 text-center">
+        {/* Boutons de contrôle */}
+        <div className="mt-6 text-center">
+          {currentRevealIndex < players.length - 1 ? (
             <button
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
+              onClick={handleNextPlayer}
+              disabled={currentPlayerHasImpostor() && !diceResults}
+            >
+              Joueur suivant
+            </button>
+          ) : currentRevealIndex === players.length - 1 ? (
+            <button
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
+              onClick={handleNextPlayer}
+              disabled={currentPlayerHasImpostor() && !diceResults}
+            >
+              Révéler le gagnant
+            </button>
+          ) : (
+            <button
+              className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg"
               onClick={() => setGameState(GAME_STATES.END_ROUND)}
             >
               Voir les résultats
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

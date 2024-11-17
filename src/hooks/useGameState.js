@@ -407,6 +407,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     rollInitialDice,
     confirmTransition,
     getHistorySinceLastTurn,
+    setDiceResults,
 
     // État de la partie
     isGameOver: gameState === GAME_STATES.GAME_OVER,

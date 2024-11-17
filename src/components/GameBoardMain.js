@@ -38,6 +38,7 @@ const GameBoardMain = ({
   playerOrder,
   roundStartPlayer,
   endRound,
+  setDiceResults,
 }) => {
   const getPlayerPosition = (playerId) => {
     const playerIndex = players.findIndex((p) => p.id === playerId);
@@ -154,6 +155,7 @@ const GameBoardMain = ({
           rollDice={rollDice}
           setGameState={setGameState}
           GAME_STATES={GAME_STATES}
+          setDiceResults={setDiceResults}
         />
       )}
 
