@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const FinalRevealOverlay = ({
   players,
@@ -15,14 +15,15 @@ const FinalRevealOverlay = ({
   setDiceResults,
 }) => {
   const [currentRevealIndex, setCurrentRevealIndex] = useState(0);
-  const [, setRevealPhase] = useState(
+  const [revealPhase, setRevealPhase] = useState(
     pendingImpostors.length > 0 ? "IMPOSTORS" : "REVEAL"
   );
+
   // Réorganiser les joueurs pour commencer par celui qui suit le joueur actuel
   const orderedPlayers = useMemo(() => {
     if (!players || players.length === 0) return [];
 
-    const filteredPlayers = players.filter((p) => p); // Exclure les joueurs undefined
+    const filteredPlayers = players.filter((p) => p);
 
     if (lastPlayerBeforeReveal === null) return filteredPlayers;
 
@@ -34,7 +35,7 @@ const FinalRevealOverlay = ({
     const startingPlayerIndex = filteredPlayers.findIndex(
       (p) => p.id === nextPlayerId
     );
-    if (startingPlayerIndex === -1) return filteredPlayers; // Si aucun joueur trouvé
+    if (startingPlayerIndex === -1) return filteredPlayers;
 
     const orderedPlayers = [];
     let currentIndex = startingPlayerIndex;
@@ -46,15 +47,42 @@ const FinalRevealOverlay = ({
 
     return orderedPlayers;
   }, [players, lastPlayerBeforeReveal]);
-  // Gestion des imposteurs
+
+  // Réorganiser les pendingImpostors pour correspondre à l'ordre des joueurs
+  const orderedPendingImpostors = useMemo(() => {
+    const impostorMap = new Map(
+      pendingImpostors.map((imp) => [imp.playerId, imp])
+    );
+
+    return orderedPlayers
+      .map((player) => impostorMap.get(player.id))
+      .filter((imp) => imp !== undefined);
+  }, [orderedPlayers, pendingImpostors]);
+
+  const currentPlayerHasImpostor = () => {
+    if (currentRevealIndex >= players.length) return false;
+
+    const currentPlayer = orderedPlayers[currentRevealIndex];
+    if (!currentPlayer) return false;
+
+    const hasUnresolvedImpostor =
+      currentPlayer.id ===
+      orderedPendingImpostors[currentImpostorIndex]?.playerId;
+
+    const hasImpostorCard = currentPlayer.hand.some(
+      (card) => card.type === "IMPOSTOR" && !card.value
+    );
+
+    return hasUnresolvedImpostor && hasImpostorCard;
+  };
+
   const handleImpostorValueAndNext = (value) => {
     const success = handleImpostorValue(value);
-    if (success && currentImpostorIndex + 1 >= pendingImpostors.length) {
+    if (success && currentImpostorIndex + 1 >= orderedPendingImpostors.length) {
       setRevealPhase("REVEAL");
     }
   };
 
-  // Calcul du gagnant une fois tous les joueurs révélés
   const calculateWinner = () => {
     if (currentRevealIndex < players.length) return null;
 
@@ -67,24 +95,17 @@ const FinalRevealOverlay = ({
     return bestHand;
   };
 
-  // Vérifier si le joueur actuel a un imposteur à résoudre
-  const currentPlayerHasImpostor = () => {
-    if (currentRevealIndex >= players.length) return false;
-    return pendingImpostors.some(
-      (imp) =>
-        imp.playerId === orderedPlayers[currentRevealIndex].id &&
-        pendingImpostors[currentImpostorIndex]?.playerId ===
-          orderedPlayers[currentRevealIndex].id
-    );
-  };
-
-  // Passer au joueur suivant
   const handleNextPlayer = () => {
     if (currentRevealIndex < players.length) {
       setCurrentRevealIndex((prev) => prev + 1);
-      setDiceResults(null); // Réinitialiser les dés pour le prochain joueur
     }
   };
+
+  useEffect(() => {
+    if (currentPlayerHasImpostor()) {
+      setDiceResults(null);
+    }
+  }, [currentRevealIndex]);
 
   const bestHand = calculateWinner();
 
@@ -95,7 +116,6 @@ const FinalRevealOverlay = ({
           Révélation des mains
         </h2>
 
-        {/* Interface de résolution des imposteurs */}
         {currentPlayerHasImpostor() && (
           <div className="mb-6 p-4 bg-yellow-50 rounded-lg">
             <div className="text-lg mb-4">
@@ -130,7 +150,7 @@ const FinalRevealOverlay = ({
           </div>
         )}
 
-        {/* Affichage des joueurs révélés */}
+        {/* Rest of the component remains the same */}
         <div className="space-y-4">
           {orderedPlayers.slice(0, currentRevealIndex + 1).map((player) => {
             if (!player) return null;
@@ -208,7 +228,6 @@ const FinalRevealOverlay = ({
           })}
         </div>
 
-        {/* Boutons de contrôle */}
         <div className="mt-6 text-center">
           {currentRevealIndex < players.length - 1 ? (
             <button
