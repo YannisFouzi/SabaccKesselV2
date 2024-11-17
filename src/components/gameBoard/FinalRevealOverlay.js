@@ -20,39 +20,32 @@ const FinalRevealOverlay = ({
   );
   // Réorganiser les joueurs pour commencer par celui qui suit le joueur actuel
   const orderedPlayers = useMemo(() => {
-    console.log(
-      "Original players:",
-      players.map((p) => `${p.name} (${p.id})`)
-    );
-    console.log("Last player before reveal:", lastPlayerBeforeReveal);
+    if (!players || players.length === 0) return [];
 
-    if (lastPlayerBeforeReveal === null) return players;
+    const filteredPlayers = players.filter((p) => p); // Exclure les joueurs undefined
 
-    // On cherche le prochain joueur après lastPlayerBeforeReveal
+    if (lastPlayerBeforeReveal === null) return filteredPlayers;
+
     const nextPlayerId =
-      lastPlayerBeforeReveal === players.length
+      lastPlayerBeforeReveal === filteredPlayers.length
         ? 1
         : lastPlayerBeforeReveal + 1;
-    const startingPlayerIndex = players.findIndex((p) => p.id === nextPlayerId);
-    console.log("Next player should start at index:", startingPlayerIndex);
 
-    // On réorganise les joueurs en commençant par celui qui suit le dernier
+    const startingPlayerIndex = filteredPlayers.findIndex(
+      (p) => p.id === nextPlayerId
+    );
+    if (startingPlayerIndex === -1) return filteredPlayers; // Si aucun joueur trouvé
+
     const orderedPlayers = [];
     let currentIndex = startingPlayerIndex;
 
-    // On ajoute les joueurs dans l'ordre en commençant par le startingPlayerIndex
-    for (let i = 0; i < players.length; i++) {
-      orderedPlayers.push(players[currentIndex]);
-      currentIndex = (currentIndex + 1) % players.length;
+    for (let i = 0; i < filteredPlayers.length; i++) {
+      orderedPlayers.push(filteredPlayers[currentIndex]);
+      currentIndex = (currentIndex + 1) % filteredPlayers.length;
     }
 
-    console.log(
-      "Final order:",
-      orderedPlayers.map((p) => `${p.name} (${p.id})`)
-    );
     return orderedPlayers;
   }, [players, lastPlayerBeforeReveal]);
-
   // Gestion des imposteurs
   const handleImpostorValueAndNext = (value) => {
     const success = handleImpostorValue(value);
@@ -140,6 +133,7 @@ const FinalRevealOverlay = ({
         {/* Affichage des joueurs révélés */}
         <div className="space-y-4">
           {orderedPlayers.slice(0, currentRevealIndex + 1).map((player) => {
+            if (!player) return null;
             const isWinner =
               bestHand && compareHands(player.hand, bestHand) === 0;
 

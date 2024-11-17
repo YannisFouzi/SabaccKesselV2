@@ -114,7 +114,7 @@ const GameBoardMain = ({
       </div>
 
       {/* Mains des joueurs */}
-      {players.map((player) => (
+      {players?.filter(Boolean).map((player) => (
         <div
           key={player.id}
           className={`absolute ${getPlayerPositionClasses(
@@ -123,7 +123,7 @@ const GameBoardMain = ({
         >
           <PlayerHand
             player={player}
-            isCurrentPlayer={player.id === players[currentPlayerIndex].id}
+            isCurrentPlayer={player.id === players[currentPlayerIndex]?.id}
             isRevealPhase={gameState === GAME_STATES.REVEAL}
             pendingDrawnCard={pendingDrawnCard}
             onChooseDiscard={handleDiscard}
