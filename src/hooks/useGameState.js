@@ -138,7 +138,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     if (gameState === GAME_STATES.SETUP) {
       initializeGame();
     }
-  }, [gameState]); // On écoute les changements de gameState
+  }, [gameState]);
 
   // Fonction utilitaire pour tirer une carte d'un paquet
   const drawCardFromDeck = (deck) => {
@@ -175,25 +175,18 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
 
   // Passer au joueur suivant
   const nextPlayer = () => {
-    // Si c'est la fin de la manche (état REVEAL ou END_ROUND), ne pas activer la transition
-    if (
-      gameState === GAME_STATES.REVEAL ||
-      gameState === GAME_STATES.END_ROUND
-    ) {
+    if (gameState === GAME_STATES.END_ROUND) {
       return;
     }
 
-    // Vérifier si c'est la fin de la manche avant d'activer la transition
     const nextIndex = (currentPlayerIndex + 1) % players.length;
     if (nextIndex === 0 && turn >= 3) {
-      if (checkForImpostors()) {
-        return;
-      }
+      // On vérifie s'il y a des imposteurs mais on passe à la phase REVEAL dans tous les cas
+      checkForImpostors();
       setGameState(GAME_STATES.REVEAL);
       return;
     }
 
-    // Si ce n'est pas la fin de la manche, activer la transition normalement
     setIsTransitioning(true);
   };
 
@@ -287,7 +280,8 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
 
   // Lancer les dés
   const rollDice = () => {
-    if (gameState !== GAME_STATES.DICE_ROLL) return false;
+    // On autorise le lancer si nous sommes en phase REVEAL
+    if (gameState !== GAME_STATES.REVEAL) return false;
 
     const dice1 = Math.floor(Math.random() * 6) + 1;
     const dice2 = Math.floor(Math.random() * 6) + 1;
@@ -314,9 +308,8 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   const checkForImpostors = () => {
     const impostorsToHandle = [];
 
-    // Scanner les joueurs dans l'ordre (1, 2, 3...)
     players
-      .sort((a, b) => a.id - b.id) // Trier les joueurs par ID
+      .sort((a, b) => a.id - b.id)
       .forEach((player) => {
         player.hand.forEach((card) => {
           if (card.type === CARD_TYPES.IMPOSTOR && !card.value) {
@@ -332,11 +325,10 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     if (impostorsToHandle.length > 0) {
       setPendingImpostors(impostorsToHandle);
       setCurrentImpostorIndex(0);
-      setGameState(GAME_STATES.DICE_ROLL);
-      return true;
+      setDiceResults(null);
     }
 
-    return false;
+    return impostorsToHandle.length > 0;
   };
 
   // Gérer la sélection de la valeur pour un imposteur

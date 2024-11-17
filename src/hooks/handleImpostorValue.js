@@ -5,10 +5,7 @@ const handleImpostorValue = ({
   players,
   setPlayers,
   setCurrentImpostorIndex,
-  setPendingImpostors,
-  setGameState,
   setDiceResults,
-  GAME_STATES,
 }) => {
   if (!pendingImpostors[currentImpostorIndex]) return false;
 
@@ -29,19 +26,9 @@ const handleImpostorValue = ({
     })
   );
 
-  // Passer à l'imposteur suivant ou terminer
-  if (currentImpostorIndex + 1 < pendingImpostors.length) {
-    setCurrentImpostorIndex((prev) => prev + 1);
-    setDiceResults(null); // Réinitialiser les dés pour le prochain lancer
-  } else {
-    // Ajouter un délai avant de passer à l'état suivant
-    setTimeout(() => {
-      setGameState(GAME_STATES.REVEAL);
-      setPendingImpostors([]);
-      setCurrentImpostorIndex(0);
-      setDiceResults(null);
-    }, 1000);
-  }
+  // Passer à l'imposteur suivant
+  setCurrentImpostorIndex((prev) => prev + 1);
+  setDiceResults(null);
 
   return true;
 };

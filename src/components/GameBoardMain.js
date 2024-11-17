@@ -1,11 +1,10 @@
 import React from "react";
 import GameTurn from "./GameTurn";
-import DiceRollOverlay from "./gameBoard/DiceRollOverlay";
 import EndRoundOverlay from "./gameBoard/EndRoundOverlay";
+import FinalRevealOverlay from "./gameBoard/FinalRevealOverlay";
 import GameDecks from "./gameBoard/GameDecks";
 import PlayerHand from "./gameBoard/PlayerHand";
 import PlayerTransitionScreen from "./gameBoard/PlayerTransitionScreen";
-import RevealPhaseOverlay from "./gameBoard/RevealPhaseOverlay";
 
 const GameBoardMain = ({
   gameState,
@@ -133,18 +132,6 @@ const GameBoardMain = ({
         </div>
       ))}
 
-      {/* Overlay pour la phase de lancer de dés */}
-      {gameState === GAME_STATES.DICE_ROLL && (
-        <DiceRollOverlay
-          pendingImpostors={pendingImpostors}
-          currentImpostorIndex={currentImpostorIndex}
-          players={players}
-          diceResults={diceResults}
-          handleImpostorValue={handleImpostorValue}
-          rollDice={rollDice}
-        />
-      )}
-
       {/* Ajout de l'écran de transition */}
       {isTransitioning && nextPlayer && (
         <PlayerTransitionScreen
@@ -156,10 +143,15 @@ const GameBoardMain = ({
 
       {/* Overlay pour la phase de révélation */}
       {gameState === GAME_STATES.REVEAL && (
-        <RevealPhaseOverlay
+        <FinalRevealOverlay
           players={players}
+          pendingImpostors={pendingImpostors}
+          currentImpostorIndex={currentImpostorIndex}
+          diceResults={diceResults}
           compareHands={compareHands}
           calculateHandValue={calculateHandValue}
+          handleImpostorValue={handleImpostorValue}
+          rollDice={rollDice}
           setGameState={setGameState}
           GAME_STATES={GAME_STATES}
         />
