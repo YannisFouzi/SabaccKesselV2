@@ -3,7 +3,6 @@ import React, { useMemo, useState } from "react";
 const FinalRevealOverlay = ({
   players,
   lastPlayerBeforeReveal,
-  currentPlayerIndex,
   pendingImpostors,
   currentImpostorIndex,
   diceResults,

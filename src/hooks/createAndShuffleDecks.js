@@ -12,7 +12,7 @@ const createAndShuffleDecks = () => {
     // Ajout des cartes normales
     structure.normalCards.forEach((value) => {
       deck.push({
-        id: `${family}-normal-${value}-${Date.now()}`, // Ajout de timestamp pour l'unicité
+        id: `${family}-normal-${value}-${Date.now()}`,
         type: CARD_TYPES.NORMAL,
         family,
         value,

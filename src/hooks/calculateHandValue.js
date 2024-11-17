@@ -1,5 +1,3 @@
-// calculateHandValue.js
-
 import { CARD_TYPES } from "../constants/gameConstants";
 
 const calculateHandValue = (hand) => {

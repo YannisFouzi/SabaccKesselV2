@@ -4,7 +4,7 @@ import GameBoard from "./components/GameBoard";
 import { GAME_CONFIG } from "./constants/gameConstants";
 
 const App = () => {
-  const [gameMode, setGameMode] = useState(null); // 'local', 'multi', 'rules'
+  const [gameMode, setGameMode] = useState(null);
   const [gameStarted, setGameStarted] = useState(false);
   const [playerCount, setPlayerCount] = useState(null);
   const [tokenCount, setTokenCount] = useState(null);
