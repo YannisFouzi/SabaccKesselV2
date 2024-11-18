@@ -344,19 +344,30 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   };
 
   // Gérer la sélection de la valeur pour un imposteur
-  const handleImpostorValue = (value) =>
-    handleImpostorValueFn({
-      value,
-      pendingImpostors,
-      currentImpostorIndex,
-      players,
-      setPlayers,
-      setCurrentImpostorIndex,
-      setPendingImpostors,
-      setGameState,
-      setDiceResults,
-      GAME_STATES,
-    });
+  const handleImpostorValue = ({ value, playerId, cardId }) => {
+    // La fonction handleImpostorValueFn retourne maintenant juste les valeurs
+    const impostorData = handleImpostorValueFn({ value, playerId, cardId });
+
+    // On gère la mise à jour des états ici
+    setPlayers(
+      players.map((player) => {
+        if (player.id === impostorData.playerId) {
+          return {
+            ...player,
+            hand: player.hand.map((card) =>
+              card.id === impostorData.cardId
+                ? { ...card, value: impostorData.value }
+                : card
+            ),
+          };
+        }
+        return player;
+      })
+    );
+
+    setDiceResults(null);
+    return true;
+  };
 
   // Modification de la fonction endRound
   const endRound = () =>

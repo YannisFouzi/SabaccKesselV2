@@ -147,9 +147,7 @@ const GameBoardMain = ({
       {gameState === GAME_STATES.REVEAL && (
         <FinalRevealOverlay
           players={players}
-          currentPlayerIndex={currentPlayerIndex}
-          pendingImpostors={pendingImpostors}
-          currentImpostorIndex={currentImpostorIndex}
+          lastPlayerBeforeReveal={lastPlayerBeforeReveal}
           diceResults={diceResults}
           compareHands={compareHands}
           calculateHandValue={calculateHandValue}
@@ -158,7 +156,6 @@ const GameBoardMain = ({
           setGameState={setGameState}
           GAME_STATES={GAME_STATES}
           setDiceResults={setDiceResults}
-          lastPlayerBeforeReveal={lastPlayerBeforeReveal}
         />
       )}
 

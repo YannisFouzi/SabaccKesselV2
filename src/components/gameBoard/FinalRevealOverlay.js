@@ -3,8 +3,6 @@ import React, { useEffect, useMemo, useState } from "react";
 const FinalRevealOverlay = ({
   players,
   lastPlayerBeforeReveal,
-  pendingImpostors,
-  currentImpostorIndex,
   diceResults,
   compareHands,
   calculateHandValue,
@@ -15,16 +13,14 @@ const FinalRevealOverlay = ({
   setDiceResults,
 }) => {
   const [currentRevealIndex, setCurrentRevealIndex] = useState(0);
-  const [revealPhase, setRevealPhase] = useState(
-    pendingImpostors.length > 0 ? "IMPOSTORS" : "REVEAL"
-  );
+  const [currentPlayerImpostorIndex, setCurrentPlayerImpostorIndex] =
+    useState(0);
+  const [revealPhase, setRevealPhase] = useState("IMPOSTORS");
 
-  // Réorganiser les joueurs pour commencer par celui qui suit le joueur actuel
   const orderedPlayers = useMemo(() => {
     if (!players || players.length === 0) return [];
 
     const filteredPlayers = players.filter((p) => p);
-
     if (lastPlayerBeforeReveal === null) return filteredPlayers;
 
     const nextPlayerId =
@@ -48,39 +44,69 @@ const FinalRevealOverlay = ({
     return orderedPlayers;
   }, [players, lastPlayerBeforeReveal]);
 
-  // Réorganiser les pendingImpostors pour correspondre à l'ordre des joueurs
-  const orderedPendingImpostors = useMemo(() => {
-    const impostorMap = new Map(
-      pendingImpostors.map((imp) => [imp.playerId, imp])
-    );
+  const getCurrentPlayerUnresolvedImpostors = () => {
+    if (currentRevealIndex >= orderedPlayers.length) return [];
+    const currentPlayer = orderedPlayers[currentRevealIndex];
+    if (!currentPlayer) return [];
 
-    return orderedPlayers
-      .map((player) => impostorMap.get(player.id))
-      .filter((imp) => imp !== undefined);
-  }, [orderedPlayers, pendingImpostors]);
+    return currentPlayer.hand
+      .filter((card) => card.type === "IMPOSTOR" && !card.value)
+      .sort((a, b) => a.id - b.id); // Assurer un ordre constant
+  };
 
   const currentPlayerHasImpostor = () => {
-    if (currentRevealIndex >= players.length) return false;
-
-    const currentPlayer = orderedPlayers[currentRevealIndex];
-    if (!currentPlayer) return false;
-
-    const hasUnresolvedImpostor =
-      currentPlayer.id ===
-      orderedPendingImpostors[currentImpostorIndex]?.playerId;
-
-    const hasImpostorCard = currentPlayer.hand.some(
-      (card) => card.type === "IMPOSTOR" && !card.value
-    );
-
-    return hasUnresolvedImpostor && hasImpostorCard;
+    const unresolvedImpostors = getCurrentPlayerUnresolvedImpostors();
+    return unresolvedImpostors.length > currentPlayerImpostorIndex;
   };
 
   const handleImpostorValueAndNext = (value) => {
-    const success = handleImpostorValue(value);
-    if (success && currentImpostorIndex + 1 >= orderedPendingImpostors.length) {
-      setRevealPhase("REVEAL");
+    const currentPlayer = orderedPlayers[currentRevealIndex];
+    const unresolvedImpostors = getCurrentPlayerUnresolvedImpostors();
+    const currentImpostor = unresolvedImpostors[currentPlayerImpostorIndex];
+
+    if (currentImpostor) {
+      const success = handleImpostorValue({
+        value,
+        playerId: currentPlayer.id,
+        cardId: currentImpostor.id,
+      });
+
+      if (success) {
+        // Attendre que le state soit mis à jour avant de vérifier
+        setTimeout(() => {
+          const updatedUnresolvedImpostors =
+            getCurrentPlayerUnresolvedImpostors();
+
+          if (currentPlayerImpostorIndex < updatedUnresolvedImpostors.length) {
+            // Il reste encore des imposteurs à résoudre pour ce joueur
+            setDiceResults(null);
+          } else if (hasMoreUnresolvedImpostors()) {
+            // Passer au joueur suivant car celui-ci a fini
+            handleNextPlayer();
+          } else {
+            // Tous les imposteurs sont résolus
+            setRevealPhase("REVEAL");
+          }
+        }, 0);
+      }
     }
+  };
+
+  const hasMoreUnresolvedImpostors = () => {
+    for (let i = currentRevealIndex; i < orderedPlayers.length; i++) {
+      const player = orderedPlayers[i];
+      const unresolvedImpostors = player.hand.filter(
+        (card) => card.type === "IMPOSTOR" && !card.value
+      );
+
+      if (i === currentRevealIndex) {
+        if (unresolvedImpostors.length > currentPlayerImpostorIndex)
+          return true;
+      } else {
+        if (unresolvedImpostors.length > 0) return true;
+      }
+    }
+    return false;
   };
 
   const calculateWinner = () => {
@@ -98,6 +124,8 @@ const FinalRevealOverlay = ({
   const handleNextPlayer = () => {
     if (currentRevealIndex < players.length) {
       setCurrentRevealIndex((prev) => prev + 1);
+      setCurrentPlayerImpostorIndex(0);
+      setDiceResults(null);
     }
   };
 
@@ -105,9 +133,12 @@ const FinalRevealOverlay = ({
     if (currentPlayerHasImpostor()) {
       setDiceResults(null);
     }
-  }, [currentRevealIndex]);
+  }, [currentRevealIndex, currentPlayerImpostorIndex]);
 
   const bestHand = calculateWinner();
+
+  const currentPlayer = orderedPlayers[currentRevealIndex];
+  const unresolvedImpostors = getCurrentPlayerUnresolvedImpostors();
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -116,11 +147,11 @@ const FinalRevealOverlay = ({
           Révélation des mains
         </h2>
 
-        {currentPlayerHasImpostor() && (
+        {currentPlayerHasImpostor() && currentPlayer && (
           <div className="mb-6 p-4 bg-yellow-50 rounded-lg">
             <div className="text-lg mb-4">
-              {orderedPlayers[currentRevealIndex].name} doit choisir la valeur
-              de son Imposteur
+              {currentPlayer.name} doit choisir la valeur de son Imposteur{" "}
+              {currentPlayerImpostorIndex + 1} sur {unresolvedImpostors.length}
             </div>
             {!diceResults ? (
               <button
@@ -135,9 +166,9 @@ const FinalRevealOverlay = ({
                   Résultats: {diceResults.join(" et ")}
                 </div>
                 <div className="flex gap-4">
-                  {diceResults.map((value) => (
+                  {[...new Set(diceResults)].map((value, index) => (
                     <button
-                      key={value}
+                      key={`${value}-${index}`}
                       className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
                       onClick={() => handleImpostorValueAndNext(value)}
                     >
@@ -150,7 +181,6 @@ const FinalRevealOverlay = ({
           </div>
         )}
 
-        {/* Rest of the component remains the same */}
         <div className="space-y-4">
           {orderedPlayers.slice(0, currentRevealIndex + 1).map((player) => {
             if (!player) return null;
@@ -233,7 +263,7 @@ const FinalRevealOverlay = ({
             <button
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
               onClick={handleNextPlayer}
-              disabled={currentPlayerHasImpostor() && !diceResults}
+              disabled={currentPlayerHasImpostor()}
             >
               Joueur suivant
             </button>
@@ -241,7 +271,7 @@ const FinalRevealOverlay = ({
             <button
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
               onClick={handleNextPlayer}
-              disabled={currentPlayerHasImpostor() && !diceResults}
+              disabled={currentPlayerHasImpostor()}
             >
               Révéler le gagnant
             </button>
