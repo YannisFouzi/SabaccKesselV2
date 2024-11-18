@@ -39,34 +39,6 @@ const GameBoardMain = ({
   setDiceResults,
   lastPlayerBeforeReveal,
 }) => {
-  const getPlayerPosition = (playerId) => {
-    const playerIndex = players.findIndex((p) => p.id === playerId);
-    const positions =
-      players.length === 3
-        ? ["bottom", "top-left", "top-right"]
-        : ["bottom", "left", "top", "right"];
-    return positions[playerIndex];
-  };
-
-  const getPlayerPositionClasses = (position) => {
-    switch (position) {
-      case "bottom":
-        return "bottom-0 left-1/2 transform -translate-x-1/2 mb-4";
-      case "top":
-        return "top-0 left-1/2 transform -translate-x-1/2 mt-4";
-      case "left":
-        return "left-0 top-1/2 transform -translate-y-1/2 ml-4";
-      case "right":
-        return "right-0 top-1/2 transform -translate-y-1/2 mr-4";
-      case "top-left":
-        return "top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2";
-      case "top-right":
-        return "top-1/4 right-1/4 transform translate-x-1/2 -translate-y-1/2";
-      default:
-        return "";
-    }
-  };
-
   const getNextPlayer = () => {
     if (!players || players.length === 0) return null;
     const nextIndex = (currentPlayerIndex + 1) % players.length;
@@ -111,26 +83,31 @@ const GameBoardMain = ({
         />
       </div>
 
-      {/* Mains des joueurs */}
-      {players?.filter(Boolean).map((player) => (
-        <div
-          key={player.id}
-          className={`absolute ${getPlayerPositionClasses(
-            getPlayerPosition(player.id)
-          )}`}
-        >
+      {/* Affichage de la main du joueur actif et des joueurs restants */}
+      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 mb-4 flex space-x-8 items-start">
+        <div>
           <PlayerHand
-            player={player}
-            isCurrentPlayer={player.id === players[currentPlayerIndex]?.id}
+            player={players[currentPlayerIndex]}
+            isCurrentPlayer={true}
             isRevealPhase={gameState === GAME_STATES.REVEAL}
             pendingDrawnCard={pendingDrawnCard}
             onChooseDiscard={handleDiscard}
-            selectedDiceValue={player.selectedDiceValue}
+            selectedDiceValue={players[currentPlayerIndex]?.selectedDiceValue}
             onSelectDiceValue={selectImpostorValue}
             isTransitioning={isTransitioning}
           />
         </div>
-      ))}
+        <div className="bg-white p-4 rounded-lg shadow-lg">
+          <h3 className="font-bold mb-2">Joueurs restants</h3>
+          <ul>
+            {players.map((player) => (
+              <li key={player.id} className="mb-1">
+                {player.name}: {player.tokens} jetons
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
 
       {/* Ajout de l'écran de transition */}
       {isTransitioning && nextPlayer && (
