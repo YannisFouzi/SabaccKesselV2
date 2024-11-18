@@ -1,4 +1,5 @@
 import { GAME_STATES } from "../constants/gameConstants";
+import createAndShuffleDecks from "./createAndShuffleDecks";
 
 const initializeGame = ({
   players,
@@ -17,7 +18,6 @@ const initializeGame = ({
   setStartingTokens,
   setGameState,
   round,
-  createAndShuffleDecks,
   drawCardFromDeck,
   roundStartPlayer,
 }) => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   CARD_TYPES,
   GAME_STATES,
@@ -9,7 +9,6 @@ import {
 } from "../constants/gameConstants";
 import calculateHandValue from "./calculateHandValue";
 import checkForTiesFn from "./checkForTies";
-import createAndShuffleDecksFn from "./createAndShuffleDecks";
 import drawCardFn from "./drawCard";
 import endRoundFn from "./endRound";
 import { getHistorySinceLastTurn as getHistorySinceLastTurnUtil } from "./gameHistoryUtils";
@@ -134,21 +133,14 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     hidden: [],
   });
 
-  // Initialisation du jeu et nouvelle manche
-  useEffect(() => {
-    if (gameState === GAME_STATES.SETUP) {
-      initializeGame();
-    }
-  }, [gameState]);
-
   // Fonction utilitaire pour tirer une carte d'un paquet
-  const drawCardFromDeck = (deck) => {
+  const drawCardFromDeck = useCallback((deck) => {
     if (!deck || deck.length === 0) return null;
     return deck.shift();
-  };
+  }, []);
 
   // Initialisation du jeu et nouvelle manche
-  const initializeGame = () => {
+  const initializeGame = useCallback(() => {
     const result = initializeGameFn({
       players,
       initialPlayerCount,
@@ -166,13 +158,38 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       setStartingTokens,
       setGameState,
       round,
-      createAndShuffleDecks: createAndShuffleDecksFn,
       drawCardFromDeck,
       roundStartPlayer,
     });
     setActionHistory([]); // Réinitialiser l'historique
     return result;
-  };
+  }, [
+    players,
+    initialPlayerCount,
+    initialTokenCount,
+    playerOrder,
+    setPlayers,
+    setSandDecks,
+    setBloodDecks,
+    setCurrentPlayerIndex,
+    setRoundStartPlayer,
+    setPendingDrawnCard,
+    setDiceResults,
+    setConsecutivePasses,
+    setTurn,
+    setStartingTokens,
+    setGameState,
+    round,
+    drawCardFromDeck,
+    roundStartPlayer,
+  ]);
+
+  // Initialisation du jeu et nouvelle manche
+  useEffect(() => {
+    if (gameState === GAME_STATES.SETUP) {
+      initializeGame();
+    }
+  }, [gameState, initializeGame]);
 
   // Passer au joueur suivant
   const nextPlayer = () => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 const FinalRevealOverlay = ({
   players,
@@ -15,7 +15,7 @@ const FinalRevealOverlay = ({
   const [currentRevealIndex, setCurrentRevealIndex] = useState(0);
   const [currentPlayerImpostorIndex, setCurrentPlayerImpostorIndex] =
     useState(0);
-  const [revealPhase, setRevealPhase] = useState("IMPOSTORS");
+  const [, setRevealPhase] = useState("IMPOSTORS");
 
   const orderedPlayers = useMemo(() => {
     if (!players || players.length === 0) return [];
@@ -44,7 +44,7 @@ const FinalRevealOverlay = ({
     return orderedPlayers;
   }, [players, lastPlayerBeforeReveal]);
 
-  const getCurrentPlayerUnresolvedImpostors = () => {
+  const getCurrentPlayerUnresolvedImpostors = useCallback(() => {
     if (currentRevealIndex >= orderedPlayers.length) return [];
     const currentPlayer = orderedPlayers[currentRevealIndex];
     if (!currentPlayer) return [];
@@ -52,12 +52,12 @@ const FinalRevealOverlay = ({
     return currentPlayer.hand
       .filter((card) => card.type === "IMPOSTOR" && !card.value)
       .sort((a, b) => a.id - b.id); // Assurer un ordre constant
-  };
+  }, [currentRevealIndex, orderedPlayers]);
 
-  const currentPlayerHasImpostor = () => {
+  const currentPlayerHasImpostor = useCallback(() => {
     const unresolvedImpostors = getCurrentPlayerUnresolvedImpostors();
     return unresolvedImpostors.length > currentPlayerImpostorIndex;
-  };
+  }, [getCurrentPlayerUnresolvedImpostors, currentPlayerImpostorIndex]);
 
   const handleImpostorValueAndNext = (value) => {
     const currentPlayer = orderedPlayers[currentRevealIndex];
@@ -133,7 +133,12 @@ const FinalRevealOverlay = ({
     if (currentPlayerHasImpostor()) {
       setDiceResults(null);
     }
-  }, [currentRevealIndex, currentPlayerImpostorIndex]);
+  }, [
+    currentRevealIndex,
+    currentPlayerImpostorIndex,
+    currentPlayerHasImpostor,
+    setDiceResults,
+  ]);
 
   const bestHand = calculateWinner();
 
