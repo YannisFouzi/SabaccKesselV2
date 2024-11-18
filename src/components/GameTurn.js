@@ -1,5 +1,4 @@
 import React from "react";
-import DiceRoll from "./gameTurn/DiceRoll";
 import DiscardChoice from "./gameTurn/DiscardChoice";
 import RoundInfo from "./gameTurn/RoundInfo";
 import TurnInterface from "./gameTurn/TurnInterface";
@@ -46,11 +45,7 @@ const GameTurn = ({
         playerOrder={playerOrder}
         players={players}
       />
-      <DiceRoll
-        gameState={gameState}
-        diceResults={diceResults}
-        onRollDice={onRollDice}
-      />
+
       <DiscardChoice
         pendingDrawnCard={pendingDrawnCard}
         currentPlayer={currentPlayer}
