@@ -99,12 +99,21 @@ const GameBoardMain = ({
         </div>
         <div className="bg-white p-4 rounded-lg shadow-lg">
           <h3 className="font-bold mb-2">Joueurs restants</h3>
-          <ul>
-            {players.map((player) => (
-              <li key={player.id} className="mb-1">
-                {player.name}: {player.tokens} jetons
-              </li>
-            ))}
+          <ul className="space-y-2">
+            {players.map((player) => {
+              const tokensBet = startingTokens[player.id] - player.tokens;
+              return (
+                <li key={player.id} className="flex flex-col">
+                  <span className="font-semibold">{player.name}</span>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span>Jetons: {player.tokens}</span>
+                    {tokensBet > 0 && (
+                      <span className="text-amber-600">Misés: {tokensBet}</span>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>
