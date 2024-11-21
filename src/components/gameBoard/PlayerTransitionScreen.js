@@ -67,20 +67,11 @@ const PlayerTransitionScreen = ({ nextPlayer, onReady, actionHistory }) => {
 
         <ActionHistory actions={actionHistory} />
 
-        <div className="mb-8 space-y-4">
-          <p className="text-gray-600">
-            {nextPlayer.name}, préparez-vous à jouer votre tour.
-          </p>
-          <p className="text-amber-600 font-medium">
-            Les autres joueurs ne doivent pas voir l'écran.
-          </p>
-        </div>
-
         <button
           onClick={onReady}
           className="w-full bg-blue-500 text-white py-4 rounded-lg text-lg font-semibold hover:bg-blue-600 transition-colors"
         >
-          Je suis {nextPlayer.name} - Commencer mon tour
+          Commencer mon tour
         </button>
       </div>
     </div>

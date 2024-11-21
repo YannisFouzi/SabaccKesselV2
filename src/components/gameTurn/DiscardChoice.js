@@ -1,4 +1,5 @@
 import React from "react";
+import { getCardImage } from "../../constants/cardImages";
 import { CARD_FAMILIES, CARD_TYPES } from "../../constants/gameConstants";
 
 const DiscardChoice = ({
@@ -33,30 +34,18 @@ const DiscardChoice = ({
               onClick={() => onChooseDiscard(pendingDrawnCard)}
               className="cursor-pointer transform hover:scale-105 transition-transform"
             >
-              <div
-                className={`w-32 h-48 border-2 rounded-lg p-4 flex flex-col items-center justify-between ${
-                  pendingDrawnCard.family === CARD_FAMILIES.SAND
-                    ? "bg-yellow-100 border-yellow-800"
-                    : "bg-red-100 border-red-800"
-                } hover:shadow-lg`}
-              >
-                <span className="text-2xl font-bold">
-                  {pendingDrawnCard.type === CARD_TYPES.SYLOP
-                    ? "S"
-                    : pendingDrawnCard.type === CARD_TYPES.IMPOSTOR
-                    ? "I"
-                    : pendingDrawnCard.value}
-                </span>
-                <div className="text-center">
-                  <div className="font-medium">Nouvelle carte</div>
-                  <div className="text-sm mt-1">
-                    {pendingDrawnCard.type === CARD_TYPES.SYLOP
-                      ? "Sylop"
-                      : pendingDrawnCard.type === CARD_TYPES.IMPOSTOR
-                      ? "Imposteur"
-                      : "Normale"}
-                  </div>
-                </div>
+              <div className="w-32 h-48 rounded-lg flex flex-col items-center justify-between hover:shadow-lg">
+                <img
+                  src={getCardImage(
+                    pendingDrawnCard.family,
+                    pendingDrawnCard.type,
+                    pendingDrawnCard.type === CARD_TYPES.NORMAL
+                      ? pendingDrawnCard.value
+                      : null
+                  )}
+                  alt={`Nouvelle carte ${pendingDrawnCard.type}`}
+                  className="w-full h-full rounded-lg"
+                />
               </div>
             </div>
             <div className="mt-2 text-sm text-gray-600">
@@ -70,30 +59,18 @@ const DiscardChoice = ({
               onClick={() => onChooseDiscard(sameTypeCard)}
               className="cursor-pointer transform hover:scale-105 transition-transform"
             >
-              <div
-                className={`w-32 h-48 border-2 rounded-lg p-4 flex flex-col items-center justify-between ${
-                  sameTypeCard.family === CARD_FAMILIES.SAND
-                    ? "bg-yellow-100 border-yellow-800"
-                    : "bg-red-100 border-red-800"
-                } hover:shadow-lg`}
-              >
-                <span className="text-2xl font-bold">
-                  {sameTypeCard.type === CARD_TYPES.SYLOP
-                    ? "S"
-                    : sameTypeCard.type === CARD_TYPES.IMPOSTOR
-                    ? "I"
-                    : sameTypeCard.value}
-                </span>
-                <div className="text-center">
-                  <div className="font-medium">Carte actuelle</div>
-                  <div className="text-sm mt-1">
-                    {sameTypeCard.type === CARD_TYPES.SYLOP
-                      ? "Sylop"
-                      : sameTypeCard.type === CARD_TYPES.IMPOSTOR
-                      ? "Imposteur"
-                      : "Normale"}
-                  </div>
-                </div>
+              <div className="w-32 h-48 rounded-lg flex flex-col items-center justify-between hover:shadow-lg">
+                <img
+                  src={getCardImage(
+                    sameTypeCard.family,
+                    sameTypeCard.type,
+                    sameTypeCard.type === CARD_TYPES.NORMAL
+                      ? sameTypeCard.value
+                      : null
+                  )}
+                  alt={`Carte actuelle ${sameTypeCard.type}`}
+                  className="w-full h-full rounded-lg"
+                />
               </div>
             </div>
             <div className="mt-2 text-sm text-gray-600">

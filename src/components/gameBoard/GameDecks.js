@@ -1,4 +1,5 @@
 import React from "react";
+import { getCardBack, getCardImage } from "../../constants/cardImages";
 import { CARD_FAMILIES, CARD_TYPES } from "../../constants/gameConstants";
 
 const GameDecks = ({
@@ -25,13 +26,7 @@ const GameDecks = ({
     <div
       onClick={() => handleVisibleCardClick(card)}
       className={`
-        w-24 h-36 border-2 rounded-lg flex flex-col items-center justify-center
-        ${card.family === CARD_FAMILIES.SAND ? "bg-yellow-100" : "bg-red-100"}
-        ${
-          card.family === CARD_FAMILIES.SAND
-            ? "border-yellow-800"
-            : "border-red-800"
-        }
+        w-24 h-36 rounded-lg flex flex-col items-center justify-center
         ${
           isCurrentPlayerTurn && currentPlayerTokens > 0
             ? "cursor-pointer hover:opacity-75"
@@ -39,22 +34,15 @@ const GameDecks = ({
         }
       `}
     >
-      <span className="text-2xl font-bold">
-        {card.type === CARD_TYPES.SYLOP
-          ? "S"
-          : card.type === CARD_TYPES.IMPOSTOR
-          ? "I"
-          : card.value}
-      </span>
-      <span className="text-sm mt-2">
-        {card.type === "SYLOP"
-          ? "Sylop"
-          : card.type === "IMPOSTOR"
-          ? "Imposteur"
-          : card.family === CARD_FAMILIES.SAND
-          ? "Sable"
-          : "Sang"}
-      </span>
+      <img
+        src={getCardImage(
+          card.family,
+          card.type,
+          card.type === CARD_TYPES.NORMAL ? card.value : null
+        )}
+        alt={`${card.family} ${card.type} ${card.value || ""}`}
+        className="w-full h-full rounded-lg"
+      />
     </div>
   );
 
@@ -63,22 +51,19 @@ const GameDecks = ({
     <div
       onClick={() => handleHiddenDeckClick(family)}
       className={`
-        w-24 h-36 border-2 rounded-lg flex items-center justify-center
-        ${
-          family === CARD_FAMILIES.SAND
-            ? "bg-yellow-900 hover:bg-yellow-800"
-            : "bg-red-900 hover:bg-red-800"
-        }
+        w-24 h-36 rounded-lg flex items-center justify-center
         ${
           isCurrentPlayerTurn && currentPlayerTokens > 0
-            ? "cursor-pointer"
+            ? "cursor-pointer hover:opacity-75"
             : "cursor-not-allowed opacity-50"
         }
       `}
     >
-      <span className="text-white text-sm rotate-90">
-        {family === CARD_FAMILIES.SAND ? "Sable" : "Sang"}
-      </span>
+      <img
+        src={getCardBack(family)}
+        alt={`${family} deck`}
+        className="w-full h-full rounded-lg"
+      />
     </div>
   );
 
@@ -89,7 +74,6 @@ const GameDecks = ({
       {/* Pioches de Sable */}
       <div className="flex space-x-8 items-center">
         <div className="text-center">
-          <h3 className="mb-2 text-yellow-800">Sable</h3>
           <div className="flex space-x-4">
             {visibleSandCard && <VisibleCard card={visibleSandCard} />}
             <HiddenDeck family={CARD_FAMILIES.SAND} />
@@ -98,25 +82,11 @@ const GameDecks = ({
 
         {/* Pioches de Sang */}
         <div className="text-center">
-          <h3 className="mb-2 text-red-800">Sang</h3>
           <div className="flex space-x-4">
             {visibleBloodCard && <VisibleCard card={visibleBloodCard} />}
             <HiddenDeck family={CARD_FAMILIES.BLOOD} />
           </div>
         </div>
-      </div>
-
-      {/* Indicateur de jetons */}
-      <div className="mt-4 text-center">
-        <p
-          className={`text-sm ${
-            currentPlayerTokens < 1 ? "text-red-600" : "text-gray-600"
-          }`}
-        >
-          {isCurrentPlayerTurn
-            ? `Jetons disponibles: ${currentPlayerTokens}`
-            : "En attente de votre tour"}
-        </p>
       </div>
     </div>
   );

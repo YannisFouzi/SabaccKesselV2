@@ -3,13 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 export const useFinalReveal = ({
   players,
   lastPlayerBeforeReveal,
-  diceResults,
   compareHands,
-  calculateHandValue,
   handleImpostorValue,
   setDiceResults,
-  setGameState,
-  GAME_STATES,
 }) => {
   const [currentRevealIndex, setCurrentRevealIndex] = useState(0);
   const [currentPlayerImpostorIndex, setCurrentPlayerImpostorIndex] =

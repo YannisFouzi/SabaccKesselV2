@@ -1,4 +1,5 @@
 import React from "react";
+import { getCardBack, getCardImage } from "../../constants/cardImages";
 import { CARD_FAMILIES, CARD_TYPES } from "../../constants/gameConstants";
 
 const PlayerHand = ({
@@ -15,8 +16,6 @@ const PlayerHand = ({
 
   // Composant pour une carte
   const Card = ({ card }) => {
-    const isBloodCard = card.family === CARD_FAMILIES.BLOOD;
-
     // On ne peut interagir avec une carte que si :
     // - C'est le joueur actif
     // - Une carte a été piochée
@@ -29,44 +28,33 @@ const PlayerHand = ({
     return (
       <div
         className={`
-            relative w-24 h-36 border-2 rounded-lg flex flex-col items-center justify-between p-2
-            ${
-              isBloodCard
-                ? "bg-red-100 border-red-800"
-                : "bg-yellow-100 border-yellow-800"
-            }
-            ${
-              canInteract ? "cursor-pointer hover:opacity-75" : "cursor-default"
-            }
-            ${
-              (!isRevealPhase && !isCurrentPlayer) || isTransitioning
-                ? "transform rotate-180"
-                : ""
-            }
-          `}
+          relative w-24 h-36 rounded-lg flex flex-col items-center justify-between
+          ${canInteract ? "cursor-pointer hover:opacity-75" : "cursor-default"}
+          ${
+            (!isRevealPhase && !isCurrentPlayer) || isTransitioning
+              ? "transform rotate-180"
+              : ""
+          }
+        `}
         onClick={() => (canInteract ? onChooseDiscard(card) : null)}
       >
-        <div className="text-2xl font-bold">
-          {(!isRevealPhase && !isCurrentPlayer) || isTransitioning
-            ? "?"
-            : card.type === CARD_TYPES.SYLOP
-            ? "S"
-            : card.type === CARD_TYPES.IMPOSTOR
-            ? "I"
-            : card.value}
-        </div>
-
-        <div className="text-xs text-center">
-          {(!isRevealPhase && !isCurrentPlayer) || isTransitioning
-            ? ""
-            : card.type === CARD_TYPES.SYLOP
-            ? "Sylop"
-            : card.type === CARD_TYPES.IMPOSTOR
-            ? "Imposteur"
-            : isBloodCard
-            ? "Sang"
-            : "Sable"}
-        </div>
+        {(!isRevealPhase && !isCurrentPlayer) || isTransitioning ? (
+          <img
+            src={getCardBack(card.family)}
+            alt="Carte cachée"
+            className="w-full h-full rounded-lg"
+          />
+        ) : (
+          <img
+            src={getCardImage(
+              card.family,
+              card.type,
+              card.type === CARD_TYPES.NORMAL ? card.value : null
+            )}
+            alt={`${card.type} ${card.value || ""}`}
+            className="w-full h-full rounded-lg"
+          />
+        )}
 
         {/* Interface de sélection de la valeur pour un imposteur */}
         {card.type === CARD_TYPES.IMPOSTOR &&

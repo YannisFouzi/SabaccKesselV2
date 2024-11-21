@@ -28,21 +28,10 @@ const TurnInterface = ({
 
   return (
     <div className="text-center mb-4">
-      <div className="text-xl font-bold mb-3">
-        {isCurrentPlayerTurn ? "À votre tour" : `Tour de ${currentPlayer.name}`}
-      </div>
-
       {isCurrentPlayerTurn && (
         <div className="space-y-3">
           {currentPlayerTokens > 0 ? (
-            <>
-              <p className="text-gray-600">
-                Piochez une carte (coût: 1 jeton) ou passez votre tour
-              </p>
-              <div className="text-sm text-green-600">
-                Jetons disponibles: {currentPlayerTokens}
-              </div>
-            </>
+            <></>
           ) : (
             <p className="text-amber-600">
               Plus de jetons disponibles ! Vous devez passer votre tour.

@@ -4,7 +4,6 @@ import RoundInfo from "./gameTurn/RoundInfo";
 import TurnInterface from "./gameTurn/TurnInterface";
 
 const GameTurn = ({
-  gameState,
   currentPlayer,
   players,
   roundNumber,
@@ -14,8 +13,6 @@ const GameTurn = ({
   pendingDrawnCard,
   onPass,
   onChooseDiscard,
-  diceResults,
-  onRollDice,
   currentPlayerTokens,
   playerOrder,
   roundStartPlayer,
@@ -51,25 +48,6 @@ const GameTurn = ({
         currentPlayer={currentPlayer}
         onChooseDiscard={onChooseDiscard}
       />
-
-      <div className="mt-6 text-sm text-gray-600 border-t pt-4">
-        <h4 className="font-bold mb-2">Rappel des règles :</h4>
-        <ul className="list-disc list-inside space-y-1">
-          <li>Piocher coûte 1 jeton</li>
-          <li>
-            Après avoir pioché, vous devez défausser une carte de la même
-            famille
-          </li>
-          <li>
-            Les cartes de sang vont à droite, les cartes de sable à gauche
-          </li>
-          {consecutivePasses > 0 && (
-            <li className="text-amber-600">
-              Si tous les joueurs passent, les cartes seront révélées
-            </li>
-          )}
-        </ul>
-      </div>
     </div>
   );
 };
