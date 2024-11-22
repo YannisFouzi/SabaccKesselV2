@@ -47,9 +47,9 @@ const TurnInterface = ({
           </button>
 
           {/* Indication du prochain joueur */}
-          <div className="text-sm text-gray-600 mt-2">
+          {/* <div className="text-sm text-gray-600 mt-2">
             Prochain joueur : {nextPlayer.name}
-          </div>
+          </div> */}
         </div>
       )}
     </div>

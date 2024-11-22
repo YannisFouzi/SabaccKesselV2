@@ -17,13 +17,13 @@ const RoundInfo = ({
       </div>
 
       {/* Information sur qui commence la manche */}
-      <div className="text-sm text-blue-600 mt-1 mb-2">
+      {/* <div className="text-sm text-blue-600 mt-1 mb-2">
         {players.find((p) => p.id === roundStartPlayer)?.name} commence cette
         manche
-      </div>
+      </div> */}
 
       {/* Ajout de l'ordre des joueurs avec mise en évidence du joueur qui commence */}
-      <div className="text-sm text-gray-600">
+      {/* <div className="text-sm text-gray-600">
         <div className="flex justify-center items-center space-x-2 flex-wrap">
           {playerOrder.map((playerId, index) => {
             const player = players.find((p) => p.id === playerId);
@@ -42,7 +42,7 @@ const RoundInfo = ({
             );
           })}
         </div>
-      </div>
+      </div> */}
 
       {consecutivePasses > 0 && (
         <div className="text-sm text-amber-600 mt-2">
