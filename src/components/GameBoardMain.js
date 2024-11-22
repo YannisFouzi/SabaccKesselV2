@@ -1,10 +1,54 @@
 import React from "react";
+import jetonImage from "../assets/img/jeton.png";
+import jetonKoImage from "../assets/img/jeton_ko.png";
 import GameTurn from "./GameTurn";
 import EndRoundOverlay from "./gameBoard/EndRoundOverlay";
 import FinalRevealOverlay from "./gameBoard/FinalRevealOverlay";
 import GameDecks from "./gameBoard/GameDecks";
 import PlayerHand from "./gameBoard/PlayerHand";
 import PlayerTransitionScreen from "./gameBoard/PlayerTransitionScreen";
+
+const TokenDisplay = ({ count, type = "available" }) => {
+  return (
+    <div className="flex items-center gap-1">
+      <img
+        src={type === "available" ? jetonImage : jetonImage}
+        alt="Jeton"
+        className="w-4 h-4 sm:w-5 sm:h-5"
+      />
+      <span className="text-xs sm:text-sm">{count}</span>
+    </div>
+  );
+};
+
+const TokensRow = ({ availableTokens, betTokens }) => {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
+        {[...Array(availableTokens)].map((_, index) => (
+          <img
+            key={index}
+            src={jetonImage}
+            alt="Jeton disponible"
+            className="w-4 h-4 sm:w-5 sm:h-5"
+          />
+        ))}
+      </div>
+      {betTokens > 0 && (
+        <div className="flex items-center gap-1">
+          {[...Array(betTokens)].map((_, index) => (
+            <img
+              key={index}
+              src={jetonKoImage}
+              alt="Jeton misé"
+              className="w-4 h-4 sm:w-5 sm:h-5"
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const GameBoardMain = ({
   gameState,
@@ -98,6 +142,7 @@ const GameBoardMain = ({
               selectedDiceValue={players[currentPlayerIndex]?.selectedDiceValue}
               onSelectDiceValue={selectImpostorValue}
               isTransitioning={isTransitioning}
+              startingTokens={startingTokens}
             />
           </div>
 
@@ -111,18 +156,20 @@ const GameBoardMain = ({
                 .map((player) => {
                   const tokensBet = startingTokens[player.id] - player.tokens;
                   return (
-                    <li key={player.id} className="flex flex-col">
+                    <li key={player.id} className="flex flex-col gap-1">
                       <span className="font-semibold text-xs sm:text-sm">
                         {player.name}
                       </span>
-                      <div className="flex flex-col items-start gap-0.5 text-xs">
-                        <span>Jetons: {player.tokens}</span>
-                        {tokensBet > 0 && (
-                          <span className="text-amber-600">
-                            Misés: {tokensBet}
-                          </span>
-                        )}
-                      </div>
+                      <TokensRow
+                        availableTokens={player.tokens}
+                        betTokens={tokensBet}
+                      />
+                      {tokensBet > 0 && (
+                        <div className="flex items-center gap-1 text-amber-600">
+                          <TokenDisplay count={tokensBet} type="bet" />
+                          <span className="text-xs">misés</span>
+                        </div>
+                      )}
                     </li>
                   );
                 })}

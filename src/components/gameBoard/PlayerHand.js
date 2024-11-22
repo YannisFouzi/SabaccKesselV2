@@ -1,4 +1,6 @@
 import React from "react";
+import jetonImage from "../../assets/img/jeton.png";
+import jetonKoImage from "../../assets/img/jeton_ko.png";
 import { getCardBack, getCardImage } from "../../constants/cardImages";
 import { CARD_FAMILIES, CARD_TYPES } from "../../constants/gameConstants";
 
@@ -11,8 +13,12 @@ const PlayerHand = ({
   selectedDiceValue,
   onSelectDiceValue,
   isTransitioning,
+  startingTokens,
 }) => {
-  const { hand, tokens, name } = player;
+  const { hand, tokens, name, id } = player;
+  const totalTokens = startingTokens[id] || 0;
+  const tokensBet = Math.max(0, totalTokens - tokens);
+  const usedTokens = Math.max(0, totalTokens - tokens - tokensBet);
 
   // Composant pour une carte
   const Card = ({ card }) => {
@@ -86,18 +92,51 @@ const PlayerHand = ({
   };
 
   return (
-    <div
-      className={`
-      p-4 rounded-lg 
-      ${isCurrentPlayer ? "bg-blue-100" : "bg-gray-100"}
-    `}
-    >
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="font-bold">{name}</h3>
-        <span className="text-sm">Jetons: {tokens}</span>
+    <div className="bg-blue-50 p-4 rounded-lg">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-4">
+        <span className="font-bold text-sm sm:text-base">{name}</span>
+
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          {/* Tous les jetons dans une seule ligne */}
+          <div className="flex items-center gap-1">
+            <span className="text-sm">Jetons:</span>
+            <div className="flex items-center gap-1.5">
+              {/* Jetons disponibles */}
+              {tokens > 0 &&
+                [...Array(tokens)].map((_, index) => (
+                  <img
+                    key={`available-${index}`}
+                    src={jetonImage}
+                    alt="Jeton disponible"
+                    className="w-6 h-6 sm:w-7 sm:h-7"
+                  />
+                ))}
+              {/* Jetons utilisés (indisponibles) */}
+              {usedTokens > 0 &&
+                [...Array(usedTokens)].map((_, index) => (
+                  <img
+                    key={`used-${index}`}
+                    src={jetonKoImage}
+                    alt="Jeton indisponible"
+                    className="w-6 h-6 sm:w-7 sm:h-7"
+                  />
+                ))}
+              {/* Jetons misés directement à la suite */}
+              {tokensBet > 0 &&
+                [...Array(tokensBet)].map((_, index) => (
+                  <img
+                    key={`bet-${index}`}
+                    src={jetonKoImage}
+                    alt="Jeton misé"
+                    className="w-6 h-6 sm:w-7 sm:h-7"
+                  />
+                ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex justify-center space-x-4">
+      <div className="flex gap-2 justify-center">
         {hand &&
           hand
             .sort((a, b) => {
