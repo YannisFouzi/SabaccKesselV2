@@ -26,7 +26,8 @@ const GameDecks = ({
     <div
       onClick={() => handleVisibleCardClick(card)}
       className={`
-        w-24 h-36 rounded-lg flex flex-col items-center justify-center
+        w-16 h-24 sm:w-20 sm:h-32 md:w-24 md:h-36
+        rounded-lg flex flex-col items-center justify-center
         ${
           isCurrentPlayerTurn && currentPlayerTokens > 0
             ? "cursor-pointer hover:opacity-75"
@@ -41,7 +42,7 @@ const GameDecks = ({
           card.type === CARD_TYPES.NORMAL ? card.value : null
         )}
         alt={`${card.family} ${card.type} ${card.value || ""}`}
-        className="w-full h-full rounded-lg"
+        className="w-full h-full rounded-lg object-contain"
       />
     </div>
   );
@@ -51,7 +52,8 @@ const GameDecks = ({
     <div
       onClick={() => handleHiddenDeckClick(family)}
       className={`
-        w-24 h-36 rounded-lg flex items-center justify-center
+        w-16 h-24 sm:w-20 sm:h-32 md:w-24 md:h-36
+        rounded-lg flex flex-col items-center justify-center
         ${
           isCurrentPlayerTurn && currentPlayerTokens > 0
             ? "cursor-pointer hover:opacity-75"
@@ -62,7 +64,7 @@ const GameDecks = ({
       <img
         src={getCardBack(family)}
         alt={`${family} deck`}
-        className="w-full h-full rounded-lg"
+        className="w-full h-full rounded-lg object-contain"
       />
     </div>
   );

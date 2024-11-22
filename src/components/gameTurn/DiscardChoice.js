@@ -1,6 +1,6 @@
 import React from "react";
 import { getCardImage } from "../../constants/cardImages";
-import { CARD_FAMILIES, CARD_TYPES } from "../../constants/gameConstants";
+import { CARD_TYPES } from "../../constants/gameConstants";
 
 const DiscardChoice = ({
   pendingDrawnCard,
@@ -20,11 +20,6 @@ const DiscardChoice = ({
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-xl">
         <h3 className="text-xl font-bold text-center mb-4">
           Choisissez la carte à défausser
-          <span className="text-sm block mt-1 text-gray-600">
-            {pendingDrawnCard.family === CARD_FAMILIES.SAND
-              ? "(Famille : Sable)"
-              : "(Famille : Sang)"}
-          </span>
         </h3>
 
         <div className="flex space-x-8 mb-4">

@@ -28,7 +28,10 @@ const PlayerHand = ({
     return (
       <div
         className={`
-          relative w-24 h-36 rounded-lg flex flex-col items-center justify-between
+          relative w-20 h-32 sm:w-24 sm:h-36 md:w-28 md:h-40 
+          cursor-pointer 
+          transition-transform 
+          hover:scale-105
           ${canInteract ? "cursor-pointer hover:opacity-75" : "cursor-default"}
           ${
             (!isRevealPhase && !isCurrentPlayer) || isTransitioning

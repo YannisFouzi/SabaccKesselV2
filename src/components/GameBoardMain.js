@@ -48,30 +48,32 @@ const GameBoardMain = ({
   const nextPlayer = getNextPlayer();
 
   return (
-    <div className="relative w-full h-screen bg-gray-100 overflow-hidden">
+    <div className="relative w-full min-h-screen bg-gray-100 flex flex-col justify-between overflow-hidden">
       {/* Zone d'information du tour */}
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 mt-4">
-        <GameTurn
-          gameState={gameState}
-          currentPlayer={players[currentPlayerIndex]}
-          players={players}
-          roundNumber={round}
-          turnNumber={turn}
-          consecutivePasses={consecutivePasses}
-          isCurrentPlayerTurn={gameState === GAME_STATES.PLAYER_TURN}
-          pendingDrawnCard={pendingDrawnCard}
-          onPass={passTurn}
-          onChooseDiscard={handleDiscard}
-          diceResults={diceResults}
-          onRollDice={rollDice}
-          currentPlayerTokens={players[currentPlayerIndex]?.tokens || 0}
-          playerOrder={playerOrder}
-          roundStartPlayer={roundStartPlayer}
-        />
+      <div className="w-full px-4 py-2">
+        <div className="mx-auto max-w-md">
+          <GameTurn
+            gameState={gameState}
+            currentPlayer={players[currentPlayerIndex]}
+            players={players}
+            roundNumber={round}
+            turnNumber={turn}
+            consecutivePasses={consecutivePasses}
+            isCurrentPlayerTurn={gameState === GAME_STATES.PLAYER_TURN}
+            pendingDrawnCard={pendingDrawnCard}
+            onPass={passTurn}
+            onChooseDiscard={handleDiscard}
+            diceResults={diceResults}
+            onRollDice={rollDice}
+            currentPlayerTokens={players[currentPlayerIndex]?.tokens || 0}
+            playerOrder={playerOrder}
+            roundStartPlayer={roundStartPlayer}
+          />
+        </div>
       </div>
 
       {/* Zone du centre avec les pioches */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+      <div className="flex-1 flex items-center justify-center px-4">
         <GameDecks
           visibleSandCard={sandDecks.visible[0]}
           visibleBloodCard={bloodDecks.visible[0]}
@@ -83,38 +85,49 @@ const GameBoardMain = ({
         />
       </div>
 
-      {/* Affichage de la main du joueur actif et des joueurs restants */}
-      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 mb-4 flex space-x-8 items-start">
-        <div>
-          <PlayerHand
-            player={players[currentPlayerIndex]}
-            isCurrentPlayer={true}
-            isRevealPhase={gameState === GAME_STATES.REVEAL}
-            pendingDrawnCard={pendingDrawnCard}
-            onChooseDiscard={handleDiscard}
-            selectedDiceValue={players[currentPlayerIndex]?.selectedDiceValue}
-            onSelectDiceValue={selectImpostorValue}
-            isTransitioning={isTransitioning}
-          />
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-lg">
-          <h3 className="font-bold mb-2">Joueurs restants</h3>
-          <ul className="space-y-2">
-            {players.map((player) => {
-              const tokensBet = startingTokens[player.id] - player.tokens;
-              return (
-                <li key={player.id} className="flex flex-col">
-                  <span className="font-semibold">{player.name}</span>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span>Jetons: {player.tokens}</span>
-                    {tokensBet > 0 && (
-                      <span className="text-amber-600">Misés: {tokensBet}</span>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+      {/* Zone du bas avec la main du joueur et les joueurs restants */}
+      <div className="w-full px-4 py-2">
+        <div className="flex flex-row items-start justify-center gap-4">
+          <div className="flex-shrink-0 max-w-[80%]">
+            <PlayerHand
+              player={players[currentPlayerIndex]}
+              isCurrentPlayer={true}
+              isRevealPhase={gameState === GAME_STATES.REVEAL}
+              pendingDrawnCard={pendingDrawnCard}
+              onChooseDiscard={handleDiscard}
+              selectedDiceValue={players[currentPlayerIndex]?.selectedDiceValue}
+              onSelectDiceValue={selectImpostorValue}
+              isTransitioning={isTransitioning}
+            />
+          </div>
+
+          <div className="flex-shrink-0 w-[20%] min-w-[100px] max-w-[150px] bg-white p-2 sm:p-3 rounded-lg shadow-lg">
+            <h3 className="font-bold mb-2 text-xs sm:text-sm">
+              Joueurs restants
+            </h3>
+            <ul className="space-y-2">
+              {players
+                .filter((player, index) => index !== currentPlayerIndex)
+                .map((player) => {
+                  const tokensBet = startingTokens[player.id] - player.tokens;
+                  return (
+                    <li key={player.id} className="flex flex-col">
+                      <span className="font-semibold text-xs sm:text-sm">
+                        {player.name}
+                      </span>
+                      <div className="flex flex-col items-start gap-0.5 text-xs">
+                        <span>Jetons: {player.tokens}</span>
+                        {tokensBet > 0 && (
+                          <span className="text-amber-600">
+                            Misés: {tokensBet}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+            </ul>
+          </div>
         </div>
       </div>
 
