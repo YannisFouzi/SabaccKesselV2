@@ -1,7 +1,8 @@
 import { CARD_FAMILIES, CARD_TYPES } from "./cardDefinitions";
 
 // Importons directement toutes les images
-import cardBack from "../assets/img/dos.png";
+import cardBackSand from "../assets/img/dos_sable.png";
+import cardBackBlood from "../assets/img/dos_sang.png";
 
 // Import des cartes de sable
 import sable1 from "../assets/img/sable_1.png";
@@ -35,7 +36,7 @@ export const CARD_IMAGES = {
       5: sable5,
       6: sable6,
     },
-    BACK: cardBack,
+    BACK: cardBackSand,
   },
   [CARD_FAMILIES.BLOOD]: {
     [CARD_TYPES.SYLOP]: sangSylop,
@@ -48,7 +49,7 @@ export const CARD_IMAGES = {
       5: sang5,
       6: sang6,
     },
-    BACK: cardBack,
+    BACK: cardBackBlood,
   },
 };
 

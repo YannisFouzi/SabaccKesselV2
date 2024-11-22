@@ -1,7 +1,26 @@
 import { Shield } from "lucide-react";
 import React from "react";
+import { getCardBack, getCardImage } from "../../constants/cardImages";
 
 const ActionHistory = ({ actions }) => {
+  const renderCardImage = (card) => {
+    return (
+      <img
+        src={
+          card.isHidden
+            ? getCardBack(card.family)
+            : getCardImage(
+                card.family,
+                card.type,
+                card.type === "NORMAL" ? card.value : null
+              )
+        }
+        alt={`Carte ${card.family === "SAND" ? "Sable" : "Sang"}`}
+        className="inline-block w-8 h-12 mx-1 align-middle"
+      />
+    );
+  };
+
   // Regrouper les actions par joueur
   const groupedActions = actions.reduce((acc, action) => {
     if (!acc[action.playerName]) {
@@ -9,21 +28,17 @@ const ActionHistory = ({ actions }) => {
     }
     let description = "";
     if (action.type === "DRAW_VISIBLE") {
-      description = `a pioché la carte ${
-        action.card.family === "SAND" ? "Sable" : "Sang"
-      } ${
-        action.card.type === "NORMAL" ? action.card.value : action.card.type
-      } visible`;
+      description = (
+        <>a pioché {renderCardImage({ ...action.card, isHidden: false })}</>
+      );
     } else if (action.type === "DRAW_HIDDEN") {
-      description = `a pioché une carte ${
-        action.card.family === "SAND" ? "Sable" : "Sang"
-      } de la pile cachée`;
+      description = (
+        <>a pioché {renderCardImage({ ...action.card, isHidden: true })}</>
+      );
     } else if (action.type === "DISCARD") {
-      description = `a défaussé une carte ${
-        action.card.family === "SAND" ? "Sable" : "Sang"
-      } ${
-        action.card.type === "NORMAL" ? action.card.value : action.card.type
-      }`;
+      description = (
+        <>a défaussé {renderCardImage({ ...action.card, isHidden: false })}</>
+      );
     } else if (action.type === "PASS") {
       description = "a passé son tour";
     }
@@ -46,7 +61,12 @@ const ActionHistory = ({ actions }) => {
               >
                 <span className="font-medium text-blue-600">{playerName}</span>
                 <span className="text-gray-600"> : </span>
-                <span>{actions.join(" et ")}</span>
+                {actions.map((action, actionIndex) => (
+                  <span key={actionIndex} className="inline-flex items-center">
+                    {actionIndex > 0 && " et "}
+                    {action}
+                  </span>
+                ))}
               </div>
             )
           )}
