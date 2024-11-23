@@ -19,10 +19,6 @@ const PlayerHand = ({
 
   const hand = player.hand || [];
 
-  const totalTokens = startingTokens[player.id] || 0;
-  const tokensBet = Math.max(0, totalTokens - player.tokens);
-  const usedTokens = Math.max(0, totalTokens - player.tokens - tokensBet);
-
   // Composant pour une carte
   const Card = ({ card }) => {
     // On ne peut interagir avec une carte que si :

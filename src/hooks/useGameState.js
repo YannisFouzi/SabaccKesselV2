@@ -56,6 +56,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     useState(0);
   const [usedJokersThisRound, setUsedJokersThisRound] = useState([]);
   const [hasUsedJokerA, setHasUsedJokerA] = useState(false);
+  const [hasUsedJokerB, setHasUsedJokerB] = useState(false);
 
   const setters = {
     setGameState,
@@ -232,9 +233,27 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
 
   const useJoker = useCallback(
     (playerId, jokerId, jokerIndex) => {
-      // Si c'est le Joker A, activer son effet
+      const player = players.find((p) => p.id === playerId);
+      if (!player) return;
+
       if (jokerId === "A") {
         setHasUsedJokerA(true);
+      } else if (jokerId === "B") {
+        // Calculer les jetons misés
+        const tokensBet = startingTokens[playerId] - player.tokens;
+        // Récupérer jusqu'à 2 jetons
+        const tokensToRecover = Math.min(2, tokensBet);
+
+        if (tokensToRecover > 0) {
+          setPlayers((prevPlayers) =>
+            prevPlayers.map((p) =>
+              p.id === playerId
+                ? { ...p, tokens: p.tokens + tokensToRecover }
+                : p
+            )
+          );
+          setHasUsedJokerB(true);
+        }
       }
 
       // Retirer le joker de la liste des jokers du joueur
@@ -251,66 +270,21 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       setUsedJokersThisRound((prev) => [...prev, playerId]);
 
       // Ajouter l'action à l'historique
-      const player = players.find((p) => p.id === playerId);
-      if (player) {
-        addToHistory({
-          type: "USE_JOKER",
-          playerName: player.name,
-          jokerId: jokerId,
-        });
-      }
+      addToHistory({
+        type: "USE_JOKER",
+        playerName: player.name,
+        jokerId: jokerId,
+      });
     },
-    [players, addToHistory]
+    [players, addToHistory, startingTokens]
   );
 
-  // Réinitialiser les jokers utilisés au début de chaque tour plutôt que chaque manche
+  // Réinitialiser les jokers utilisés au début de chaque tour
   useEffect(() => {
     setUsedJokersThisRound([]);
+    setHasUsedJokerA(false);
+    setHasUsedJokerB(false);
   }, [turn]);
-
-  const getHistorySinceLastTurn = useCallback(
-    (playerId) => {
-      const actions = [];
-      // ... autres actions existantes ...
-
-      // Ajouter les actions de joker
-      usedJokersThisRound.forEach((userId) => {
-        const player = players.find((p) => p.id === userId);
-        if (player) {
-          actions.push({
-            type: "USE_JOKER",
-            playerName: player.name,
-            jokerId: selectedJokers[userId]?.[0], // On prend le premier joker utilisé
-          });
-        }
-      });
-
-      return actions;
-    },
-    [players, usedJokersThisRound, selectedJokers]
-  );
-
-  const passTurn = useCallback(
-    () => {
-      setUsedJokersThisRound([]); // Réinitialiser les jokers utilisés
-      setHasUsedJokerA(false); // Réinitialiser le Joker A
-      // ... reste de la logique de passTurn
-    },
-    [
-      /* ... dépendances existantes ... */
-    ]
-  );
-
-  const handleDiscard = useCallback(
-    (card) => {
-      setUsedJokersThisRound([]); // Réinitialiser les jokers utilisés
-      setHasUsedJokerA(false); // Réinitialiser le Joker A
-      // ... reste de la logique de handleDiscard
-    },
-    [
-      /* ... dépendances existantes ... */
-    ]
-  );
 
   return {
     // État du jeu
@@ -343,6 +317,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     currentJokerSelectionPlayer,
     usedJokersThisRound,
     hasUsedJokerA,
+    hasUsedJokerB,
 
     // Actions du jeu
     ...gameActions,
