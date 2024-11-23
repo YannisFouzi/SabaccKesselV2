@@ -55,6 +55,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   const [currentJokerSelectionPlayer, setCurrentJokerSelectionPlayer] =
     useState(0);
   const [usedJokersThisRound, setUsedJokersThisRound] = useState([]);
+  const [hasUsedJokerA, setHasUsedJokerA] = useState(false);
 
   const setters = {
     setGameState,
@@ -171,8 +172,71 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     [currentPlayerIndex, players]
   );
 
+  const drawCard = useCallback(
+    (family, type) => {
+      const currentPlayer = players[currentPlayerIndex];
+      const deck = family === "SAND" ? sandDecks : bloodDecks;
+      const deckType = type === "VISIBLE" ? "visible" : "hidden";
+      const card = deck[deckType][0];
+
+      if (!card) return;
+
+      // Vérifier si le joueur utilise le Joker A
+      const isUsingJokerA = hasUsedJokerA;
+
+      // Si le joueur n'utilise pas le Joker A, vérifier s'il a assez de jetons
+      if (!isUsingJokerA && currentPlayer.tokens <= 0) return;
+
+      // Mettre à jour les jetons du joueur seulement s'il n'utilise pas le Joker A
+      if (!isUsingJokerA) {
+        setPlayers((prevPlayers) =>
+          prevPlayers.map((player) =>
+            player.id === currentPlayer.id
+              ? { ...player, tokens: player.tokens - 1 }
+              : player
+          )
+        );
+      }
+
+      // Réinitialiser l'utilisation du Joker A
+      setHasUsedJokerA(false);
+
+      setPendingDrawnCard(card);
+      addToHistory({
+        type: `DRAW_${type}`,
+        card: card,
+      });
+
+      // Mettre à jour le deck
+      if (family === "SAND") {
+        setSandDecks((prev) => ({
+          ...prev,
+          [deckType]: prev[deckType].slice(1),
+        }));
+      } else {
+        setBloodDecks((prev) => ({
+          ...prev,
+          [deckType]: prev[deckType].slice(1),
+        }));
+      }
+    },
+    [
+      players,
+      currentPlayerIndex,
+      sandDecks,
+      bloodDecks,
+      hasUsedJokerA,
+      addToHistory,
+    ]
+  );
+
   const useJoker = useCallback(
     (playerId, jokerId, jokerIndex) => {
+      // Si c'est le Joker A, activer son effet
+      if (jokerId === "A") {
+        setHasUsedJokerA(true);
+      }
+
       // Retirer le joker de la liste des jokers du joueur
       setSelectedJokers((prev) => {
         const playerJokers = [...prev[playerId]];
@@ -256,6 +320,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     selectedJokers,
     currentJokerSelectionPlayer,
     usedJokersThisRound,
+    hasUsedJokerA,
 
     // Actions du jeu
     ...gameActions,
@@ -269,6 +334,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     setCurrentJokerSelectionPlayer,
     useJoker,
     addToHistory,
+    drawCard,
 
     // État de la partie
     isGameOver: gameState === GAME_STATES.GAME_OVER,

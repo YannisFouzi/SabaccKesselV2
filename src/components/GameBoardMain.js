@@ -86,6 +86,7 @@ const GameBoardMain = ({
   selectedJokers,
   usedJokersThisRound,
   useJoker,
+  hasUsedJokerA,
 }) => {
   const getNextPlayer = () => {
     if (!players || players.length === 0) return null;
@@ -130,6 +131,7 @@ const GameBoardMain = ({
           isCurrentPlayerTurn={
             gameState === GAME_STATES.PLAYER_TURN && !pendingDrawnCard
           }
+          hasUsedJokerA={hasUsedJokerA}
         />
       </div>
 
