@@ -57,6 +57,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   const [usedJokersThisRound, setUsedJokersThisRound] = useState([]);
   const [hasUsedJokerA, setHasUsedJokerA] = useState(false);
   const [hasUsedJokerB, setHasUsedJokerB] = useState(false);
+  const [hasUsedJokerC, setHasUsedJokerC] = useState(false);
 
   const setters = {
     setGameState,
@@ -254,6 +255,22 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
           );
           setHasUsedJokerB(true);
         }
+      } else if (jokerId === "C") {
+        // Calculer les jetons misés
+        const tokensBet = startingTokens[playerId] - player.tokens;
+        // Récupérer jusqu'à 2 jetons
+        const tokensToRecover = Math.min(3, tokensBet);
+
+        if (tokensToRecover > 0) {
+          setPlayers((prevPlayers) =>
+            prevPlayers.map((p) =>
+              p.id === playerId
+                ? { ...p, tokens: p.tokens + tokensToRecover }
+                : p
+            )
+          );
+          setHasUsedJokerC(true);
+        }
       }
 
       // Retirer le joker de la liste des jokers du joueur
@@ -284,6 +301,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     setUsedJokersThisRound([]);
     setHasUsedJokerA(false);
     setHasUsedJokerB(false);
+    setHasUsedJokerC(false);
   }, [turn]);
 
   return {
@@ -318,6 +336,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     usedJokersThisRound,
     hasUsedJokerA,
     hasUsedJokerB,
+    hasUsedJokerC,
 
     // Actions du jeu
     ...gameActions,
