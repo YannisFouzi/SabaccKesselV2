@@ -263,10 +263,10 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     [players, addToHistory]
   );
 
-  // Réinitialiser les jokers utilisés au début de chaque manche
+  // Réinitialiser les jokers utilisés au début de chaque tour plutôt que chaque manche
   useEffect(() => {
     setUsedJokersThisRound([]);
-  }, [round]);
+  }, [turn]);
 
   const getHistorySinceLastTurn = useCallback(
     (playerId) => {
@@ -288,6 +288,28 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       return actions;
     },
     [players, usedJokersThisRound, selectedJokers]
+  );
+
+  const passTurn = useCallback(
+    () => {
+      setUsedJokersThisRound([]); // Réinitialiser les jokers utilisés
+      setHasUsedJokerA(false); // Réinitialiser le Joker A
+      // ... reste de la logique de passTurn
+    },
+    [
+      /* ... dépendances existantes ... */
+    ]
+  );
+
+  const handleDiscard = useCallback(
+    (card) => {
+      setUsedJokersThisRound([]); // Réinitialiser les jokers utilisés
+      setHasUsedJokerA(false); // Réinitialiser le Joker A
+      // ... reste de la logique de handleDiscard
+    },
+    [
+      /* ... dépendances existantes ... */
+    ]
   );
 
   return {
