@@ -11,7 +11,7 @@ import initializeGameFn from "./initializeGame";
 import { createGameActions } from "./useGameActions";
 
 const useGameState = (initialPlayerCount, initialTokenCount) => {
-  const [gameState, setGameState] = useState(GAME_STATES.INITIAL_DICE_ROLL);
+  const [gameState, setGameState] = useState(GAME_STATES.JOKER_SELECTION);
   const [players, setPlayers] = useState(
     Array(initialPlayerCount)
       .fill(null)
@@ -51,6 +51,10 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     visible: [],
     hidden: [],
   });
+  const [selectedJokers, setSelectedJokers] = useState({});
+  const [currentJokerSelectionPlayer, setCurrentJokerSelectionPlayer] =
+    useState(0);
+  const [usedJokersThisRound, setUsedJokersThisRound] = useState([]);
 
   const setters = {
     setGameState,
@@ -76,6 +80,8 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     setLastPlayerBeforeReveal,
     setSandDecks,
     setBloodDecks,
+    setSelectedJokers,
+    setCurrentJokerSelectionPlayer,
   };
 
   const gameActions = createGameActions({
@@ -139,6 +145,37 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     }
   }, [gameState, initializeGame]);
 
+  useEffect(() => {
+    if (
+      gameState === GAME_STATES.INITIAL_DICE_ROLL &&
+      playerOrder.length === players.length
+    ) {
+      setTimeout(() => {
+        setGameState(GAME_STATES.SETUP);
+      }, 3000);
+    }
+  }, [gameState, playerOrder, players.length]);
+
+  const useJoker = useCallback((playerId, jokerId, jokerIndex) => {
+    // Retirer le joker de la liste des jokers du joueur
+    setSelectedJokers((prev) => {
+      const playerJokers = [...prev[playerId]];
+      playerJokers.splice(jokerIndex, 1);
+      return {
+        ...prev,
+        [playerId]: playerJokers,
+      };
+    });
+
+    // Marquer le joueur comme ayant utilisé un joker ce tour
+    setUsedJokersThisRound((prev) => [...prev, playerId]);
+  }, []);
+
+  // Réinitialiser les jokers utilisés au début de chaque manche
+  useEffect(() => {
+    setUsedJokersThisRound([]);
+  }, [round]);
+
   return {
     // État du jeu
     gameState,
@@ -166,6 +203,9 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     rerollResults,
     roundStartPlayer,
     isTransitioning,
+    selectedJokers,
+    currentJokerSelectionPlayer,
+    usedJokersThisRound,
 
     // Actions du jeu
     ...gameActions,
@@ -175,6 +215,9 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     calculateHandValue,
     compareHands,
     getHandValue,
+    setSelectedJokers,
+    setCurrentJokerSelectionPlayer,
+    useJoker,
 
     // État de la partie
     isGameOver: gameState === GAME_STATES.GAME_OVER,

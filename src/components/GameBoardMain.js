@@ -6,6 +6,7 @@ import EndRoundOverlay from "./gameBoard/EndRoundOverlay";
 import FinalRevealOverlay from "./gameBoard/FinalRevealOverlay";
 import GameDecks from "./gameBoard/GameDecks";
 import PlayerHand from "./gameBoard/PlayerHand";
+import PlayerJokers from "./gameBoard/PlayerJokers";
 import PlayerTransitionScreen from "./gameBoard/PlayerTransitionScreen";
 
 const TokenDisplay = ({ count, type = "available" }) => {
@@ -82,6 +83,9 @@ const GameBoardMain = ({
   endRound,
   setDiceResults,
   lastPlayerBeforeReveal,
+  selectedJokers,
+  usedJokersThisRound,
+  useJoker,
 }) => {
   const getNextPlayer = () => {
     if (!players || players.length === 0) return null;
@@ -133,17 +137,28 @@ const GameBoardMain = ({
       <div className="w-full px-4 py-2">
         <div className="flex flex-row items-start justify-center gap-4">
           <div className="flex-shrink-0 max-w-[80%]">
-            <PlayerHand
-              player={players[currentPlayerIndex]}
-              isCurrentPlayer={true}
-              isRevealPhase={gameState === GAME_STATES.REVEAL}
-              pendingDrawnCard={pendingDrawnCard}
-              onChooseDiscard={handleDiscard}
-              selectedDiceValue={players[currentPlayerIndex]?.selectedDiceValue}
-              onSelectDiceValue={selectImpostorValue}
-              isTransitioning={isTransitioning}
-              startingTokens={startingTokens}
-            />
+            <div className="flex flex-col gap-2">
+              <PlayerHand
+                player={players[currentPlayerIndex]}
+                isCurrentPlayer={true}
+                isRevealPhase={gameState === GAME_STATES.REVEAL}
+                pendingDrawnCard={pendingDrawnCard}
+                onChooseDiscard={handleDiscard}
+                selectedDiceValue={
+                  players[currentPlayerIndex]?.selectedDiceValue
+                }
+                onSelectDiceValue={selectImpostorValue}
+                isTransitioning={isTransitioning}
+                startingTokens={startingTokens}
+              />
+              <PlayerJokers
+                player={players[currentPlayerIndex]}
+                selectedJokers={selectedJokers}
+                isCurrentPlayer={true}
+                onUseJoker={useJoker}
+                usedJokersThisRound={usedJokersThisRound}
+              />
+            </div>
           </div>
 
           <div className="flex-shrink-0 w-[20%] min-w-[100px] max-w-[150px] bg-white p-2 sm:p-3 rounded-lg shadow-lg">
@@ -170,6 +185,13 @@ const GameBoardMain = ({
                           <span className="text-xs">misés</span>
                         </div>
                       )}
+                      <PlayerJokers
+                        player={player}
+                        selectedJokers={selectedJokers}
+                        isCurrentPlayer={false}
+                        onUseJoker={useJoker}
+                        usedJokersThisRound={usedJokersThisRound}
+                      />
                     </li>
                   );
                 })}

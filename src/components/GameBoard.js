@@ -4,6 +4,7 @@ import useGameState from "../hooks/useGameState";
 import GameOverScreen from "./gameBoard/GameOverScreen";
 import InitialDiceRoll from "./gameBoard/InitialDiceRoll";
 import GameBoardMain from "./GameBoardMain";
+import JokerSelection from "./JokerSelection";
 
 const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
   const {
@@ -46,6 +47,12 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
     getHistorySinceLastTurn,
     setDiceResults,
     lastPlayerBeforeReveal,
+    selectedJokers,
+    currentJokerSelectionPlayer,
+    setSelectedJokers,
+    setCurrentJokerSelectionPlayer,
+    usedJokersThisRound,
+    useJoker,
   } = useGameState(playerCount, tokenCount);
 
   // Vérification que le jeu est correctement initialisé
@@ -65,6 +72,20 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
         rollInitialDice={rollInitialDice}
         playersToReroll={playersToReroll}
         playerOrder={playerOrder}
+      />
+    );
+  }
+
+  // Ajout de la condition pour afficher la sélection des jokers
+  if (gameState === GAME_STATES.JOKER_SELECTION) {
+    return (
+      <JokerSelection
+        players={players}
+        currentJokerSelectionPlayer={currentJokerSelectionPlayer}
+        selectedJokers={selectedJokers}
+        setSelectedJokers={setSelectedJokers}
+        setCurrentJokerSelectionPlayer={setCurrentJokerSelectionPlayer}
+        setGameState={setGameState}
       />
     );
   }
@@ -117,6 +138,9 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
       endRound={endRound}
       setDiceResults={setDiceResults}
       lastPlayerBeforeReveal={lastPlayerBeforeReveal}
+      selectedJokers={selectedJokers}
+      usedJokersThisRound={usedJokersThisRound}
+      useJoker={useJoker}
     />
   );
 };

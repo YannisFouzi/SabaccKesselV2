@@ -10,6 +10,12 @@ const InitialDiceRoll = ({
   playersToReroll,
   playerOrder,
 }) => {
+  const handleRollComplete = () => {
+    if (initialDiceState === INITIAL_DICE_STATES.COMPLETE) {
+      rollInitialDice();
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg max-w-2xl w-full">
@@ -132,9 +138,12 @@ const InitialDiceRoll = ({
                   );
                 })}
               </div>
-              <div className="text-sm text-gray-600 mt-4">
-                La partie va commencer...
-              </div>
+              <button
+                onClick={handleRollComplete}
+                className="mt-6 bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
+              >
+                Commencer la partie
+              </button>
             </div>
           )}
         </div>
