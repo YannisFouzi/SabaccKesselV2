@@ -58,6 +58,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   const [hasUsedJokerA, setHasUsedJokerA] = useState(false);
   const [hasUsedJokerB, setHasUsedJokerB] = useState(false);
   const [hasUsedJokerC, setHasUsedJokerC] = useState(false);
+  const [hasUsedJokerD, setHasUsedJokerD] = useState(false);
 
   const setters = {
     setGameState,
@@ -271,6 +272,34 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
           );
           setHasUsedJokerC(true);
         }
+      } else if (jokerId === "D") {
+        // Pour chaque adversaire
+        setStartingTokens((prevStartingTokens) => {
+          const updatedStartingTokens = { ...prevStartingTokens };
+          let totalTokensStolen = 0;
+
+          // Parcourir tous les joueurs
+          players.forEach((p) => {
+            if (p.id !== playerId) {
+              const tokensBet = prevStartingTokens[p.id] - p.tokens;
+              if (tokensBet > 0) {
+                // Augmenter le startingTokens de l'adversaire pour simuler un jeton de mise en moins
+                updatedStartingTokens[p.id] = prevStartingTokens[p.id] - 1;
+                totalTokensStolen++;
+              }
+            }
+          });
+
+          // Diminuer le startingTokens du joueur actif pour simuler l'ajout des jetons volés à sa mise
+          if (totalTokensStolen > 0) {
+            updatedStartingTokens[playerId] =
+              prevStartingTokens[playerId] + totalTokensStolen;
+          }
+
+          return updatedStartingTokens;
+        });
+
+        setHasUsedJokerD(true);
       }
 
       // Retirer le joker de la liste des jokers du joueur
@@ -302,6 +331,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     setHasUsedJokerA(false);
     setHasUsedJokerB(false);
     setHasUsedJokerC(false);
+    setHasUsedJokerD(false);
   }, [turn]);
 
   return {
@@ -337,6 +367,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     hasUsedJokerA,
     hasUsedJokerB,
     hasUsedJokerC,
+    hasUsedJokerD,
 
     // Actions du jeu
     ...gameActions,
