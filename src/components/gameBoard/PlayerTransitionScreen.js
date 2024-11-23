@@ -2,7 +2,7 @@ import { Shield } from "lucide-react";
 import React from "react";
 import { getCardBack, getCardImage } from "../../constants/cardImages";
 
-const ActionHistory = ({ actions }) => {
+const ActionHistory = ({ actions, usedJokers }) => {
   const renderCardImage = (card) => {
     return (
       <img
@@ -41,6 +41,12 @@ const ActionHistory = ({ actions }) => {
       );
     } else if (action.type === "PASS") {
       description = "a passé son tour";
+    } else if (action.type === "USE_JOKER") {
+      description = (
+        <>
+          a utilisé le joker <span className="font-bold">{action.jokerId}</span>
+        </>
+      );
     }
     acc[action.playerName].push(description);
     return acc;
@@ -78,7 +84,12 @@ const ActionHistory = ({ actions }) => {
   );
 };
 
-const PlayerTransitionScreen = ({ nextPlayer, onReady, actionHistory }) => {
+const PlayerTransitionScreen = ({
+  nextPlayer,
+  onReady,
+  actionHistory,
+  usedJokers,
+}) => {
   return (
     <div className="fixed inset-0 bg-gray-900 z-50 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-xl max-w-2xl w-full">
@@ -88,7 +99,7 @@ const PlayerTransitionScreen = ({ nextPlayer, onReady, actionHistory }) => {
           Au tour de {nextPlayer.name}
         </h2>
 
-        <ActionHistory actions={actionHistory} />
+        <ActionHistory actions={actionHistory} usedJokers={usedJokers} />
 
         <button
           onClick={onReady}

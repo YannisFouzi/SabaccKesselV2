@@ -14,6 +14,16 @@ const PlayerJokers = ({
   const playerJokers = selectedJokers[player.id];
   const hasUsedJokerThisRound = usedJokersThisRound.includes(player.id);
 
+  if (!isCurrentPlayer) {
+    return (
+      <div className="mt-1">
+        <div className="text-xs text-gray-600">
+          Jokers restants : {playerJokers.length}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-2">
       <div className="text-sm font-medium mb-1">Jokers :</div>
@@ -22,9 +32,9 @@ const PlayerJokers = ({
           <button
             key={`${jokerId}-${index}`}
             onClick={() => onUseJoker(player.id, jokerId, index)}
-            disabled={!isCurrentPlayer || hasUsedJokerThisRound}
+            disabled={hasUsedJokerThisRound}
             className={`px-2 py-1 text-sm rounded ${
-              isCurrentPlayer && !hasUsedJokerThisRound
+              !hasUsedJokerThisRound
                 ? "bg-blue-100 hover:bg-blue-200"
                 : "bg-gray-100"
             }`}
