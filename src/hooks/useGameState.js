@@ -204,6 +204,9 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       // Réinitialiser l'utilisation du Joker A
       setHasUsedJokerA(false);
 
+      // Réinitialiser le compteur de passes consécutives
+      setConsecutivePasses(0);
+
       setPendingDrawnCard(card);
       addToHistory({
         type: `DRAW_${type}`,
@@ -237,6 +240,9 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     (playerId, jokerId, jokerIndex) => {
       const player = players.find((p) => p.id === playerId);
       if (!player) return;
+
+      // Réinitialiser le compteur de passes consécutives
+      setConsecutivePasses(0);
 
       if (jokerId === "A") {
         setHasUsedJokerA(true);
