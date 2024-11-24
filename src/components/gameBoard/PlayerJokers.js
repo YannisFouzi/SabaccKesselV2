@@ -1,4 +1,11 @@
 import React from "react";
+import { JOKERS } from "../../constants/gameConstants";
+
+// Importation dynamique des images des jokers
+const jokerImages = {};
+Object.keys(JOKERS).forEach((key) => {
+  jokerImages[key] = require(`../../assets/img/jokers/joker-${key}.png`);
+});
 
 const PlayerJokers = ({
   player,
@@ -33,13 +40,20 @@ const PlayerJokers = ({
             key={`${jokerId}-${index}`}
             onClick={() => onUseJoker(player.id, jokerId, index)}
             disabled={hasUsedJokerThisRound}
-            className={`px-2 py-1 text-sm rounded ${
+            className={`relative p-2 text-sm rounded min-w-[80px] ${
               !hasUsedJokerThisRound
                 ? "bg-blue-100 hover:bg-blue-200"
                 : "bg-gray-100"
             }`}
           >
-            {jokerId}
+            <div className="w-12 h-12 mx-auto mb-1">
+              <img
+                src={jokerImages[jokerId]}
+                alt={`Joker ${jokerId}`}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <span className="block text-xs">{JOKERS[jokerId].title}</span>
           </button>
         ))}
       </div>
