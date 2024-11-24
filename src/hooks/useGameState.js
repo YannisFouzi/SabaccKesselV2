@@ -247,9 +247,6 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       const player = players.find((p) => p.id === playerId);
       if (!player) return;
 
-      // Réinitialiser le compteur de passes consécutives
-      setConsecutivePasses(0);
-
       if (jokerId === "A") {
         setHasUsedJokerA(true);
       } else if (jokerId === "B") {
