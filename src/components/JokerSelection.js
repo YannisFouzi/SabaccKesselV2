@@ -81,9 +81,13 @@ const JokerSelection = ({
                       <div className="text-xs text-gray-600 mb-2 text-center h-12 overflow-y-auto">
                         {joker.description}
                       </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <span>Stock: {joker.quantity}</span>
+                      <div className="flex items-center justify-between bg-white rounded-lg p-2 shadow-md">
                         <div className="flex items-center space-x-1">
+                          <span className="text-xs font-semibold bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                            Stock: {joker.quantity}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
                           <button
                             onClick={() => {
                               const newSelection = [...currentSelection];
@@ -94,15 +98,21 @@ const JokerSelection = ({
                               }
                             }}
                             disabled={!canRemove}
-                            className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                              canRemove
-                                ? "bg-red-500 hover:bg-red-600 text-white"
-                                : "bg-gray-300 cursor-not-allowed"
-                            }`}
+                            className={`
+                              w-7 h-7 rounded-full 
+                              flex items-center justify-center 
+                              transform transition-all duration-200
+                              text-sm font-bold
+                              ${
+                                canRemove
+                                  ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              }
+                            `}
                           >
                             -
                           </button>
-                          <span className="w-4 text-center font-bold">
+                          <span className="w-5 h-5 flex items-center justify-center text-sm font-bold bg-white rounded-full shadow-inner">
                             {selectedCount}
                           </span>
                           <button
@@ -112,11 +122,17 @@ const JokerSelection = ({
                               }
                             }}
                             disabled={!canAdd}
-                            className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                              canAdd
-                                ? "bg-green-500 hover:bg-green-600 text-white"
-                                : "bg-gray-300 cursor-not-allowed"
-                            }`}
+                            className={`
+                              w-7 h-7 rounded-full 
+                              flex items-center justify-center 
+                              transform transition-all duration-200
+                              text-sm font-bold
+                              ${
+                                canAdd
+                                  ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              }
+                            `}
                           >
                             +
                           </button>
@@ -149,11 +165,56 @@ const JokerSelection = ({
           <button
             onClick={handleConfirmSelection}
             disabled={currentSelection.length !== 3}
-            className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg text-lg font-bold disabled:bg-gray-400"
+            className={`
+              w-full py-4 px-6 rounded-xl text-lg font-bold
+              transition-all duration-200 transform
+              ${
+                currentSelection.length === 3
+                  ? "bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }
+              relative overflow-hidden
+            `}
           >
-            Confirmer la sélection ({currentSelection.length}/3)
+            <div className="relative z-10 flex items-center justify-center">
+              {currentSelection.length === 3 ? (
+                <>
+                  <span className="mr-2">🎮</span>
+                  <span>Confirmer la sélection</span>
+                  <span className="ml-2">✨</span>
+                </>
+              ) : (
+                <>
+                  <span className="mr-2">🎲</span>
+                  <span>
+                    Sélectionnez {3 - currentSelection.length} joker
+                    {3 - currentSelection.length > 1 ? "s" : ""} de plus
+                  </span>
+                </>
+              )}
+            </div>
+            {currentSelection.length === 3 && (
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-purple-400 to-blue-300 opacity-20"
+                style={{
+                  backgroundSize: "200% 100%",
+                  animation: "shimmer 2s linear infinite",
+                }}
+              />
+            )}
           </button>
         </div>
+
+        <style jsx>{`
+          @keyframes shimmer {
+            0% {
+              background-position: 100% 0;
+            }
+            100% {
+              background-position: -100% 0;
+            }
+          }
+        `}</style>
       </div>
     </div>
   );
