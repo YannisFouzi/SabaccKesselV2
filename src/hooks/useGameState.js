@@ -240,10 +240,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
 
   const useJoker = useCallback(
     (playerId, jokerId, jokerIndex) => {
-      console.log("useJoker called - jokerId:", jokerId);
-
       if (jokerId === "E") {
-        console.log("Setting jokerEUsed to true");
         setJokerEUsed(true);
       }
 
@@ -350,8 +347,6 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     setHasUsedJokerC(false);
     setHasUsedJokerD(false);
   }, [turn]);
-
-  console.log("useGameState - jokerEUsed state:", jokerEUsed);
 
   return {
     // État du jeu

@@ -21,10 +21,6 @@ export const passTurn = ({
   if (newCount === players.length) {
     // Stocker l'ID du joueur actuel au lieu de son index
     setLastPlayerBeforeReveal(players[currentPlayerIndex].id);
-    console.log(
-      "Setting lastPlayerBeforeReveal in passTurn:",
-      players[currentPlayerIndex].id
-    );
 
     checkForImpostors();
     setGameState(GAME_STATES.REVEAL);

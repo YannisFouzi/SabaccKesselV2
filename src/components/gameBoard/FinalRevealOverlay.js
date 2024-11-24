@@ -35,23 +35,8 @@ const FinalRevealOverlay = ({
     GAME_STATES,
   });
 
-  console.log("FinalRevealOverlay - jokerEUsed:", jokerEUsed);
-  console.log("FinalRevealOverlay - currentPlayer:", currentPlayer);
-  console.log("FinalRevealOverlay - diceResults:", diceResults);
-  console.log(
-    "FinalRevealOverlay - currentPlayerHasImpostor:",
-    currentPlayerHasImpostor()
-  );
-  console.log("FinalRevealOverlay - unresolvedImpostors:", unresolvedImpostors);
-
   useEffect(() => {
-    console.log("useEffect - jokerEUsed:", jokerEUsed);
-    console.log(
-      "useEffect - currentPlayerHasImpostor:",
-      currentPlayerHasImpostor()
-    );
     if (jokerEUsed && currentPlayerHasImpostor()) {
-      console.log("Applying Joker E effect - setting impostor value to 6");
       handleImpostorValueAndNext(6);
     }
   }, [
