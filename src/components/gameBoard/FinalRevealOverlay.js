@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFinalReveal } from "./useFinalReveal";
 
 const FinalRevealOverlay = ({
@@ -12,6 +12,7 @@ const FinalRevealOverlay = ({
   setGameState,
   GAME_STATES,
   setDiceResults,
+  jokerEUsed,
 }) => {
   const {
     currentRevealIndex,
@@ -34,6 +35,32 @@ const FinalRevealOverlay = ({
     GAME_STATES,
   });
 
+  console.log("FinalRevealOverlay - jokerEUsed:", jokerEUsed);
+  console.log("FinalRevealOverlay - currentPlayer:", currentPlayer);
+  console.log("FinalRevealOverlay - diceResults:", diceResults);
+  console.log(
+    "FinalRevealOverlay - currentPlayerHasImpostor:",
+    currentPlayerHasImpostor()
+  );
+  console.log("FinalRevealOverlay - unresolvedImpostors:", unresolvedImpostors);
+
+  useEffect(() => {
+    console.log("useEffect - jokerEUsed:", jokerEUsed);
+    console.log(
+      "useEffect - currentPlayerHasImpostor:",
+      currentPlayerHasImpostor()
+    );
+    if (jokerEUsed && currentPlayerHasImpostor()) {
+      console.log("Applying Joker E effect - setting impostor value to 6");
+      handleImpostorValueAndNext(6);
+    }
+  }, [
+    currentRevealIndex,
+    jokerEUsed,
+    currentPlayerHasImpostor,
+    handleImpostorValueAndNext,
+  ]);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg max-w-4xl w-full">
@@ -41,7 +68,7 @@ const FinalRevealOverlay = ({
           Révélation des mains
         </h2>
 
-        {currentPlayerHasImpostor() && currentPlayer && (
+        {currentPlayerHasImpostor() && currentPlayer && !jokerEUsed && (
           <div className="mb-6 p-4 bg-yellow-50 rounded-lg">
             <div className="text-lg mb-4">
               {currentPlayer.name} doit choisir la valeur de son Imposteur{" "}
@@ -75,6 +102,15 @@ const FinalRevealOverlay = ({
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {currentPlayerHasImpostor() && currentPlayer && jokerEUsed && (
+          <div className="mb-6 p-4 bg-yellow-50 rounded-lg">
+            <div className="text-lg">
+              {currentPlayer.name} : L'imposteur prend automatiquement la valeur
+              6 (Effet du Joker E)
+            </div>
           </div>
         )}
 
@@ -160,7 +196,9 @@ const FinalRevealOverlay = ({
             <button
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
               onClick={handleNextPlayer}
-              disabled={currentPlayerHasImpostor()}
+              disabled={
+                currentPlayerHasImpostor() && !jokerEUsed && !diceResults
+              }
             >
               Joueur suivant
             </button>
@@ -168,7 +206,9 @@ const FinalRevealOverlay = ({
             <button
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
               onClick={handleNextPlayer}
-              disabled={currentPlayerHasImpostor()}
+              disabled={
+                currentPlayerHasImpostor() && !jokerEUsed && !diceResults
+              }
             >
               Révéler le gagnant
             </button>

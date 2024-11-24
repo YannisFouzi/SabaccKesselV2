@@ -17,6 +17,7 @@ const initializeGame = ({
   setTurn,
   setStartingTokens,
   setGameState,
+  setJokerEUsed,
   round,
   drawCardFromDeck,
   roundStartPlayer,
@@ -90,6 +91,7 @@ const initializeGame = ({
   setConsecutivePasses(0);
   setTurn(1);
   setPlayers(newPlayers);
+  setJokerEUsed(false);
 
   // Passer à l'état PLAYER_TURN
   setGameState(GAME_STATES.PLAYER_TURN);

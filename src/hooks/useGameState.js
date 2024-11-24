@@ -59,6 +59,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   const [hasUsedJokerB, setHasUsedJokerB] = useState(false);
   const [hasUsedJokerC, setHasUsedJokerC] = useState(false);
   const [hasUsedJokerD, setHasUsedJokerD] = useState(false);
+  const [jokerEUsed, setJokerEUsed] = useState(false);
 
   const setters = {
     setGameState,
@@ -127,6 +128,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       setTurn,
       setStartingTokens,
       setGameState,
+      setJokerEUsed,
       round,
       drawCardFromDeck: gameActions.drawCardFromDeck,
       roundStartPlayer,
@@ -238,6 +240,13 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
 
   const useJoker = useCallback(
     (playerId, jokerId, jokerIndex) => {
+      console.log("useJoker called - jokerId:", jokerId);
+
+      if (jokerId === "E") {
+        console.log("Setting jokerEUsed to true");
+        setJokerEUsed(true);
+      }
+
       const player = players.find((p) => p.id === playerId);
       if (!player) return;
 
@@ -306,6 +315,8 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
         });
 
         setHasUsedJokerD(true);
+      } else if (jokerId === "E") {
+        setJokerEUsed(true);
       }
 
       // Retirer le joker de la liste des jokers du joueur
@@ -328,7 +339,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
         jokerId: jokerId,
       });
     },
-    [players, addToHistory, startingTokens]
+    [players, addToHistory, startingTokens, setJokerEUsed]
   );
 
   // Réinitialiser les jokers utilisés au début de chaque tour
@@ -339,6 +350,8 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     setHasUsedJokerC(false);
     setHasUsedJokerD(false);
   }, [turn]);
+
+  console.log("useGameState - jokerEUsed state:", jokerEUsed);
 
   return {
     // État du jeu
@@ -374,6 +387,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     hasUsedJokerB,
     hasUsedJokerC,
     hasUsedJokerD,
+    jokerEUsed,
 
     // Actions du jeu
     ...gameActions,
@@ -388,6 +402,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     useJoker,
     addToHistory,
     drawCard,
+    setJokerEUsed,
 
     // État de la partie
     isGameOver: gameState === GAME_STATES.GAME_OVER,

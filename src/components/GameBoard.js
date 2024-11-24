@@ -53,6 +53,7 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
     setCurrentJokerSelectionPlayer,
     usedJokersThisRound,
     useJoker,
+    jokerEUsed,
   } = useGameState(playerCount, tokenCount);
 
   // Vérification que le jeu est correctement initialisé
@@ -141,6 +142,7 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
       selectedJokers={selectedJokers}
       usedJokersThisRound={usedJokersThisRound}
       useJoker={useJoker}
+      jokerEUsed={jokerEUsed}
     />
   );
 };

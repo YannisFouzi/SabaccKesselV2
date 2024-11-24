@@ -87,6 +87,7 @@ const GameBoardMain = ({
   usedJokersThisRound,
   useJoker,
   hasUsedJokerA,
+  jokerEUsed,
 }) => {
   const getNextPlayer = () => {
     if (!players || players.length === 0) return null;
@@ -225,6 +226,7 @@ const GameBoardMain = ({
           setGameState={setGameState}
           GAME_STATES={GAME_STATES}
           setDiceResults={setDiceResults}
+          jokerEUsed={jokerEUsed}
         />
       )}
 
