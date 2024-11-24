@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { GAME_STATES, JOKERS } from "../constants/gameConstants";
+import ComingSoonRibbon from "./ComingSoonRibbon";
 
 const JokerSelection = ({
   players,
@@ -84,59 +85,63 @@ const JokerSelection = ({
             const canRemove = selectedCount > 0;
 
             return (
-              <div
-                key={key}
-                className={`p-4 rounded border ${
-                  !joker.enabled
-                    ? "bg-gray-200"
-                    : selectedCount > 0
-                    ? "bg-blue-200"
-                    : "bg-blue-100"
-                }`}
-              >
-                <div className="font-bold">{joker.title || `Joker ${key}`}</div>
-                <div className="text-xs text-gray-600 mt-1">
-                  {joker.description}
-                </div>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-sm">Stock: {joker.quantity}</span>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => {
-                        const newSelection = [...currentSelection];
-                        const index = newSelection.lastIndexOf(key);
-                        if (index !== -1) {
-                          newSelection.splice(index, 1);
-                          setCurrentSelection(newSelection);
-                        }
-                      }}
-                      disabled={!canRemove}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        canRemove
-                          ? "bg-red-500 hover:bg-red-600 text-white"
-                          : "bg-gray-300 cursor-not-allowed"
-                      }`}
-                    >
-                      -
-                    </button>
-                    <span className="w-6 text-center font-bold">
-                      {selectedCount}
-                    </span>
-                    <button
-                      onClick={() => {
-                        if (canAdd) {
-                          setCurrentSelection([...currentSelection, key]);
-                        }
-                      }}
-                      disabled={!canAdd}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        canAdd
-                          ? "bg-green-500 hover:bg-green-600 text-white"
-                          : "bg-gray-300 cursor-not-allowed"
-                      }`}
-                    >
-                      +
-                    </button>
+              <div key={key} className="relative">
+                {!joker.enabled && <ComingSoonRibbon />}
+                <div
+                  className={`p-4 rounded border ${
+                    !joker.enabled
+                      ? "bg-gray-200"
+                      : selectedCount > 0
+                      ? "bg-blue-200"
+                      : "bg-blue-100"
+                  }`}
+                >
+                  <div className="font-bold">
+                    {joker.title || `Joker ${key}`}
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {joker.description}
+                  </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-sm">Stock: {joker.quantity}</span>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => {
+                          const newSelection = [...currentSelection];
+                          const index = newSelection.lastIndexOf(key);
+                          if (index !== -1) {
+                            newSelection.splice(index, 1);
+                            setCurrentSelection(newSelection);
+                          }
+                        }}
+                        disabled={!canRemove}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          canRemove
+                            ? "bg-red-500 hover:bg-red-600 text-white"
+                            : "bg-gray-300 cursor-not-allowed"
+                        }`}
+                      >
+                        -
+                      </button>
+                      <span className="w-6 text-center font-bold">
+                        {selectedCount}
+                      </span>
+                      <button
+                        onClick={() => {
+                          if (canAdd) {
+                            setCurrentSelection([...currentSelection, key]);
+                          }
+                        }}
+                        disabled={!canAdd}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          canAdd
+                            ? "bg-green-500 hover:bg-green-600 text-white"
+                            : "bg-gray-300 cursor-not-allowed"
+                        }`}
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
