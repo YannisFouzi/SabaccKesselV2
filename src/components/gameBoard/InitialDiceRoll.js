@@ -101,15 +101,44 @@ const InitialDiceRoll = ({
                   ${
                     shouldRoll
                       ? "border-blue-500/50 bg-blue-500/5"
+                      : playerOrder[0] === player.id &&
+                        initialDiceState === INITIAL_DICE_STATES.COMPLETED
+                      ? "border-yellow-500/50 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 shadow-lg shadow-yellow-500/20"
                       : "border-white/10 bg-white/5"
                   }
                   backdrop-blur-sm hover:bg-white/10
+                  ${
+                    playerOrder[0] === player.id &&
+                    initialDiceState === INITIAL_DICE_STATES.COMPLETED
+                      ? "scale-105"
+                      : ""
+                  }
                 `}
               >
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="font-medium text-white flex items-center gap-3">
-                    <span className="text-xl">👤</span>
-                    <span className="text-lg">{player.name}</span>
+                    <span className="text-xl">
+                      {playerOrder[0] === player.id &&
+                      initialDiceState === INITIAL_DICE_STATES.COMPLETED
+                        ? "👑"
+                        : "👤"}
+                    </span>
+                    <span
+                      className={`text-lg ${
+                        playerOrder[0] === player.id &&
+                        initialDiceState === INITIAL_DICE_STATES.COMPLETED
+                          ? "text-yellow-300"
+                          : "text-white"
+                      }`}
+                    >
+                      {player.name}
+                    </span>
+                    {playerOrder[0] === player.id &&
+                      initialDiceState === INITIAL_DICE_STATES.COMPLETED && (
+                        <span className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-sm animate-pulse">
+                          Premier joueur
+                        </span>
+                      )}
                     {shouldRoll &&
                       initialDiceState ===
                         INITIAL_DICE_STATES.REROLL_NEEDED && (
@@ -199,8 +228,27 @@ const InitialDiceRoll = ({
                 return (
                   <div key={playerId} className="flex items-center">
                     {index > 0 && <span className="mx-3 text-white/40">→</span>}
-                    <div className="px-4 py-2 rounded-lg bg-gradient-to-br from-white/10 to-white/5 text-white font-medium border border-white/10 backdrop-blur-sm">
-                      {player.name}
+                    <div
+                      className={`px-4 py-2 rounded-lg font-medium border backdrop-blur-sm
+                        ${
+                          index === 0
+                            ? "bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-yellow-500/50 text-yellow-300 shadow-lg shadow-yellow-500/20 animate-pulse"
+                            : "bg-gradient-to-br from-white/10 to-white/5 border-white/10 text-white"
+                        }
+                        ${index === 0 ? "scale-110" : ""}
+                      `}
+                    >
+                      <div className="flex items-center gap-2">
+                        {index === 0 && (
+                          <span className="text-yellow-300">👑</span>
+                        )}
+                        {player.name}
+                        {index === 0 && (
+                          <span className="text-sm text-yellow-300/80">
+                            (Premier joueur)
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
