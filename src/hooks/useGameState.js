@@ -157,7 +157,7 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
       playerOrder.length === players.length
     ) {
       setTimeout(() => {
-        setGameState(GAME_STATES.SETUP);
+        setGameState(GAME_STATES.PLAYER_TURN);
       }, 3000);
     }
   }, [gameState, playerOrder, players.length]);
