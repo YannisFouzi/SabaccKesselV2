@@ -7,6 +7,7 @@ import GameDecks from "./gameBoard/GameDecks";
 import PlayerHand from "./gameBoard/PlayerHand";
 import PlayerJokers from "./gameBoard/PlayerJokers";
 import PlayerTransitionScreen from "./gameBoard/PlayerTransitionScreen";
+import DiscardChoice from "./gameTurn/DiscardChoice";
 
 const TokenDisplay = ({ count, type = "available" }) => {
   return (
@@ -141,6 +142,19 @@ const GameBoardMain = ({
           players={players}
         />
       </div>
+
+      {/* Modal DiscardChoice avec z-index élevé */}
+      {pendingDrawnCard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="transform -translate-y-16">
+            <DiscardChoice
+              pendingDrawnCard={pendingDrawnCard}
+              currentPlayer={currentPlayer}
+              onChooseDiscard={handleDiscard}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Zone du bas avec la main du joueur et les joueurs restants */}
       <div className="w-full px-4 py-2">

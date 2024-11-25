@@ -26,16 +26,16 @@ const GameDecks = ({
           family === "SAND" ? "amber" : "red"
         }-200/10 rounded-lg p-2 backdrop-blur-sm border border-white/10 shadow-xl`}
       >
-        {card ? (
-          <button
-            onClick={() => canDrawCard && onClick()}
-            disabled={!canDrawCard}
-            className={`transform transition-all duration-200 ${
-              canDrawCard
-                ? "hover:scale-105 hover:-translate-y-1 active:translate-y-0 hover:brightness-110"
-                : "opacity-50"
-            }`}
-          >
+        <button
+          onClick={onClick}
+          disabled={!canDrawCard}
+          className={`transform transition-all duration-200 ${
+            canDrawCard
+              ? "hover:scale-105 hover:-translate-y-1 active:translate-y-0 hover:brightness-110"
+              : "opacity-50"
+          }`}
+        >
+          {card ? (
             <img
               src={
                 type === "VISIBLE"
@@ -51,14 +51,14 @@ const GameDecks = ({
               }`}
               className="w-32 h-48 rounded-lg shadow-md"
             />
-          </button>
-        ) : (
-          <div
-            className={`w-32 h-48 rounded-lg bg-${
-              family === "SAND" ? "amber" : "red"
-            }-900/20 shadow-inner`}
-          />
-        )}
+          ) : (
+            <div
+              className={`w-32 h-48 rounded-lg bg-${
+                family === "SAND" ? "amber" : "red"
+              }-900/20 shadow-inner`}
+            />
+          )}
+        </button>
       </div>
     </div>
   );
@@ -96,20 +96,32 @@ const GameDecks = ({
 
       <div className="relative flex gap-16 items-center justify-center mt-8">
         <div className="flex gap-8">
-          {renderCard(visibleSandCard, "SAND", "VISIBLE", () =>
-            onDrawCard("SAND", "VISIBLE")
+          {renderCard(
+            visibleSandCard,
+            "SAND",
+            "VISIBLE",
+            () => canDrawCard && onDrawCard("SAND", "VISIBLE")
           )}
-          {renderCard({ type: "HIDDEN" }, "SAND", "HIDDEN", () =>
-            onDrawCard("SAND", "HIDDEN")
+          {renderCard(
+            { type: "HIDDEN" },
+            "SAND",
+            "HIDDEN",
+            () => canDrawCard && onDrawCard("SAND", "HIDDEN")
           )}
         </div>
 
         <div className="flex gap-8">
-          {renderCard({ type: "HIDDEN" }, "BLOOD", "HIDDEN", () =>
-            onDrawCard("BLOOD", "HIDDEN")
+          {renderCard(
+            { type: "HIDDEN" },
+            "BLOOD",
+            "HIDDEN",
+            () => canDrawCard && onDrawCard("BLOOD", "HIDDEN")
           )}
-          {renderCard(visibleBloodCard, "BLOOD", "VISIBLE", () =>
-            onDrawCard("BLOOD", "VISIBLE")
+          {renderCard(
+            visibleBloodCard,
+            "BLOOD",
+            "VISIBLE",
+            () => canDrawCard && onDrawCard("BLOOD", "VISIBLE")
           )}
         </div>
       </div>
