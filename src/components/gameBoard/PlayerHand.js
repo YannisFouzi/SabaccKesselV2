@@ -37,7 +37,8 @@ const PlayerHand = ({
     return (
       <div
         className={`
-          relative w-20 h-32 sm:w-24 sm:h-36 md:w-28 md:h-40 
+          relative w-[100px] sm:w-[120px] md:w-[140px]
+          aspect-[2/3]
           cursor-pointer 
           transition-transform 
           hover:scale-105
@@ -54,7 +55,7 @@ const PlayerHand = ({
           <img
             src={getCardBack(card.family)}
             alt="Carte cachée"
-            className="w-full h-full rounded-lg"
+            className="w-full h-full object-cover rounded-lg"
           />
         ) : (
           <img
@@ -64,7 +65,7 @@ const PlayerHand = ({
               card.type === CARD_TYPES.NORMAL ? card.value : null
             )}
             alt={`${card.type} ${card.value || ""}`}
-            className="w-full h-full rounded-lg"
+            className="w-full h-full object-cover rounded-lg"
           />
         )}
 
@@ -150,8 +151,7 @@ const PlayerHand = ({
                 ${currentPlayerTokens === 0 ? "animate-pulse" : ""}
               `}
             >
-              <span className="text-2xl">⏭️</span>
-              <span>Passer</span>
+              <span>Passer son tour</span>
               {currentPlayerTokens === 0 && (
                 <div className="text-amber-300 text-xs font-normal">
                   Plus de jetons !
