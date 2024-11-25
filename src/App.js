@@ -375,8 +375,8 @@ const App = () => {
                   Imposteur : Adopte la valeur de l'un des deux dés lancés
                 </li>
                 <li>
-                  Une paire de sylops forme un "Sabacc pur", la meilleure main
-                  possible
+                  Une paire de sylops forme un "Sabacc pur", c'est la meilleure
+                  main possible
                 </li>
               </ul>
             </section>

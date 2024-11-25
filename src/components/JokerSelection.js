@@ -39,7 +39,7 @@ const JokerSelection = ({
       <div className="w-full h-full flex flex-col">
         {/* En-tête fixe */}
         <h2 className="text-xl md:text-2xl font-bold text-center p-4 bg-white border-b">
-          {currentPlayer.name}, sélectionnez 3 jokers
+          {currentPlayer.name}, sélectionnez 3 jetons d'action
         </h2>
 
         {/* Zone scrollable */}
