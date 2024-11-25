@@ -1,7 +1,6 @@
 import React from "react";
 import jetonImage from "../assets/img/jeton.png";
 import jetonKoImage from "../assets/img/jeton_ko.png";
-import GameTurn from "./GameTurn";
 import EndRoundOverlay from "./gameBoard/EndRoundOverlay";
 import FinalRevealOverlay from "./gameBoard/FinalRevealOverlay";
 import GameDecks from "./gameBoard/GameDecks";
@@ -96,15 +95,18 @@ const GameBoardMain = ({
   };
 
   const nextPlayer = getNextPlayer();
+  const currentPlayer = players?.[currentPlayerIndex];
+
+  if (!currentPlayer) return null;
 
   return (
     <div className="relative w-full min-h-screen bg-gray-100 flex flex-col justify-between overflow-hidden">
       {/* Zone d'information du tour */}
-      <div className="w-full px-4 py-2">
+      {/* <div className="w-full px-4 py-2">
         <div className="mx-auto max-w-md">
           <GameTurn
             gameState={gameState}
-            currentPlayer={players[currentPlayerIndex]}
+            currentPlayer={currentPlayer}
             players={players}
             roundNumber={round}
             turnNumber={turn}
@@ -115,24 +117,28 @@ const GameBoardMain = ({
             onChooseDiscard={handleDiscard}
             diceResults={diceResults}
             onRollDice={rollDice}
-            currentPlayerTokens={players[currentPlayerIndex]?.tokens || 0}
+            currentPlayerTokens={currentPlayer.tokens}
             playerOrder={playerOrder}
             roundStartPlayer={roundStartPlayer}
           />
         </div>
       </div>
-
+*/}
       {/* Zone du centre avec les pioches */}
       <div className="flex-1 flex items-center justify-center px-4">
         <GameDecks
-          visibleSandCard={sandDecks.visible[0]}
-          visibleBloodCard={bloodDecks.visible[0]}
+          visibleSandCard={sandDecks.visible[sandDecks.visible.length - 1]}
+          visibleBloodCard={bloodDecks.visible[bloodDecks.visible.length - 1]}
           onDrawCard={drawCard}
-          currentPlayerTokens={players[currentPlayerIndex]?.tokens || 0}
+          currentPlayerTokens={currentPlayer.tokens}
           isCurrentPlayerTurn={
             gameState === GAME_STATES.PLAYER_TURN && !pendingDrawnCard
           }
           hasUsedJokerA={hasUsedJokerA}
+          round={round}
+          turn={turn}
+          consecutivePasses={consecutivePasses}
+          players={players}
         />
       </div>
 
@@ -142,20 +148,22 @@ const GameBoardMain = ({
           <div className="flex-shrink-0 max-w-[80%]">
             <div className="flex flex-col gap-2">
               <PlayerHand
-                player={players[currentPlayerIndex]}
+                player={currentPlayer}
                 isCurrentPlayer={true}
                 isRevealPhase={gameState === GAME_STATES.REVEAL}
                 pendingDrawnCard={pendingDrawnCard}
                 onChooseDiscard={handleDiscard}
-                selectedDiceValue={
-                  players[currentPlayerIndex]?.selectedDiceValue
-                }
+                selectedDiceValue={currentPlayer.selectedDiceValue}
                 onSelectDiceValue={selectImpostorValue}
                 isTransitioning={isTransitioning}
                 startingTokens={startingTokens}
+                onPass={passTurn}
+                currentPlayerTokens={currentPlayer.tokens}
+                players={players}
+                consecutivePasses={consecutivePasses}
               />
               <PlayerJokers
-                player={players[currentPlayerIndex]}
+                player={currentPlayer}
                 selectedJokers={selectedJokers}
                 isCurrentPlayer={true}
                 onUseJoker={useJoker}

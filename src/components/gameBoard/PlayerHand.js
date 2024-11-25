@@ -12,6 +12,10 @@ const PlayerHand = ({
   onSelectDiceValue,
   isTransitioning,
   startingTokens,
+  onPass,
+  currentPlayerTokens,
+  players,
+  consecutivePasses,
 }) => {
   if (!player) {
     return null;
@@ -91,30 +95,93 @@ const PlayerHand = ({
   };
 
   return (
-    <div className={`relative ${isCurrentPlayer ? "border-blue-500" : ""}`}>
-      <div className="flex justify-between items-center mb-2">
-        <div className="font-medium">{player.name}</div>
-        <div className="text-sm">
-          {player.tokens} jetons
-          {typeof startingTokens[player.id] !== "undefined" &&
-            startingTokens[player.id] !== player.tokens && (
-              <span className="text-red-500 ml-1">
-                (-{startingTokens[player.id] - player.tokens})
-              </span>
-            )}
+    <div className="relative flex flex-col gap-4">
+      {/* Alerte de révélation imminente */}
+      {players?.length > 0 && consecutivePasses === players.length - 1 && (
+        <div className="w-full flex justify-center mb-4">
+          <div className="bg-red-500/80 backdrop-blur-sm px-6 py-2 rounded-lg shadow-lg text-white font-bold flex items-center space-x-2 animate-pulse">
+            <span>⚠️</span>
+            <span>Un pass de plus et les mains seront révélées !</span>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="flex space-x-4">
-        {hand.map((card) => (
-          <Card key={card.id} card={card} />
-        ))}
-        {pendingDrawnCard && isCurrentPlayer && (
-          <Card card={pendingDrawnCard} isPending={true} />
+      <div className="flex items-center gap-4">
+        <div
+          className={`flex-grow ${isCurrentPlayer ? "border-blue-500" : ""}`}
+        >
+          <div className="flex justify-between items-center mb-2">
+            <div className="font-medium">{player.name}</div>
+            <div className="text-sm">
+              {player.tokens} jetons
+              {typeof startingTokens[player.id] !== "undefined" &&
+                startingTokens[player.id] !== player.tokens && (
+                  <span className="text-red-500 ml-1">
+                    (-{startingTokens[player.id] - player.tokens})
+                  </span>
+                )}
+            </div>
+          </div>
+
+          <div className="flex space-x-4">
+            {hand.map((card) => (
+              <Card key={card.id} card={card} />
+            ))}
+            {pendingDrawnCard && isCurrentPlayer && (
+              <Card card={pendingDrawnCard} isPending={true} />
+            )}
+          </div>
+        </div>
+
+        {/* Bouton Passer le tour */}
+        {isCurrentPlayer && !pendingDrawnCard && !isRevealPhase && (
+          <div className="flex-shrink-0 ml-4">
+            <button
+              onClick={onPass}
+              className={`
+                relative overflow-hidden
+                bg-gradient-to-r from-indigo-600 to-blue-600 
+                hover:from-indigo-700 hover:to-blue-700
+                text-white px-6 py-3 rounded-xl shadow-lg 
+                transform transition-all duration-200 
+                hover:-translate-y-0.5 active:translate-y-0
+                font-bold
+                flex flex-col items-center gap-2
+                ${currentPlayerTokens === 0 ? "animate-pulse" : ""}
+              `}
+            >
+              <span className="text-2xl">⏭️</span>
+              <span>Passer</span>
+              {currentPlayerTokens === 0 && (
+                <div className="text-amber-300 text-xs font-normal">
+                  Plus de jetons !
+                </div>
+              )}
+              {/* Effet de brillance */}
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0"
+                style={{
+                  transform: "translateX(-100%)",
+                  animation: "shimmer 2s infinite",
+                }}
+              />
+            </button>
+          </div>
         )}
       </div>
     </div>
   );
 };
+
+// Ajout des styles d'animation
+const style = document.createElement("style");
+style.textContent = `
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+`;
+document.head.appendChild(style);
 
 export default PlayerHand;
