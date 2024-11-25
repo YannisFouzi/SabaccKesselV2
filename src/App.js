@@ -142,7 +142,7 @@ const App = () => {
                 <div className="relative">
                   <ComingSoonRibbon />
                   <button
-                    className="w-full py-4 px-6 rounded-xl text-lg font-bold
+                    className="relative w-full py-4 px-6 rounded-xl text-lg font-bold
                       bg-gray-500/50 text-gray-300 cursor-not-allowed
                       flex items-center justify-center space-x-2"
                     disabled
