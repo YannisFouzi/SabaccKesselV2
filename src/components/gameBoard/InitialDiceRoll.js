@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+import DiceFace from "./DiceFace";
 
 const DiceAnimation = ({ value, isRolling, isReroll }) => (
   <div
-    className={`relative w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold
+    className={`relative w-16 h-16 rounded-2xl flex items-center justify-center
       ${
         isRolling
           ? "animate-dice-roll"
@@ -24,17 +25,17 @@ const DiceAnimation = ({ value, isRolling, isReroll }) => (
     </div>
 
     {/* Contenu du dé */}
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex items-center justify-center w-full h-full">
       {isRolling ? (
         <span className="animate-bounce">🎲</span>
       ) : (
-        <span
-          className={`font-bold ${
+        <div
+          className={`w-full h-full ${
             isReroll ? "text-emerald-400" : "text-white"
           }`}
         >
-          {value}
-        </span>
+          <DiceFace value={value} />
+        </div>
       )}
     </div>
   </div>
