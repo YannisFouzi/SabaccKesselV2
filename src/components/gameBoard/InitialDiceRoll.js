@@ -52,12 +52,24 @@ const InitialDiceRoll = ({
   playerOrder,
 }) => {
   const [rollingPlayerId, setRollingPlayerId] = useState(null);
+  const [hasRerolled, setHasRerolled] = useState({});
 
   const handleRoll = (playerId) => {
+    if (
+      initialDiceState === INITIAL_DICE_STATES.REROLL_NEEDED &&
+      hasRerolled[playerId]
+    ) {
+      return;
+    }
+
     setRollingPlayerId(playerId);
     setTimeout(() => {
       rollInitialDice(playerId);
       setRollingPlayerId(null);
+
+      if (initialDiceState === INITIAL_DICE_STATES.REROLL_NEEDED) {
+        setHasRerolled((prev) => ({ ...prev, [playerId]: true }));
+      }
     }, 1000);
   };
 
@@ -190,7 +202,12 @@ const InitialDiceRoll = ({
                     {shouldRoll && (
                       <button
                         onClick={() => handleRoll(player.id)}
-                        disabled={isRolling}
+                        disabled={
+                          isRolling ||
+                          (initialDiceState ===
+                            INITIAL_DICE_STATES.REROLL_NEEDED &&
+                            hasRerolled[player.id])
+                        }
                         className="bg-gradient-to-r from-blue-500 to-indigo-600 
                           text-white px-6 py-3 rounded-xl font-medium
                           hover:from-blue-600 hover:to-indigo-700
@@ -204,7 +221,9 @@ const InitialDiceRoll = ({
                         <span>
                           {initialDiceState ===
                           INITIAL_DICE_STATES.REROLL_NEEDED
-                            ? "Relancer"
+                            ? hasRerolled[player.id]
+                              ? "Relancé"
+                              : "Relancer"
                             : "Lancer les dés"}
                         </span>
                       </button>
