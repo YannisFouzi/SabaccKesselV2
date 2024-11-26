@@ -64,7 +64,7 @@ const InitialDiceRoll = ({
       if (initialDiceState === INITIAL_DICE_STATES.REROLL_NEEDED) {
         setHasRerolled((prev) => ({ ...prev, [playerId]: true }));
       }
-    }, 2000);
+    }, 1000);
   };
 
   return (
@@ -155,11 +155,7 @@ const InitialDiceRoll = ({
 
                   <div className="flex items-center gap-6">
                     {(initialResult || rollingPlayerId === player.id) && (
-                      <div
-                        className={`flex gap-4 items-center ${
-                          shouldRoll ? "opacity-30" : ""
-                        }`}
-                      >
+                      <div className={`flex gap-4 items-center ${""}`}>
                         <DiceAnimation
                           value={initialResult?.dice1}
                           isRolling={
@@ -213,7 +209,7 @@ const InitialDiceRoll = ({
                       <button
                         onClick={() => handleRoll(player.id)}
                         disabled={
-                          rollingPlayerId === player.id ||
+                          rollingPlayerId !== null ||
                           (initialDiceState ===
                             INITIAL_DICE_STATES.REROLL_NEEDED &&
                             hasRerolled[player.id])
