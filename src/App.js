@@ -303,7 +303,7 @@ const App = () => {
           </div>
 
           {/* Ajout du toggle switch avant les boutons de navigation */}
-          <div className="mb-6">
+          <div className="mb-6 flex justify-center">
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
@@ -357,7 +357,7 @@ const App = () => {
                 disabled:opacity-50 disabled:cursor-not-allowed
                 disabled:hover:transform-none"
             >
-              Commencer la partie
+              Étape suivante
             </button>
           </div>
 
