@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import jeton from "../assets/img/jeton.png";
 import jetonKo from "../assets/img/jeton_ko.png";
 
@@ -34,6 +34,20 @@ const TokenSelector = ({ value, onChange }) => {
   // On utilise directement la valeur saisie pour le nombre de jetons
   const tokensToShow = value || 0;
 
+  // Gardez en mémoire le nombre précédent de jetons pour l'animation
+  const [previousTokens, setPreviousTokens] = useState(tokensToShow);
+
+  // Utilisez useEffect pour mettre à jour previousTokens après chaque changement
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPreviousTokens(tokensToShow);
+    }, 300); // Durée de l'animation
+    return () => clearTimeout(timer);
+  }, [tokensToShow]);
+
+  // Calculez le nombre maximum de jetons à afficher
+  const maxTokensToShow = Math.max(previousTokens, tokensToShow);
+
   return (
     <div className="flex flex-col items-center space-y-4">
       <div className="text-center">
@@ -47,22 +61,29 @@ const TokenSelector = ({ value, onChange }) => {
       <div className="flex flex-col items-center gap-4">
         <div className="relative flex-shrink-0">
           <div className="relative w-[400px] h-20 flex items-center justify-center">
-            {[...Array(tokensToShow)].map((_, index) => (
-              <img
-                key={index}
-                src={isValid ? jeton : jetonKo}
-                alt=""
-                className="absolute w-14 h-14 object-contain
-                  transition-all duration-200 ease-in-out
-                  animate-fadeIn hover:scale-110"
-                style={{
-                  left: `${(index - tokensToShow / 2) * 30 + 200}px`,
-                  zIndex: index,
-                  opacity: 0,
-                  animation: `fadeIn 0.3s ease-out ${index * 0.02}s forwards`,
-                }}
-              />
-            ))}
+            {[...Array(maxTokensToShow)].map((_, index) => {
+              const shouldShow = index < tokensToShow;
+              const isExiting = index >= tokensToShow && index < previousTokens;
+
+              return (
+                <img
+                  key={index}
+                  src={isValid ? jeton : jetonKo}
+                  alt=""
+                  className={`absolute w-14 h-14 object-contain
+                    transition-all duration-200 ease-in-out
+                    hover:scale-110 ${isExiting ? "token-exit" : ""}`}
+                  style={{
+                    left: `${(index - maxTokensToShow / 2) * 30 + 200}px`,
+                    zIndex: index,
+                    opacity: shouldShow ? 0 : undefined,
+                    animation: shouldShow
+                      ? `fadeIn 0.3s ease-out ${index * 0.02}s forwards`
+                      : undefined,
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
 
@@ -128,6 +149,21 @@ const styles = `
       opacity: 1;
       transform: scale(1) translateY(0);
     }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.3) translateY(-20px);
+    }
+  }
+
+  .token-exit {
+    animation: fadeOut 0.3s ease-out forwards;
   }
 `;
 
