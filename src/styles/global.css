@@ -1,8 +1,35 @@
+/* Import des polices */
+@font-face {
+  font-family: "Atures";
+  src: url("../assets/fonts/Atures-700_PERSONAL_USE.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "StarJedi";
+  src: url("../assets/fonts/Starjedi.ttf") format("truetype");
+}
+
 /* Variables pour les couleurs de la scrollbar */
 :root {
   --primary: rgba(59, 130, 246, 0.8); /* Bleu plus vif */
   --primary-dark: rgba(37, 99, 235, 0.9); /* Version plus foncée */
   --glow: rgba(59, 130, 246, 0.4); /* Lueur bleue */
+}
+
+/* Application de la police Atures par défaut */
+body {
+  font-family: "Atures", sans-serif;
+}
+
+/* Application de StarJedi pour les titres */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "StarJedi", sans-serif;
+  letter-spacing: 2px; /* Améliore la lisibilité de la police StarJedi */
 }
 
 /* Styles de base */
