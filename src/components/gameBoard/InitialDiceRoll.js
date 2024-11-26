@@ -14,13 +14,8 @@ const DiceAnimation = ({ value, isRolling, isReroll }) => (
     {/* Fond brillant */}
     <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm" />
 
-    {/* Bordure lumineuse */}
-    <div
-      className={`absolute inset-0 rounded-2xl ${
-        isReroll ? "animate-pulse-green" : ""
-      } 
-      ${isRolling ? "animate-pulse-blue" : ""}`}
-    >
+    {/* Bordure lumineuse - Suppression des animations de couleur */}
+    <div className="absolute inset-0 rounded-2xl">
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/30 to-transparent" />
     </div>
 
@@ -29,11 +24,7 @@ const DiceAnimation = ({ value, isRolling, isReroll }) => (
       {isRolling ? (
         <span className="animate-bounce">🎲</span>
       ) : (
-        <div
-          className={`w-full h-full ${
-            isReroll ? "text-emerald-400" : "text-white"
-          }`}
-        >
+        <div className="w-full h-full text-white">
           <DiceFace value={value} />
         </div>
       )}
@@ -63,6 +54,7 @@ const InitialDiceRoll = ({
     }
 
     setRollingPlayerId(playerId);
+
     setTimeout(() => {
       rollInitialDice(playerId);
       setRollingPlayerId(null);
@@ -70,7 +62,7 @@ const InitialDiceRoll = ({
       if (initialDiceState === INITIAL_DICE_STATES.REROLL_NEEDED) {
         setHasRerolled((prev) => ({ ...prev, [playerId]: true }));
       }
-    }, 1000);
+    }, 2000);
   };
 
   return (
@@ -104,7 +96,6 @@ const InitialDiceRoll = ({
 
             const initialResult = initialDiceResults[player.id];
             const rerollResult = rerollResults[player.id];
-            const isRolling = rollingPlayerId === player.id;
 
             return (
               <div
@@ -161,41 +152,58 @@ const InitialDiceRoll = ({
                   </div>
 
                   <div className="flex items-center gap-6">
-                    {initialResult && (
+                    {(initialResult || rollingPlayerId === player.id) && (
                       <div
                         className={`flex gap-4 items-center ${
                           shouldRoll ? "opacity-30" : ""
                         }`}
                       >
                         <DiceAnimation
-                          value={initialResult.dice1}
-                          isRolling={isRolling}
+                          value={initialResult?.dice1}
+                          isRolling={
+                            rollingPlayerId === player.id &&
+                            initialDiceState !==
+                              INITIAL_DICE_STATES.REROLL_NEEDED
+                          }
+                          isReroll={false}
                         />
                         <DiceAnimation
-                          value={initialResult.dice2}
-                          isRolling={isRolling}
+                          value={initialResult?.dice2}
+                          isRolling={
+                            rollingPlayerId === player.id &&
+                            initialDiceState !==
+                              INITIAL_DICE_STATES.REROLL_NEEDED
+                          }
+                          isReroll={false}
                         />
-                        <span className="font-bold text-white/90 text-xl ml-2">
-                          = {initialResult.sum}
-                        </span>
+                        {initialResult && (
+                          <span className="font-bold text-white/90 text-xl ml-2">
+                            = {initialResult.sum}
+                          </span>
+                        )}
                       </div>
                     )}
 
-                    {rerollResult && (
+                    {(rerollResult ||
+                      (rollingPlayerId === player.id &&
+                        initialDiceState ===
+                          INITIAL_DICE_STATES.REROLL_NEEDED)) && (
                       <div className="flex gap-4 items-center">
                         <DiceAnimation
-                          value={rerollResult.dice1}
-                          isRolling={isRolling}
-                          isReroll
+                          value={rerollResult?.dice1}
+                          isRolling={rollingPlayerId === player.id}
+                          isReroll={true}
                         />
                         <DiceAnimation
-                          value={rerollResult.dice2}
-                          isRolling={isRolling}
-                          isReroll
+                          value={rerollResult?.dice2}
+                          isRolling={rollingPlayerId === player.id}
+                          isReroll={true}
                         />
-                        <span className="font-bold text-emerald-400 text-xl ml-2">
-                          = {rerollResult.sum}
-                        </span>
+                        {rerollResult && (
+                          <span className="font-bold text-emerald-400 text-xl ml-2">
+                            = {rerollResult.sum}
+                          </span>
+                        )}
                       </div>
                     )}
 
@@ -203,7 +211,7 @@ const InitialDiceRoll = ({
                       <button
                         onClick={() => handleRoll(player.id)}
                         disabled={
-                          isRolling ||
+                          rollingPlayerId === player.id ||
                           (initialDiceState ===
                             INITIAL_DICE_STATES.REROLL_NEEDED &&
                             hasRerolled[player.id])
@@ -306,24 +314,6 @@ style.textContent = `
   }
   .animate-dice-roll {
     animation: dice-roll 0.6s ease infinite;
-  }
-  
-  @keyframes pulse-green {
-    0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
-  }
-  .animate-pulse-green {
-    animation: pulse-green 2s infinite;
-  }
-  
-  @keyframes pulse-blue {
-    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-  }
-  .animate-pulse-blue {
-    animation: pulse-blue 1s infinite;
   }
 `;
 document.head.appendChild(style);
