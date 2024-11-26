@@ -37,9 +37,9 @@ const PlayerNameInput = ({
               <span className="text-white/50 text-3xl">👤</span>
             )}
           </button>
-          <span className="text-xs text-white/70">
-            {avatar ? selectedAvatar?.name : "Choisir avatar"}
-          </span>
+          {!avatar && (
+            <span className="text-xs text-white/70">Choisir avatar</span>
+          )}
         </div>
 
         <input

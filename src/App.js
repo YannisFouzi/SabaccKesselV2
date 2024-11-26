@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ComingSoonRibbon from "./components/ComingSoonRibbon";
 import GameBoard from "./components/GameBoard";
 import PlayerNameInput from "./components/PlayerNameInput";
+import TokenSelector from "./components/TokenSelector";
 import ValidationMessages from "./components/ValidationMessages";
 import { GAME_CONFIG } from "./constants/gameConstants";
 
@@ -268,14 +269,16 @@ const App = () => {
                 GAME_CONFIG.MAX_PLAYERS && (
                 <button
                   onClick={handleAddPlayer}
-                  className="h-[200px] border-2 border-dashed border-green-500/30 
+                  className="h-[72px] border-2 border-dashed border-green-500/30 
                     rounded-xl transition-all duration-200
                     bg-green-500/10 hover:bg-green-500/20
                     flex flex-col items-center justify-center gap-2
                     text-green-400 hover:text-green-300"
                 >
-                  <span className="text-5xl font-light">+</span>
-                  <span className="text-sm">Ajouter un joueur</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-light">+</span>
+                    <span className="text-sm">Ajouter un joueur</span>
+                  </div>
                 </button>
               )}
             </div>
@@ -283,35 +286,10 @@ const App = () => {
 
           {/* Sélection du nombre de jetons */}
           <div className="mb-8">
-            <label className="block text-lg font-medium text-blue-100 mb-4">
-              Jetons par joueur
-            </label>
-            <select
-              className="w-full p-3 bg-white/10 border-2 border-white/30 rounded-xl text-white 
-                backdrop-blur-sm transition-all duration-200
-                hover:bg-white/20 hover:border-white/40
-                focus:outline-none focus:ring-2 focus:ring-yellow-400/50
-                appearance-none cursor-pointer
-                bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik03LjQxIDguNTlMMTIgMTMuMTdsNC41OS00LjU4TDE4IDEwbC02IDYtNi02IDEuNDEtMS40MXoiLz48L3N2Zz4=')] 
-                bg-no-repeat bg-[length:1.5em] bg-[center_right_0.5em]"
-              value={tokenCount || ""}
-              onChange={(e) => setTokenCount(Number(e.target.value))}
-            >
-              <option value="" className="bg-gray-900">
-                Sélectionnez
-              </option>
-              {[
-                ...Array(GAME_CONFIG.MAX_TOKENS - GAME_CONFIG.MIN_TOKENS + 1),
-              ].map((_, i) => (
-                <option
-                  key={i + GAME_CONFIG.MIN_TOKENS}
-                  value={i + GAME_CONFIG.MIN_TOKENS}
-                  className="bg-gray-900"
-                >
-                  {i + GAME_CONFIG.MIN_TOKENS} Jetons
-                </option>
-              ))}
-            </select>
+            <TokenSelector
+              value={tokenCount}
+              onChange={(value) => setTokenCount(value)}
+            />
           </div>
 
           {/* Boutons de navigation */}

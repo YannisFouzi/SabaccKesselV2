@@ -137,8 +137,8 @@ export const GAME_STATES = {
 
 export const GAME_CONFIG = {
   MIN_PLAYERS: 2,
-  MAX_PLAYERS: 4,
-  MIN_TOKENS: 3,
-  MAX_TOKENS: 10,
+  MAX_PLAYERS: 6,
+  MIN_TOKENS: 4,
+  MAX_TOKENS: 100,
   MAX_NAME_LENGTH: 20,
 };
