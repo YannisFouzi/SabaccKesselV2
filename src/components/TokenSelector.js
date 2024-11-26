@@ -64,6 +64,9 @@ const TokenSelector = ({ value, onChange }) => {
             {[...Array(maxTokensToShow)].map((_, index) => {
               const shouldShow = index < tokensToShow;
               const isExiting = index >= tokensToShow && index < previousTokens;
+              const exitDelay = isExiting
+                ? (previousTokens - index - 1) * 0.02 // Pour que ça parte de droite à gauche
+                : 0;
 
               return (
                 <img
@@ -79,6 +82,8 @@ const TokenSelector = ({ value, onChange }) => {
                     opacity: shouldShow ? 0 : undefined,
                     animation: shouldShow
                       ? `fadeIn 0.3s ease-out ${index * 0.02}s forwards`
+                      : isExiting
+                      ? `fadeOut 0.3s ease-out ${exitDelay}s forwards`
                       : undefined,
                   }}
                 />
