@@ -20,6 +20,7 @@ const App = () => {
     Array(GAME_CONFIG.MIN_PLAYERS).fill(null)
   );
   const [hasAttemptedStart, setHasAttemptedStart] = useState(false);
+  const [withoutJokers, setWithoutJokers] = useState(false);
 
   // Fonction de validation des noms
   const validatePlayerName = (name) => {
@@ -292,6 +293,28 @@ const App = () => {
             />
           </div>
 
+          {/* Ajout du toggle switch avant les boutons de navigation */}
+          <div className="mb-6">
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={withoutJokers}
+                onChange={(e) => setWithoutJokers(e.target.checked)}
+              />
+              <div
+                className="w-11 h-6 bg-gray-500/30 peer-focus:outline-none rounded-full peer 
+                            peer-checked:after:translate-x-full peer-checked:after:border-white 
+                            after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+                            after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all
+                            peer-checked:bg-purple-600"
+              ></div>
+              <span className="ml-3 text-sm font-medium text-white">
+                Sans Jokers
+              </span>
+            </label>
+          </div>
+
           {/* Boutons de navigation - Adapter pour mobile */}
           <div className="flex flex-col sm:flex-row gap-4 sm:space-x-4">
             <button
@@ -449,6 +472,7 @@ const App = () => {
         playerNames={playerNames}
         playerAvatars={playerAvatars}
         onGameEnd={handleGameEnd}
+        withoutJokers={withoutJokers}
       />
     );
   }

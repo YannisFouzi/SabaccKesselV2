@@ -13,6 +13,7 @@ const GameBoard = ({
   playerNames,
   playerAvatars,
   onGameEnd,
+  withoutJokers,
 }) => {
   const {
     gameState,
@@ -94,7 +95,10 @@ const GameBoard = ({
   }
 
   // Condition pour afficher l'écran de tirage de cartes initial
-  if (gameState === GAME_STATES.INITIAL_DICE_ROLL) {
+  if (
+    gameState === GAME_STATES.INITIAL_DICE_ROLL ||
+    (withoutJokers && gameState === GAME_STATES.JOKER_SELECTION)
+  ) {
     return (
       <InitialCardDraw
         players={players}
@@ -106,7 +110,7 @@ const GameBoard = ({
   }
 
   // Ajout de la condition pour afficher la sélection des jokers
-  if (gameState === GAME_STATES.JOKER_SELECTION) {
+  if (gameState === GAME_STATES.JOKER_SELECTION && !withoutJokers) {
     return (
       <JokerSelection
         players={players}
