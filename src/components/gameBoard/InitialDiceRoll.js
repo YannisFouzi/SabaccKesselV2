@@ -122,12 +122,7 @@ const InitialDiceRoll = ({
               >
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="font-medium text-white flex items-center gap-3">
-                    <span className="text-xl">
-                      {playerOrder[0] === player.id &&
-                      initialDiceState === INITIAL_DICE_STATES.COMPLETED
-                        ? "👑"
-                        : "👤"}
-                    </span>
+                    <span className="text-xl">👤</span>
                     <span
                       className={`text-lg ${
                         playerOrder[0] === player.id &&
