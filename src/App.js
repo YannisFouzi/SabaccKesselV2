@@ -73,11 +73,19 @@ const App = () => {
                       Nombre de joueurs
                     </label>
                     <select
-                      className="w-full p-2 bg-white/20 border border-white/30 rounded-lg text-white"
+                      className="w-full p-3 bg-white/10 border-2 border-white/30 rounded-xl text-white 
+                      backdrop-blur-sm transition-all duration-200
+                      hover:bg-white/20 hover:border-white/40
+                      focus:outline-none focus:ring-2 focus:ring-yellow-400/50
+                      appearance-none cursor-pointer
+                      bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik03LjQxIDguNTlMMTIgMTMuMTdsNC41OS00LjU4TDE4IDEwbC02IDYtNi02IDEuNDEtMS40MXoiLz48L3N2Zz4=')] 
+                      bg-no-repeat bg-[length:1.5em] bg-[center_right_0.5em]"
                       value={playerCount || ""}
                       onChange={(e) => setPlayerCount(Number(e.target.value))}
                     >
-                      <option value="">Sélectionnez</option>
+                      <option value="" className="bg-gray-900">
+                        Sélectionnez
+                      </option>
                       {[
                         ...Array(
                           GAME_CONFIG.MAX_PLAYERS - GAME_CONFIG.MIN_PLAYERS + 1
@@ -86,6 +94,7 @@ const App = () => {
                         <option
                           key={i + GAME_CONFIG.MIN_PLAYERS}
                           value={i + GAME_CONFIG.MIN_PLAYERS}
+                          className="bg-gray-900"
                         >
                           {i + GAME_CONFIG.MIN_PLAYERS} Joueurs
                         </option>
@@ -98,11 +107,19 @@ const App = () => {
                       Jetons par joueur
                     </label>
                     <select
-                      className="w-full p-2 bg-white/20 border border-white/30 rounded-lg text-white"
+                      className="w-full p-3 bg-white/10 border-2 border-white/30 rounded-xl text-white 
+                      backdrop-blur-sm transition-all duration-200
+                      hover:bg-white/20 hover:border-white/40
+                      focus:outline-none focus:ring-2 focus:ring-yellow-400/50
+                      appearance-none cursor-pointer
+                      bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik03LjQxIDguNTlMMTIgMTMuMTdsNC41OS00LjU4TDE4IDEwbC02IDYtNi02IDEuNDEtMS40MXoiLz48L3N2Zz4=')] 
+                      bg-no-repeat bg-[length:1.5em] bg-[center_right_0.5em]"
                       value={tokenCount || ""}
                       onChange={(e) => setTokenCount(Number(e.target.value))}
                     >
-                      <option value="">Sélectionnez</option>
+                      <option value="" className="bg-gray-900">
+                        Sélectionnez
+                      </option>
                       {[
                         ...Array(
                           GAME_CONFIG.MAX_TOKENS - GAME_CONFIG.MIN_TOKENS + 1
@@ -111,6 +128,7 @@ const App = () => {
                         <option
                           key={i + GAME_CONFIG.MIN_TOKENS}
                           value={i + GAME_CONFIG.MIN_TOKENS}
+                          className="bg-gray-900"
                         >
                           {i + GAME_CONFIG.MIN_TOKENS} Jetons
                         </option>
