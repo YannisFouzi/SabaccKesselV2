@@ -93,7 +93,7 @@ const initializeGame = ({
   setPlayers(newPlayers);
   setJokerEUsed(false);
 
-  // Passer à l'état PLAYER_TURN
+  // Passer à PLAYER_TURN après l'initialisation
   setGameState(GAME_STATES.PLAYER_TURN);
 };
 

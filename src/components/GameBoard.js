@@ -73,6 +73,7 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
         rollInitialDice={rollInitialDice}
         playersToReroll={playersToReroll}
         playerOrder={playerOrder}
+        setGameState={setGameState}
       />
     );
   }

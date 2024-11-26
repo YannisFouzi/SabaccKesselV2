@@ -151,17 +151,6 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     }
   }, [gameState, initializeGame]);
 
-  useEffect(() => {
-    if (
-      gameState === GAME_STATES.INITIAL_DICE_ROLL &&
-      playerOrder.length === players.length
-    ) {
-      setTimeout(() => {
-        setGameState(GAME_STATES.PLAYER_TURN);
-      }, 3000);
-    }
-  }, [gameState, playerOrder, players.length]);
-
   const addToHistory = useCallback(
     (action) => {
       const currentPlayer = players[currentPlayerIndex];

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { GAME_STATES } from "../../constants/gameConstants";
 import DiceFace from "./DiceFace";
 
 const DiceAnimation = ({ value, isRolling, isReroll }) => (
@@ -41,6 +42,7 @@ const InitialDiceRoll = ({
   rollInitialDice,
   playersToReroll,
   playerOrder,
+  setGameState,
 }) => {
   const [rollingPlayerId, setRollingPlayerId] = useState(null);
   const [hasRerolled, setHasRerolled] = useState({});
@@ -282,7 +284,7 @@ const InitialDiceRoll = ({
               })}
             </div>
             <button
-              onClick={() => rollInitialDice()}
+              onClick={() => setGameState(GAME_STATES.SETUP)}
               className="bg-gradient-to-r from-green-500 to-emerald-600 
                 text-white px-8 py-3 rounded-xl font-medium text-lg
                 hover:from-green-600 hover:to-emerald-700

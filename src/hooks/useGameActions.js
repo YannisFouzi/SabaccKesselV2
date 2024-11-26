@@ -82,10 +82,6 @@ export const createGameActions = ({
     setters.setRoundStartPlayer(firstPlayerId);
     setters.setInitialDiceState(INITIAL_DICE_STATES.COMPLETED);
     setters.setInitialDiceResults(results);
-
-    setTimeout(() => {
-      setters.setGameState(GAME_STATES.SETUP);
-    }, 2000);
   };
 
   const rollInitialDice = rollInitialDiceFn({
