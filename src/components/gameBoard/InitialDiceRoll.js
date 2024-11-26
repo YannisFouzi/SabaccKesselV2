@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { GAME_STATES } from "../../constants/gameConstants";
+import PlayerIdentity from "../PlayerIdentity";
 import DiceFace from "./DiceFace";
 
 const DiceAnimation = ({ value, isRolling, isReroll }) => (
@@ -100,45 +101,18 @@ const InitialDiceRoll = ({
             const rerollResult = rerollResults[player.id];
 
             return (
-              <div
-                key={player.id}
-                className={`p-6 rounded-xl border transition-all duration-300
-                  ${
-                    shouldRoll
-                      ? "border-blue-500/50 bg-blue-500/5"
-                      : playerOrder[0] === player.id &&
-                        initialDiceState === INITIAL_DICE_STATES.COMPLETED
-                      ? "border-yellow-500/50 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 shadow-lg shadow-yellow-500/20"
-                      : "border-white/10 bg-white/5"
-                  }
-                  backdrop-blur-sm hover:bg-white/10
-                  ${
-                    playerOrder[0] === player.id &&
-                    initialDiceState === INITIAL_DICE_STATES.COMPLETED
-                      ? "scale-105"
-                      : ""
-                  }
-                `}
-              >
+              <div key={player.id} className="mb-4">
                 <div className="flex items-center justify-between flex-wrap gap-4">
-                  <div className="font-medium text-white flex items-center gap-3">
-                    <span className="text-xl">👤</span>
-                    <span
-                      className={`text-lg ${
+                  <div className="flex items-center gap-2">
+                    <PlayerIdentity
+                      player={player}
+                      className={`${
                         playerOrder[0] === player.id &&
                         initialDiceState === INITIAL_DICE_STATES.COMPLETED
                           ? "text-yellow-300"
                           : "text-white"
                       }`}
-                    >
-                      {player.name}
-                    </span>
-                    {playerOrder[0] === player.id &&
-                      initialDiceState === INITIAL_DICE_STATES.COMPLETED && (
-                        <span className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-sm animate-pulse">
-                          Premier joueur
-                        </span>
-                      )}
+                    />
                     {shouldRoll &&
                       initialDiceState ===
                         INITIAL_DICE_STATES.REROLL_NEEDED && (
@@ -147,89 +121,86 @@ const InitialDiceRoll = ({
                         </span>
                       )}
                   </div>
+                </div>
 
-                  <div className="flex items-center gap-6">
-                    {(initialResult || rollingPlayerId === player.id) && (
-                      <div className={`flex gap-4 items-center ${""}`}>
-                        <DiceAnimation
-                          value={initialResult?.dice1}
-                          isRolling={
-                            rollingPlayerId === player.id &&
-                            initialDiceState !==
-                              INITIAL_DICE_STATES.REROLL_NEEDED
-                          }
-                          isReroll={false}
-                        />
-                        <DiceAnimation
-                          value={initialResult?.dice2}
-                          isRolling={
-                            rollingPlayerId === player.id &&
-                            initialDiceState !==
-                              INITIAL_DICE_STATES.REROLL_NEEDED
-                          }
-                          isReroll={false}
-                        />
-                        {initialResult && (
-                          <span className="font-bold text-white/90 text-xl ml-2">
-                            = {initialResult.sum}
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {(rerollResult ||
-                      (rollingPlayerId === player.id &&
-                        initialDiceState ===
-                          INITIAL_DICE_STATES.REROLL_NEEDED)) && (
-                      <div className="flex gap-4 items-center">
-                        <DiceAnimation
-                          value={rerollResult?.dice1}
-                          isRolling={rollingPlayerId === player.id}
-                          isReroll={true}
-                        />
-                        <DiceAnimation
-                          value={rerollResult?.dice2}
-                          isRolling={rollingPlayerId === player.id}
-                          isReroll={true}
-                        />
-                        {rerollResult && (
-                          <span className="font-bold text-emerald-400 text-xl ml-2">
-                            = {rerollResult.sum}
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {shouldRoll && (
-                      <button
-                        onClick={() => handleRoll(player.id)}
-                        disabled={
-                          rollingPlayerId !== null ||
-                          (initialDiceState ===
-                            INITIAL_DICE_STATES.REROLL_NEEDED &&
-                            hasRerolled[player.id])
+                <div className="flex items-center gap-6">
+                  {(initialResult || rollingPlayerId === player.id) && (
+                    <div className={`flex gap-4 items-center ${""}`}>
+                      <DiceAnimation
+                        value={initialResult?.dice1}
+                        isRolling={
+                          rollingPlayerId === player.id &&
+                          initialDiceState !== INITIAL_DICE_STATES.REROLL_NEEDED
                         }
-                        className="bg-gradient-to-r from-blue-500 to-indigo-600 
-                          text-white px-6 py-3 rounded-xl font-medium
-                          hover:from-blue-600 hover:to-indigo-700
-                          transform transition-all duration-200
-                          hover:-translate-y-0.5 active:translate-y-0
-                          shadow-lg hover:shadow-xl
-                          flex items-center gap-2
-                          disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <span className="text-xl">🎲</span>
-                        <span>
-                          {initialDiceState ===
-                          INITIAL_DICE_STATES.REROLL_NEEDED
-                            ? hasRerolled[player.id]
-                              ? "Relancé"
-                              : "Relancer"
-                            : "Lancer les dés"}
+                        isReroll={false}
+                      />
+                      <DiceAnimation
+                        value={initialResult?.dice2}
+                        isRolling={
+                          rollingPlayerId === player.id &&
+                          initialDiceState !== INITIAL_DICE_STATES.REROLL_NEEDED
+                        }
+                        isReroll={false}
+                      />
+                      {initialResult && (
+                        <span className="font-bold text-white/90 text-xl ml-2">
+                          = {initialResult.sum}
                         </span>
-                      </button>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
+
+                  {(rerollResult ||
+                    (rollingPlayerId === player.id &&
+                      initialDiceState ===
+                        INITIAL_DICE_STATES.REROLL_NEEDED)) && (
+                    <div className="flex gap-4 items-center">
+                      <DiceAnimation
+                        value={rerollResult?.dice1}
+                        isRolling={rollingPlayerId === player.id}
+                        isReroll={true}
+                      />
+                      <DiceAnimation
+                        value={rerollResult?.dice2}
+                        isRolling={rollingPlayerId === player.id}
+                        isReroll={true}
+                      />
+                      {rerollResult && (
+                        <span className="font-bold text-emerald-400 text-xl ml-2">
+                          = {rerollResult.sum}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {shouldRoll && (
+                    <button
+                      onClick={() => handleRoll(player.id)}
+                      disabled={
+                        rollingPlayerId !== null ||
+                        (initialDiceState ===
+                          INITIAL_DICE_STATES.REROLL_NEEDED &&
+                          hasRerolled[player.id])
+                      }
+                      className="bg-gradient-to-r from-blue-500 to-indigo-600 
+                        text-white px-6 py-3 rounded-xl font-medium
+                        hover:from-blue-600 hover:to-indigo-700
+                        transform transition-all duration-200
+                        hover:-translate-y-0.5 active:translate-y-0
+                        shadow-lg hover:shadow-xl
+                        flex items-center gap-2
+                        disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="text-xl">🎲</span>
+                      <span>
+                        {initialDiceState === INITIAL_DICE_STATES.REROLL_NEEDED
+                          ? hasRerolled[player.id]
+                            ? "Relancé"
+                            : "Relancer"
+                          : "Lancer les dés"}
+                      </span>
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -258,17 +229,12 @@ const InitialDiceRoll = ({
                         ${index === 0 ? "scale-110" : ""}
                       `}
                     >
-                      <div className="flex items-center gap-2">
-                        {index === 0 && (
-                          <span className="text-yellow-300">👑</span>
-                        )}
-                        {player.name}
-                        {index === 0 && (
-                          <span className="text-sm text-yellow-300/80">
-                            (Premier joueur)
-                          </span>
-                        )}
-                      </div>
+                      <PlayerIdentity
+                        player={player}
+                        className={`${
+                          index === 0 ? "text-yellow-300" : "text-white"
+                        }`}
+                      />
                     </div>
                   </div>
                 );

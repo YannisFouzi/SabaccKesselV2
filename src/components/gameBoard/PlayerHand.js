@@ -1,6 +1,7 @@
 import React from "react";
 import { getCardBack, getCardImage } from "../../constants/cardImages";
 import { CARD_TYPES } from "../../constants/gameConstants";
+import PlayerIdentity from "../PlayerIdentity";
 
 const PlayerHand = ({
   player,
@@ -111,26 +112,34 @@ const PlayerHand = ({
         <div
           className={`flex-grow ${isCurrentPlayer ? "border-blue-500" : ""}`}
         >
-          <div className="flex justify-between items-center mb-2">
-            <div className="font-medium">{player.name}</div>
-            <div className="text-sm">
-              {player.tokens} jetons
-              {typeof startingTokens[player.id] !== "undefined" &&
-                startingTokens[player.id] !== player.tokens && (
-                  <span className="text-red-500 ml-1">
-                    (-{startingTokens[player.id] - player.tokens})
-                  </span>
-                )}
+          <div className="relative">
+            <PlayerIdentity
+              player={player}
+              className={`mb-2 ${
+                isCurrentPlayer ? "text-yellow-400" : "text-white"
+              }`}
+            />
+            <div className="flex justify-between items-center mb-2">
+              <div className="font-medium">{player.name}</div>
+              <div className="text-sm">
+                {player.tokens} jetons
+                {typeof startingTokens[player.id] !== "undefined" &&
+                  startingTokens[player.id] !== player.tokens && (
+                    <span className="text-red-500 ml-1">
+                      (-{startingTokens[player.id] - player.tokens})
+                    </span>
+                  )}
+              </div>
             </div>
-          </div>
 
-          <div className="flex space-x-4">
-            {hand.map((card) => (
-              <Card key={card.id} card={card} />
-            ))}
-            {pendingDrawnCard && isCurrentPlayer && (
-              <Card card={pendingDrawnCard} isPending={true} />
-            )}
+            <div className="flex space-x-4">
+              {hand.map((card) => (
+                <Card key={card.id} card={card} />
+              ))}
+              {pendingDrawnCard && isCurrentPlayer && (
+                <Card card={pendingDrawnCard} isPending={true} />
+              )}
+            </div>
           </div>
         </div>
 

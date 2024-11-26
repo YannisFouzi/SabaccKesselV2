@@ -1,5 +1,6 @@
 import React from "react";
 import { calculateRoundResults } from "../../hooks/endRound";
+import PlayerIdentity from "../PlayerIdentity";
 
 const EndRoundOverlay = ({
   round,
@@ -40,7 +41,12 @@ const EndRoundOverlay = ({
                   <div className="flex flex-col space-y-2">
                     <div className="flex justify-between items-center">
                       <div className="font-bold text-lg flex items-center gap-2">
-                        {player.name}
+                        <PlayerIdentity
+                          player={player}
+                          className={
+                            player.isEliminated ? "text-red-400" : "text-white"
+                          }
+                        />
                         {player.isWinner && (
                           <span className="text-green-600 text-sm">
                             Gagnant

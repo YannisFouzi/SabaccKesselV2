@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { GAME_STATES, INITIAL_DICE_STATES } from "../constants/gameConstants";
 import useGameState from "../hooks/useGameState";
 import GameOverScreen from "./gameBoard/GameOverScreen";
@@ -6,7 +6,13 @@ import InitialDiceRoll from "./gameBoard/InitialDiceRoll";
 import GameBoardMain from "./GameBoardMain";
 import JokerSelection from "./JokerSelection";
 
-const GameBoard = ({ playerCount, tokenCount, playerNames, onGameEnd }) => {
+const GameBoard = ({
+  playerCount,
+  tokenCount,
+  playerNames,
+  playerAvatars,
+  onGameEnd,
+}) => {
   const {
     gameState,
     setGameState,
@@ -54,7 +60,12 @@ const GameBoard = ({ playerCount, tokenCount, playerNames, onGameEnd }) => {
     usedJokersThisRound,
     useJoker,
     jokerEUsed,
-  } = useGameState(playerCount, tokenCount, playerNames);
+  } = useGameState(playerCount, tokenCount, playerNames, playerAvatars);
+
+  // Ajout d'un debug pour vérifier les données
+  useEffect(() => {
+    console.log("Players with avatars:", players);
+  }, [players]);
 
   // Vérification que le jeu est correctement initialisé
   if (!players || players.length === 0) {

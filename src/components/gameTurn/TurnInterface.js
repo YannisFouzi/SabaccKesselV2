@@ -1,4 +1,5 @@
 import React from "react";
+import PlayerIdentity from "../PlayerIdentity";
 
 const TurnInterface = ({
   pendingDrawnCard,
@@ -30,6 +31,11 @@ const TurnInterface = ({
     <div className="text-center mb-4">
       {isCurrentPlayerTurn && (
         <div className="space-y-3">
+          <PlayerIdentity
+            player={currentPlayer}
+            size="large"
+            className="justify-center text-xl font-bold"
+          />
           {currentPlayerTokens > 0 ? (
             <></>
           ) : (

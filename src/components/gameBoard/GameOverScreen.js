@@ -1,4 +1,5 @@
 import React from "react";
+import PlayerIdentity from "../PlayerIdentity";
 
 const GameOverScreen = ({
   winners,
@@ -13,13 +14,13 @@ const GameOverScreen = ({
         <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
         {winners && winners.length > 0 ? (
           winners.map((winner, index) => (
-            <p key={index} className="text-lg mb-2">
-              {winners.length > 1 ? "Gagnants :" : "Gagnant :"} {winner.name}
-              <br />
-              <span className="text-sm text-gray-600">
+            <div key={index} className="text-lg mb-2">
+              {winners.length > 1 ? "Gagnants :" : "Gagnant :"}
+              <PlayerIdentity player={winner} size="large" className="mt-2" />
+              <span className="text-sm text-gray-600 block mt-1">
                 Jetons restants : {winner.tokens}
               </span>
-            </p>
+            </div>
           ))
         ) : (
           <p className="text-lg mb-2">Pas de gagnant</p>

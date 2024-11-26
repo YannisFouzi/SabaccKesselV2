@@ -10,14 +10,27 @@ import calculateHandValue from "./calculateHandValue";
 import initializeGameFn from "./initializeGame";
 import { createGameActions } from "./useGameActions";
 
-const useGameState = (initialPlayerCount, initialTokenCount, playerNames) => {
+const useGameState = (
+  initialPlayerCount,
+  initialTokenCount,
+  playerNames,
+  playerAvatars
+) => {
+  useEffect(() => {
+    console.log("Initial avatars:", playerAvatars);
+  }, [playerAvatars]);
+
+  const safePlayerNames = playerNames || Array(initialPlayerCount).fill("");
+  const safePlayerAvatars = playerAvatars || Array(initialPlayerCount).fill(1);
+
   const [gameState, setGameState] = useState(GAME_STATES.JOKER_SELECTION);
   const [players, setPlayers] = useState(
     Array(initialPlayerCount)
       .fill(null)
       .map((_, index) => ({
         id: index + 1,
-        name: playerNames[index] || `Joueur ${index + 1}`,
+        name: safePlayerNames[index] || `Joueur ${index + 1}`,
+        avatar: safePlayerAvatars[index],
         tokens: initialTokenCount,
         hand: [],
       }))
@@ -116,7 +129,8 @@ const useGameState = (initialPlayerCount, initialTokenCount, playerNames) => {
       .fill(null)
       .map((_, index) => ({
         id: index + 1,
-        name: playerNames[index] || `Joueur ${index + 1}`,
+        name: safePlayerNames[index] || `Joueur ${index + 1}`,
+        avatar: safePlayerAvatars[index],
         tokens: initialTokenCount,
         hand: [],
       }));
@@ -147,7 +161,8 @@ const useGameState = (initialPlayerCount, initialTokenCount, playerNames) => {
   }, [
     initialPlayerCount,
     initialTokenCount,
-    playerNames,
+    safePlayerNames,
+    safePlayerAvatars,
     playerOrder,
     round,
     roundStartPlayer,

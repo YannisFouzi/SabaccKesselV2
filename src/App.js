@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ComingSoonRibbon from "./components/ComingSoonRibbon";
 import GameBoard from "./components/GameBoard";
+import PlayerNameInput from "./components/PlayerNameInput";
 import { GAME_CONFIG } from "./constants/gameConstants";
 
 const App = () => {
@@ -11,6 +12,7 @@ const App = () => {
   const [gameHistory, setGameHistory] = useState([]);
   const [gameKey, setGameKey] = useState(0);
   const [playerNames, setPlayerNames] = useState([]);
+  const [playerAvatars, setPlayerAvatars] = useState([]);
 
   // Fonction de validation des noms
   const validatePlayerName = (name) => {
@@ -28,12 +30,21 @@ const App = () => {
     setPlayerNames(newNames);
   };
 
+  // Nouvelle fonction pour gérer le changement d'avatar
+  const handleAvatarChange = (index, avatarId) => {
+    const newAvatars = [...playerAvatars];
+    newAvatars[index] = avatarId;
+    setPlayerAvatars(newAvatars);
+  };
+
   // Mise à jour de la validation de configuration
   const isConfigValid =
     playerCount &&
     tokenCount &&
     playerNames.length === playerCount &&
-    playerNames.every((name) => validatePlayerName(name));
+    playerNames.every((name) => validatePlayerName(name)) &&
+    playerAvatars.length === playerCount &&
+    playerAvatars.every((avatar) => avatar !== undefined);
 
   // Fonction pour démarrer le jeu
   const handleStartGame = () => {
@@ -209,8 +220,8 @@ const App = () => {
             onChange={(e) => {
               const count = Number(e.target.value);
               setPlayerCount(count);
-              // Initialiser un tableau de noms vides pour chaque joueur
               setPlayerNames(Array(count).fill(""));
+              setPlayerAvatars(Array(count).fill(null));
             }}
           >
             <option value="" className="bg-gray-900">
@@ -234,32 +245,19 @@ const App = () => {
         {playerCount > 0 && (
           <div className="space-y-4 mb-8">
             <h3 className="text-lg font-medium text-blue-100">
-              Noms des joueurs
+              Noms des joueurs et avatars
             </h3>
             <div className="grid gap-4 md:grid-cols-2">
               {playerNames.map((name, index) => (
-                <div key={index} className="relative group">
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => {
-                      const newNames = [...playerNames];
-                      newNames[index] = e.target.value;
-                      setPlayerNames(newNames);
-                    }}
-                    placeholder={`Joueur ${index + 1}`}
-                    className="w-full p-3 bg-white/10 border-2 border-white/30 rounded-xl text-white 
-                      backdrop-blur-sm transition-all duration-200
-                      hover:bg-white/20 hover:border-white/40
-                      focus:outline-none focus:ring-2 focus:ring-yellow-400/50
-                      placeholder-white/50"
-                  />
-                  <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                    <span className="text-white/50 group-hover:text-white/70">
-                      👤
-                    </span>
-                  </div>
-                </div>
+                <PlayerNameInput
+                  key={index}
+                  index={index}
+                  name={name}
+                  avatar={playerAvatars[index]}
+                  onChange={handleNameChange}
+                  onAvatarChange={handleAvatarChange}
+                  placeholder={`Joueur ${index + 1}`}
+                />
               ))}
             </div>
           </div>
@@ -452,6 +450,7 @@ const App = () => {
         playerCount={playerCount}
         tokenCount={tokenCount}
         playerNames={playerNames}
+        playerAvatars={playerAvatars}
         onGameEnd={handleGameEnd}
       />
     );
