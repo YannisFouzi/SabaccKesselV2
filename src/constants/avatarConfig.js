@@ -27,7 +27,7 @@ import yoda from "../assets/img/avatar/yoda.png";
 export const AVATAR_LIST = [
   {
     id: "admiral-ackbar",
-    name: "Admiral Ackbar",
+    name: "Amiral Ackbar",
     image: admiralAckbar,
   },
   {

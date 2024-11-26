@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { AVATAR_LIST } from "../constants/avatarConfig";
 import { GAME_STATES, JOKERS } from "../constants/gameConstants";
 import ComingSoonRibbon from "./ComingSoonRibbon";
 
@@ -38,8 +39,18 @@ const JokerSelection = ({
     <div className="fixed inset-0 bg-black bg-opacity-50">
       <div className="w-full h-full flex flex-col">
         {/* En-tête fixe */}
-        <h2 className="text-xl md:text-2xl font-bold text-center p-4 bg-white border-b">
-          {currentPlayer.name}, sélectionnez 3 jetons d'action
+        <h2 className="text-xl md:text-2xl font-bold text-center p-4 bg-white border-b flex items-center justify-center gap-3">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+            <img
+              src={
+                AVATAR_LIST.find((avatar) => avatar.id === currentPlayer.avatar)
+                  ?.image
+              }
+              alt={`Avatar de ${currentPlayer.name}`}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <span>{currentPlayer.name}, sélectionnez 3 jetons d'action</span>
         </h2>
 
         {/* Zone scrollable */}

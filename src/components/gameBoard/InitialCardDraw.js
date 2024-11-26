@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { AVATAR_LIST } from "../../constants/avatarConfig";
 import { getCardBack, getCardImage } from "../../constants/cardImages";
 import { CARD_FAMILIES, CARD_TYPES } from "../../constants/gameConstants";
 
@@ -112,7 +113,19 @@ const InitialCardDraw = ({
 
           {!revealCards && currentPlayerIndex !== null && (
             <div className="text-center mb-4 sm:mb-6 py-3 px-4 rounded-xl bg-amber-500/20 border border-amber-500/30 backdrop-blur-sm">
-              <span className="text-amber-400 font-medium text-sm sm:text-base">
+              <span className="text-amber-400 font-medium text-sm sm:text-base flex items-center justify-center gap-3">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
+                  <img
+                    src={
+                      AVATAR_LIST.find(
+                        (avatar) =>
+                          avatar.id === players[currentPlayerIndex].avatar
+                      )?.image
+                    }
+                    alt={`Avatar de ${players[currentPlayerIndex].name}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 {players[currentPlayerIndex].name}, choisissez une carte
               </span>
             </div>
@@ -180,7 +193,18 @@ const InitialCardDraw = ({
                       key={player.id}
                       className="flex flex-col items-center gap-2"
                     >
-                      <span className="text-gray-300 font-medium text-sm sm:text-base">
+                      <span className="text-gray-300 font-medium text-sm sm:text-base flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200">
+                          <img
+                            src={
+                              AVATAR_LIST.find(
+                                (avatar) => avatar.id === player.avatar
+                              )?.image
+                            }
+                            alt={`Avatar de ${player.name}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
                         {player.name}
                       </span>
                       {drawnCards[player.id] && (
