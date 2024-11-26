@@ -2,17 +2,23 @@ import React, { useState } from "react";
 import ComingSoonRibbon from "./components/ComingSoonRibbon";
 import GameBoard from "./components/GameBoard";
 import PlayerNameInput from "./components/PlayerNameInput";
+import ValidationMessages from "./components/ValidationMessages";
 import { GAME_CONFIG } from "./constants/gameConstants";
 
 const App = () => {
   const [gameMode, setGameMode] = useState(null);
   const [gameStarted, setGameStarted] = useState(false);
-  const [playerCount, setPlayerCount] = useState(null);
+  const [playerCount, setPlayerCount] = useState(GAME_CONFIG.MIN_PLAYERS);
   const [tokenCount, setTokenCount] = useState(null);
   const [gameHistory, setGameHistory] = useState([]);
   const [gameKey, setGameKey] = useState(0);
-  const [playerNames, setPlayerNames] = useState([]);
-  const [playerAvatars, setPlayerAvatars] = useState([]);
+  const [playerNames, setPlayerNames] = useState(
+    Array(GAME_CONFIG.MIN_PLAYERS).fill("")
+  );
+  const [playerAvatars, setPlayerAvatars] = useState(
+    Array(GAME_CONFIG.MIN_PLAYERS).fill(null)
+  );
+  const [hasAttemptedStart, setHasAttemptedStart] = useState(false);
 
   // Fonction de validation des noms
   const validatePlayerName = (name) => {
@@ -44,7 +50,7 @@ const App = () => {
     playerNames.length === playerCount &&
     playerNames.every((name) => validatePlayerName(name)) &&
     playerAvatars.length === playerCount &&
-    playerAvatars.every((avatar) => avatar !== undefined);
+    playerAvatars.every((avatar) => avatar !== null && avatar !== undefined);
 
   // Fonction pour démarrer le jeu
   const handleStartGame = () => {
@@ -70,6 +76,29 @@ const App = () => {
     setGameStarted(false);
     setGameKey((prev) => prev + 1);
     setGameMode(null);
+  };
+
+  // Fonction pour ajouter un joueur
+  const handleAddPlayer = () => {
+    if (playerCount < GAME_CONFIG.MAX_PLAYERS) {
+      const newCount = playerCount + 1;
+      setPlayerCount(newCount);
+      setPlayerNames((prev) => [...prev, ""]);
+      setPlayerAvatars((prev) => [...prev, null]);
+    }
+  };
+
+  // Fonction pour supprimer un joueur
+  const handleRemovePlayer = (indexToRemove) => {
+    if (playerCount > GAME_CONFIG.MIN_PLAYERS) {
+      setPlayerCount(playerCount - 1);
+      setPlayerNames((prev) =>
+        prev.filter((_, index) => index !== indexToRemove)
+      );
+      setPlayerAvatars((prev) =>
+        prev.filter((_, index) => index !== indexToRemove)
+      );
+    }
   };
 
   // Menu principal
@@ -197,74 +226,62 @@ const App = () => {
 
   // Configuration du mode local
   const renderLocalSetup = () => (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20">
-        <h2 className="text-3xl font-bold text-white mb-8 text-center">
-          Configuration de la partie
-        </h2>
+    <div className="min-h-screen h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 overflow-y-auto">
+      <div className="flex items-center justify-center p-4 min-h-full">
+        <div className="w-full max-w-2xl bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20 my-8">
+          <h2 className="text-3xl font-bold text-white mb-8 text-center">
+            Configuration de la partie
+          </h2>
 
-        {/* Sélection du nombre de joueurs */}
-        <div className="mb-8">
-          <label className="block text-lg font-medium text-blue-100 mb-4">
-            Nombre de joueurs
-          </label>
-          <select
-            className="w-full p-3 bg-white/10 border-2 border-white/30 rounded-xl text-white 
-              backdrop-blur-sm transition-all duration-200
-              hover:bg-white/20 hover:border-white/40
-              focus:outline-none focus:ring-2 focus:ring-yellow-400/50
-              appearance-none cursor-pointer
-              bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik03LjQxIDguNTlMMTIgMTMuMTdsNC41OS00LjU4TDE4IDEwbC02IDYtNi02IDEuNDEtMS40MXoiLz48L3N2Zz4=')] 
-              bg-no-repeat bg-[length:1.5em] bg-[center_right_0.5em]"
-            value={playerCount || ""}
-            onChange={(e) => {
-              const count = Number(e.target.value);
-              setPlayerCount(count);
-              setPlayerNames(Array(count).fill(""));
-              setPlayerAvatars(Array(count).fill(null));
-            }}
-          >
-            <option value="" className="bg-gray-900">
-              Sélectionnez
-            </option>
-            {[
-              ...Array(GAME_CONFIG.MAX_PLAYERS - GAME_CONFIG.MIN_PLAYERS + 1),
-            ].map((_, i) => (
-              <option
-                key={i + GAME_CONFIG.MIN_PLAYERS}
-                value={i + GAME_CONFIG.MIN_PLAYERS}
-                className="bg-gray-900"
-              >
-                {i + GAME_CONFIG.MIN_PLAYERS} Joueurs
-              </option>
-            ))}
-          </select>
-        </div>
+          {/* Section des joueurs */}
+          <div className="space-y-6 mb-8">
+            <div className="grid grid-cols-2 gap-4">
+              {/* Liste des joueurs */}
+              {Array(playerCount || GAME_CONFIG.MIN_PLAYERS)
+                .fill(null)
+                .map((_, index) => (
+                  <div key={index} className="relative">
+                    <PlayerNameInput
+                      index={index}
+                      name={playerNames[index] || ""}
+                      avatar={playerAvatars[index]}
+                      onChange={handleNameChange}
+                      onAvatarChange={handleAvatarChange}
+                      placeholder={`Joueur ${index + 1}`}
+                    />
+                    {index >= GAME_CONFIG.MIN_PLAYERS && (
+                      <button
+                        onClick={() => handleRemovePlayer(index)}
+                        className="absolute -right-2 -top-2 bg-red-500/20 hover:bg-red-500/30 
+                          text-red-400 p-1 rounded-full transition-all duration-200
+                          border border-red-500/30"
+                        title="Supprimer ce joueur"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
 
-        {/* Saisie des noms des joueurs */}
-        {playerCount > 0 && (
-          <div className="space-y-4 mb-8">
-            <h3 className="text-lg font-medium text-blue-100">
-              Noms des joueurs et avatars
-            </h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              {playerNames.map((name, index) => (
-                <PlayerNameInput
-                  key={index}
-                  index={index}
-                  name={name}
-                  avatar={playerAvatars[index]}
-                  onChange={handleNameChange}
-                  onAvatarChange={handleAvatarChange}
-                  placeholder={`Joueur ${index + 1}`}
-                />
-              ))}
+              {/* Bouton d'ajout de joueur */}
+              {(playerCount || GAME_CONFIG.MIN_PLAYERS) <
+                GAME_CONFIG.MAX_PLAYERS && (
+                <button
+                  onClick={handleAddPlayer}
+                  className="h-[200px] border-2 border-dashed border-green-500/30 
+                    rounded-xl transition-all duration-200
+                    bg-green-500/10 hover:bg-green-500/20
+                    flex flex-col items-center justify-center gap-2
+                    text-green-400 hover:text-green-300"
+                >
+                  <span className="text-5xl font-light">+</span>
+                  <span className="text-sm">Ajouter un joueur</span>
+                </button>
+              )}
             </div>
           </div>
-        )}
 
-        {/* Sélection du nombre de jetons */}
-        {playerCount > 0 && (
+          {/* Sélection du nombre de jetons */}
           <div className="mb-8">
             <label className="block text-lg font-medium text-blue-100 mb-4">
               Jetons par joueur
@@ -296,52 +313,52 @@ const App = () => {
               ))}
             </select>
           </div>
-        )}
 
-        {/* Boutons de navigation */}
-        <div className="flex space-x-4">
-          <button
-            onClick={() => {
-              setGameMode(null);
-              setPlayerCount(null);
-              setTokenCount(null);
-              setPlayerNames([]);
-            }}
-            className="flex-1 py-3 px-6 rounded-xl text-lg font-bold
-              bg-white/10 text-white
-              hover:bg-white/20 transition-all duration-200"
-          >
-            Retour
-          </button>
-          <button
-            onClick={() => {
-              if (playerNames.every((name) => name.trim() !== "")) {
-                setGameStarted(true);
-              }
-            }}
-            disabled={
-              !isConfigValid || !playerNames.every((name) => name.trim() !== "")
-            }
-            className="flex-1 py-3 px-6 rounded-xl text-lg font-bold
-              bg-gradient-to-r from-purple-600 to-blue-600 
-              hover:from-purple-700 hover:to-blue-700
-              text-white shadow-lg
-              transform transition-all duration-200 
-              hover:-translate-y-0.5 active:translate-y-0
-              disabled:opacity-50 disabled:cursor-not-allowed
-              disabled:hover:transform-none"
-          >
-            Commencer la partie
-          </button>
+          {/* Boutons de navigation */}
+          <div className="flex space-x-4">
+            <button
+              onClick={() => {
+                setGameMode(null);
+                setPlayerCount(GAME_CONFIG.MIN_PLAYERS);
+                setTokenCount(null);
+                setPlayerNames(Array(GAME_CONFIG.MIN_PLAYERS).fill(""));
+                setPlayerAvatars(Array(GAME_CONFIG.MIN_PLAYERS).fill(null));
+              }}
+              className="flex-1 py-3 px-6 rounded-xl text-lg font-bold
+                bg-white/10 text-white
+                hover:bg-white/20 transition-all duration-200"
+            >
+              Retour
+            </button>
+            <button
+              onClick={() => {
+                setHasAttemptedStart(true);
+                if (isConfigValid) {
+                  setGameStarted(true);
+                }
+              }}
+              disabled={!isConfigValid}
+              className="flex-1 py-3 px-6 rounded-xl text-lg font-bold
+                bg-gradient-to-r from-purple-600 to-blue-600 
+                hover:from-purple-700 hover:to-blue-700
+                text-white shadow-lg
+                transform transition-all duration-200 
+                hover:-translate-y-0.5 active:translate-y-0
+                disabled:opacity-50 disabled:cursor-not-allowed
+                disabled:hover:transform-none"
+            >
+              Commencer la partie
+            </button>
+          </div>
+
+          {/* Messages de validation */}
+          <ValidationMessages
+            playerNames={playerNames}
+            playerCount={playerCount || GAME_CONFIG.MIN_PLAYERS}
+            playerAvatars={playerAvatars}
+            showErrors={hasAttemptedStart}
+          />
         </div>
-
-        {/* Message d'erreur si des noms sont manquants */}
-        {playerCount > 0 &&
-          !playerNames.every((name) => name.trim() !== "") && (
-            <p className="mt-4 text-red-400 text-center">
-              Veuillez saisir un nom pour chaque joueur
-            </p>
-          )}
       </div>
     </div>
   );
