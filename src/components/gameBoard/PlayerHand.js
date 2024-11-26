@@ -184,21 +184,34 @@ const PlayerHand = ({
         </div>
       </div>
 
-      {/* Informations du joueur */}
-      <div className="flex justify-between items-center mb-2">
-        <PlayerIdentity
-          player={player}
-          className={`${isCurrentPlayer ? "text-yellow-400" : "text-white"}`}
-        />
-        <div className="text-sm">
-          {player.tokens} jetons
-          {typeof startingTokens[player.id] !== "undefined" &&
-            startingTokens[player.id] !== player.tokens && (
-              <span className="text-red-500 ml-1">
-                (-{startingTokens[player.id] - player.tokens})
-              </span>
-            )}
+      {/* Informations du joueur et boutons d'action */}
+      <div className="flex flex-col gap-2">
+        {/* Infos joueur */}
+        <div className="flex justify-between items-center">
+          <PlayerIdentity
+            player={player}
+            className={`${isCurrentPlayer ? "text-yellow-400" : "text-white"}`}
+          />
+          <div className="text-sm">
+            {player.tokens} jetons
+            {typeof startingTokens[player.id] !== "undefined" &&
+              startingTokens[player.id] !== player.tokens && (
+                <span className="text-red-500 ml-1">
+                  (-{startingTokens[player.id] - player.tokens})
+                </span>
+              )}
+          </div>
         </div>
+
+        {/* Bouton passer le tour */}
+        {isCurrentPlayer && !pendingDrawnCard && (
+          <button
+            onClick={onPass}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+          >
+            Passer le tour
+          </button>
+        )}
       </div>
     </div>
   );
