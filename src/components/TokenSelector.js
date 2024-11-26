@@ -1,17 +1,27 @@
 import React, { useState } from "react";
 import jeton from "../assets/img/jeton.png";
+import jetonKo from "../assets/img/jeton_ko.png";
 
 const TokenSelector = ({ value, onChange }) => {
   const MIN_TOKENS = 4;
+  const MAX_TOKENS = 12;
   const [inputValue, setInputValue] = useState(value || "");
 
   const handleInputChange = (e) => {
     const newValue = e.target.value;
     if (newValue === "" || /^\d+$/.test(newValue)) {
-      setInputValue(newValue);
-
       const numValue = parseInt(newValue, 10);
-      if (numValue >= MIN_TOKENS) {
+
+      if (!isNaN(numValue)) {
+        if (numValue > MAX_TOKENS) {
+          setInputValue(MAX_TOKENS.toString());
+          onChange(MAX_TOKENS);
+          return;
+        }
+      }
+
+      setInputValue(newValue);
+      if (numValue >= MIN_TOKENS && numValue <= MAX_TOKENS) {
         onChange(numValue);
       } else {
         onChange(null);
@@ -19,47 +29,48 @@ const TokenSelector = ({ value, onChange }) => {
     }
   };
 
+  const isValid = value && value >= MIN_TOKENS && value <= MAX_TOKENS;
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <label className="block text-lg font-medium text-blue-100">
-          Jetons par joueur
-        </label>
+    <div className="flex flex-col items-center space-y-4">
+      <div className="text-center">
         <span className="text-blue-200">
-          {value && value < MIN_TOKENS ? `Minimum ${MIN_TOKENS} jetons` : ""}
+          {value && !isValid
+            ? `Entre ${MIN_TOKENS} et ${MAX_TOKENS} jetons`
+            : ""}
         </span>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col items-center gap-4">
         <div className="relative flex-shrink-0">
           <div className="relative w-16 h-16">
             {[...Array(3)].map((_, index) => (
               <img
                 key={index}
-                src={jeton}
+                src={isValid ? jeton : jetonKo}
                 alt=""
                 className="absolute w-14 h-14 object-contain transition-all duration-200"
                 style={{
                   top: `${index * -4}px`,
                   left: `${index * 2}px`,
                   zIndex: index,
-                  opacity: value && value >= MIN_TOKENS ? 1 : 0.5,
                 }}
               />
             ))}
           </div>
         </div>
 
-        <div className="flex-1 max-w-[200px]">
-          <div className="relative">
+        <div className="flex flex-col items-center w-full max-w-[200px]">
+          <div className="relative w-full">
             <input
               type="number"
               min={MIN_TOKENS}
+              max={MAX_TOKENS}
               value={inputValue}
               onChange={handleInputChange}
-              placeholder={`Min. ${MIN_TOKENS}`}
+              placeholder={"Jetons par joueur"}
               className="w-full bg-white/10 border-2 border-white/20 rounded-xl 
-                px-4 py-2 text-white placeholder-white/50
+                px-4 py-2 text-white placeholder-white/50 text-center
                 focus:outline-none focus:border-white/40
                 transition-all duration-200
                 [appearance:textfield]
@@ -68,15 +79,15 @@ const TokenSelector = ({ value, onChange }) => {
             />
           </div>
 
-          {value && value < MIN_TOKENS && (
-            <p className="text-red-400 text-sm mt-2">
-              Minimum {MIN_TOKENS} jetons requis
+          {value && !isValid && (
+            <p className="text-red-400 text-sm mt-2 text-center">
+              Entre {MIN_TOKENS} et {MAX_TOKENS} jetons
             </p>
           )}
 
           {/* Suggestions rapides */}
-          <div className="flex gap-2 mt-3">
-            {[4, 10, 20, 50, 100].map((amount) => (
+          <div className="flex justify-center flex-wrap gap-2 mt-3">
+            {[4, 6, 8, 10, 12].map((amount) => (
               <button
                 key={amount}
                 onClick={() => {
