@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { AVATAR_LIST } from "../../constants/avatarConfig";
 import { GAME_STATES } from "../../constants/gameConstants";
 import PlayerIdentity from "../PlayerIdentity";
 import DiceFace from "./DiceFace";
@@ -66,6 +67,11 @@ const InitialDiceRoll = ({
         setHasRerolled((prev) => ({ ...prev, [playerId]: true }));
       }
     }, 1000);
+  };
+
+  const getPlayerAvatar = (avatarId) => {
+    const avatar = AVATAR_LIST.find((a) => a.id === avatarId);
+    return avatar ? avatar.image : null;
   };
 
   return (
