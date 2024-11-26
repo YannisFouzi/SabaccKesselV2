@@ -39,7 +39,6 @@ const JokerBubble = ({ joker, onClose, onUse, position }) => (
         </button>
       </div>
 
-      {/* Flèche pointant vers le joker */}
       <div className="absolute bottom-0 left-1/2 w-3 h-3 -mb-1.5 -translate-x-1/2 rotate-45 bg-gray-900"></div>
     </div>
   </div>
@@ -52,7 +51,7 @@ const PlayerJokers = ({
   onUseJoker,
   usedJokersThisRound,
 }) => {
-  const [selectedJoker, setSelectedJoker] = useState(null);
+  const [selectedJokerInstanceId, setSelectedJokerInstanceId] = useState(null);
 
   if (!player || !selectedJokers[player.id]) {
     return null;
@@ -73,61 +72,51 @@ const PlayerJokers = ({
 
   const handleJokerClick = (jokerId, index) => {
     if (!hasUsedJokerThisRound) {
-      if (selectedJoker?.id === jokerId) {
-        setSelectedJoker(null);
+      const instanceId = `${jokerId}-${index}`;
+      if (selectedJokerInstanceId === instanceId) {
+        setSelectedJokerInstanceId(null);
       } else {
-        setSelectedJoker({ id: jokerId, index });
+        setSelectedJokerInstanceId(instanceId);
       }
     }
   };
 
-  const handleUseJoker = () => {
-    if (selectedJoker) {
-      onUseJoker(player.id, selectedJoker.id, selectedJoker.index);
-      setSelectedJoker(null);
-    }
+  const handleUseJoker = (jokerId, index) => {
+    onUseJoker(player.id, jokerId, index);
+    setSelectedJokerInstanceId(null);
   };
 
   return (
     <div className="mt-2 relative">
       <div className="text-sm font-medium mb-2">Jetons d'action :</div>
-
-      <div className="flex space-x-2">
+      <div className="flex flex-wrap gap-2">
         {playerJokers.map((jokerId, index) => {
-          const joker = { ...JOKERS[jokerId], id: jokerId };
-          const isSelected = selectedJoker?.id === jokerId;
+          const joker = JOKERS[jokerId];
+          const instanceId = `${jokerId}-${index}`;
+          const isSelected = selectedJokerInstanceId === instanceId;
 
           return (
-            <div key={`${jokerId}-${index}`} className="relative">
+            <div key={instanceId} className="relative">
               <button
                 onClick={() => handleJokerClick(jokerId, index)}
                 disabled={hasUsedJokerThisRound}
-                className={`
-                  relative
-                  w-16 h-24 rounded-lg overflow-hidden
+                className={`w-10 h-10 rounded-lg overflow-hidden 
+                  ${hasUsedJokerThisRound ? "opacity-50" : "hover:opacity-75"} 
                   transition-all duration-200
-                  ${
-                    !hasUsedJokerThisRound
-                      ? "active:scale-95 cursor-pointer"
-                      : "opacity-50 cursor-not-allowed"
-                  }
-                  ${isSelected ? "ring-2 ring-blue-500 ring-offset-2" : ""}
-                  bg-gradient-to-br from-purple-100 to-blue-100
-                  border-2 border-white/50 shadow-lg
-                `}
+                  ${isSelected ? "ring-2 ring-blue-500" : ""}`}
               >
                 <img
                   src={jokerImages[jokerId]}
-                  alt={`Joker ${jokerId}`}
-                  className="w-full h-full object-contain p-1"
+                  alt={joker.title}
+                  className="w-full h-full object-contain"
                 />
               </button>
 
               {isSelected && (
                 <JokerBubble
                   joker={joker}
-                  onClose={() => setSelectedJoker(null)}
-                  onUse={handleUseJoker}
+                  onClose={() => setSelectedJokerInstanceId(null)}
+                  onUse={() => handleUseJoker(jokerId, index)}
                 />
               )}
             </div>
