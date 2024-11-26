@@ -1,7 +1,13 @@
 import React from "react";
 import { getCardBack, getCardImage } from "../../constants/cardImages";
-import { CARD_TYPES } from "../../constants/gameConstants";
+import { CARD_TYPES, JOKERS } from "../../constants/gameConstants";
 import PlayerIdentity from "../PlayerIdentity";
+
+// Importation dynamique des images des jokers
+const jokerImages = {};
+Object.keys(JOKERS).forEach((key) => {
+  jokerImages[key] = require(`../../assets/img/jokers/joker-${key}.png`);
+});
 
 const PlayerHand = ({
   player,
@@ -17,12 +23,22 @@ const PlayerHand = ({
   currentPlayerTokens,
   players,
   consecutivePasses,
+  selectedJokers = {},
+  onUseJoker,
+  hasUsedJokerThisRound,
 }) => {
   if (!player) {
     return null;
   }
 
   const hand = player.hand || [];
+  const playerJokers = selectedJokers[player.id] || [];
+
+  const handleJokerClick = (jokerId, index) => {
+    if (!hasUsedJokerThisRound && isCurrentPlayer) {
+      onUseJoker(player.id, jokerId, index);
+    }
+  };
 
   // Composant pour une carte
   const Card = ({ card }) => {
@@ -108,89 +124,84 @@ const PlayerHand = ({
         </div>
       )}
 
-      <div className="flex items-center gap-4">
-        <div
-          className={`flex-grow ${isCurrentPlayer ? "border-blue-500" : ""}`}
-        >
-          <div className="relative">
-            <PlayerIdentity
-              player={player}
-              className={`mb-2 ${
-                isCurrentPlayer ? "text-yellow-400" : "text-white"
-              }`}
-            />
-            <div className="flex justify-between items-center mb-2">
-              <div className="font-medium">{player.name}</div>
-              <div className="text-sm">
-                {player.tokens} jetons
-                {typeof startingTokens[player.id] !== "undefined" &&
-                  startingTokens[player.id] !== player.tokens && (
-                    <span className="text-red-500 ml-1">
-                      (-{startingTokens[player.id] - player.tokens})
-                    </span>
-                  )}
+      {/* Nouvelle disposition en deux colonnes */}
+      <div className="flex justify-between items-center w-full">
+        {/* Colonne de gauche - Cartes du joueur */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="relative flex -space-x-4 transform rotate-2">
+            {hand.map((card, index) => (
+              <div
+                key={card.id}
+                className={`
+                  relative transform 
+                  ${index === 0 ? "-rotate-6" : "rotate-6"}
+                  hover:translate-y-[-1rem] transition-transform duration-200
+                `}
+              >
+                <Card card={card} />
               </div>
-            </div>
-
-            <div className="flex space-x-4">
-              {hand.map((card) => (
-                <Card key={card.id} card={card} />
-              ))}
-              {pendingDrawnCard && isCurrentPlayer && (
-                <Card card={pendingDrawnCard} isPending={true} />
-              )}
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Bouton Passer le tour */}
-        {isCurrentPlayer && !pendingDrawnCard && !isRevealPhase && (
-          <div className="flex-shrink-0 ml-4">
-            <button
-              onClick={onPass}
-              className={`
-                relative overflow-hidden
-                bg-gradient-to-r from-indigo-600 to-blue-600 
-                hover:from-indigo-700 hover:to-blue-700
-                text-white px-6 py-3 rounded-xl shadow-lg 
-                transform transition-all duration-200 
-                hover:-translate-y-0.5 active:translate-y-0
-                font-bold
-                flex flex-col items-center gap-2
-                ${currentPlayerTokens === 0 ? "animate-pulse" : ""}
-              `}
-            >
-              <span>Passer son tour</span>
-              {currentPlayerTokens === 0 && (
-                <div className="text-amber-300 text-xs font-normal">
-                  Plus de jetons !
-                </div>
-              )}
-              {/* Effet de brillance */}
+        {/* Colonne de droite - Jokers */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="relative flex -space-x-2 transform -rotate-2">
+            {playerJokers.map((jokerId, index) => (
               <div
-                className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0"
-                style={{
-                  transform: "translateX(-100%)",
-                  animation: "shimmer 2s infinite",
-                }}
-              />
-            </button>
+                key={`${jokerId}-${index}`}
+                className={`
+                  relative transform 
+                  ${
+                    index === 0
+                      ? "-rotate-3"
+                      : index === 1
+                      ? "rotate-0"
+                      : "rotate-3"
+                  }
+                  hover:translate-y-[-1rem] transition-transform duration-200
+                `}
+              >
+                <button
+                  onClick={() => handleJokerClick(jokerId, index)}
+                  disabled={hasUsedJokerThisRound}
+                  className={`
+                    w-16 h-24 rounded-lg overflow-hidden
+                    ${hasUsedJokerThisRound ? "opacity-50" : "hover:opacity-75"}
+                    transition-all duration-200
+                    ${isCurrentPlayer ? "ring-2 ring-blue-500" : ""}
+                  `}
+                >
+                  <img
+                    src={jokerImages[jokerId]}
+                    alt={JOKERS[jokerId].title}
+                    className="w-full h-full object-contain"
+                  />
+                </button>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
+      </div>
+
+      {/* Informations du joueur */}
+      <div className="flex justify-between items-center mb-2">
+        <PlayerIdentity
+          player={player}
+          className={`${isCurrentPlayer ? "text-yellow-400" : "text-white"}`}
+        />
+        <div className="text-sm">
+          {player.tokens} jetons
+          {typeof startingTokens[player.id] !== "undefined" &&
+            startingTokens[player.id] !== player.tokens && (
+              <span className="text-red-500 ml-1">
+                (-{startingTokens[player.id] - player.tokens})
+              </span>
+            )}
+        </div>
       </div>
     </div>
   );
 };
-
-// Ajout des styles d'animation
-const style = document.createElement("style");
-style.textContent = `
-  @keyframes shimmer {
-    100% {
-      transform: translateX(100%);
-    }
-  }
-`;
-document.head.appendChild(style);
 
 export default PlayerHand;
