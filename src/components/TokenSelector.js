@@ -52,10 +52,14 @@ const TokenSelector = ({ value, onChange }) => {
                 key={index}
                 src={isValid ? jeton : jetonKo}
                 alt=""
-                className="absolute w-14 h-14 object-contain transition-all duration-200"
+                className="absolute w-14 h-14 object-contain
+                  transition-all duration-200 ease-in-out
+                  animate-fadeIn hover:scale-110"
                 style={{
                   left: `${(index - tokensToShow / 2) * 30 + 200}px`,
                   zIndex: index,
+                  opacity: 0,
+                  animation: `fadeIn 0.3s ease-out ${index * 0.02}s forwards`,
                 }}
               />
             ))}
@@ -113,4 +117,26 @@ const TokenSelector = ({ value, onChange }) => {
   );
 };
 
-export default TokenSelector;
+// Définition des styles d'animation
+const styles = `
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.3) translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+`;
+
+// Export du composant wrapper avec les styles
+const TokenSelectorWithStyles = (props) => (
+  <>
+    <style>{styles}</style>
+    <TokenSelector {...props} />
+  </>
+);
+
+export default TokenSelectorWithStyles;
