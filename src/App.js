@@ -218,7 +218,16 @@ const App = () => {
           {/* Footer */}
           <footer className="text-center mt-12 text-blue-200/60 text-sm">
             <p>
-              © 2024 Sabacc de Kessel - Un jeu inspiré de l'univers Star Wars
+              © 2024 Sabacc de Kessel - Un jeu inspiré de l'univers Star Wars -
+              Développé par{" "}
+              <a
+                href="https://fouzi-dev.fr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-200/80 hover:text-blue-200/100"
+              >
+                fouzi-dev.fr
+              </a>
             </p>
           </footer>
         </div>
