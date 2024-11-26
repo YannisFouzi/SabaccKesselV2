@@ -408,6 +408,7 @@ const useGameState = (
     addToHistory,
     drawCard,
     setJokerEUsed,
+    setPlayerOrder,
 
     // État de la partie
     isGameOver: gameState === GAME_STATES.GAME_OVER,

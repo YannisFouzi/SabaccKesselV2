@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
-import { GAME_STATES, INITIAL_DICE_STATES } from "../constants/gameConstants";
+import { GAME_STATES } from "../constants/gameConstants";
 import useGameState from "../hooks/useGameState";
 import GameOverScreen from "./gameBoard/GameOverScreen";
-import InitialDiceRoll from "./gameBoard/InitialDiceRoll";
+import InitialCardDraw from "./gameBoard/InitialCardDraw";
 import GameBoardMain from "./GameBoardMain";
 import JokerSelection from "./JokerSelection";
 
@@ -60,6 +60,7 @@ const GameBoard = ({
     usedJokersThisRound,
     useJoker,
     jokerEUsed,
+    setPlayerOrder,
   } = useGameState(playerCount, tokenCount, playerNames, playerAvatars);
 
   // Ajout d'un debug pour vérifier les données
@@ -72,19 +73,14 @@ const GameBoard = ({
     return <div>Chargement du jeu...</div>;
   }
 
-  // Condition pour afficher l'écran de lancer de dés initial
+  // Condition pour afficher l'écran de tirage de cartes initial
   if (gameState === GAME_STATES.INITIAL_DICE_ROLL) {
     return (
-      <InitialDiceRoll
+      <InitialCardDraw
         players={players}
-        initialDiceState={initialDiceState}
-        INITIAL_DICE_STATES={INITIAL_DICE_STATES}
-        initialDiceResults={initialDiceResults}
-        rerollResults={rerollResults}
-        rollInitialDice={rollInitialDice}
-        playersToReroll={playersToReroll}
-        playerOrder={playerOrder}
         setGameState={setGameState}
+        GAME_STATES={GAME_STATES}
+        setPlayerOrder={setPlayerOrder}
       />
     );
   }
