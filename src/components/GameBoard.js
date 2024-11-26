@@ -6,7 +6,7 @@ import InitialDiceRoll from "./gameBoard/InitialDiceRoll";
 import GameBoardMain from "./GameBoardMain";
 import JokerSelection from "./JokerSelection";
 
-const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
+const GameBoard = ({ playerCount, tokenCount, playerNames, onGameEnd }) => {
   const {
     gameState,
     setGameState,
@@ -54,7 +54,7 @@ const GameBoard = ({ playerCount, tokenCount, onGameEnd }) => {
     usedJokersThisRound,
     useJoker,
     jokerEUsed,
-  } = useGameState(playerCount, tokenCount);
+  } = useGameState(playerCount, tokenCount, playerNames);
 
   // Vérification que le jeu est correctement initialisé
   if (!players || players.length === 0) {

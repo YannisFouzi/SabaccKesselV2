@@ -10,9 +10,30 @@ const App = () => {
   const [tokenCount, setTokenCount] = useState(null);
   const [gameHistory, setGameHistory] = useState([]);
   const [gameKey, setGameKey] = useState(0);
+  const [playerNames, setPlayerNames] = useState([]);
 
-  // Vérification si la configuration est valide
-  const isConfigValid = playerCount && tokenCount;
+  // Fonction de validation des noms
+  const validatePlayerName = (name) => {
+    return (
+      name.trim() !== "" &&
+      name.length <= GAME_CONFIG.MAX_NAME_LENGTH &&
+      /^[a-zA-Z0-9\s-_]+$/.test(name)
+    );
+  };
+
+  // Mise à jour de la fonction de changement de nom
+  const handleNameChange = (index, value) => {
+    const newNames = [...playerNames];
+    newNames[index] = value.slice(0, GAME_CONFIG.MAX_NAME_LENGTH);
+    setPlayerNames(newNames);
+  };
+
+  // Mise à jour de la validation de configuration
+  const isConfigValid =
+    playerCount &&
+    tokenCount &&
+    playerNames.length === playerCount &&
+    playerNames.every((name) => validatePlayerName(name));
 
   // Fonction pour démarrer le jeu
   const handleStartGame = () => {
@@ -47,7 +68,7 @@ const App = () => {
         <div className="container mx-auto px-4 py-8 pb-8">
           {/* En-tête du jeu */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-400 mb-4 animate-pulse">
+            <h1 className="text-5xl font-bold text-white mb-4">
               Sabacc de Kessel
             </h1>
             <p className="text-lg text-blue-200 max-w-2xl mx-auto">
@@ -59,105 +80,29 @@ const App = () => {
           <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {/* Section Modes de jeu */}
             <div className="space-y-6">
-              {/* Mode Local */}
               <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/20">
                 <h2 className="text-3xl font-bold text-white mb-6 flex items-center">
                   <span className="mr-3">🎮</span>
                   Modes de jeu
                 </h2>
 
-                {/* Configuration mode local */}
-                <div className="space-y-4 mb-6">
-                  <div>
-                    <label className="block text-sm font-medium text-blue-100 mb-2">
-                      Nombre de joueurs
-                    </label>
-                    <select
-                      className="w-full p-3 bg-white/10 border-2 border-white/30 rounded-xl text-white 
-                      backdrop-blur-sm transition-all duration-200
-                      hover:bg-white/20 hover:border-white/40
-                      focus:outline-none focus:ring-2 focus:ring-yellow-400/50
-                      appearance-none cursor-pointer
-                      bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik03LjQxIDguNTlMMTIgMTMuMTdsNC41OS00LjU4TDE4IDEwbC02IDYtNi02IDEuNDEtMS40MXoiLz48L3N2Zz4=')] 
-                      bg-no-repeat bg-[length:1.5em] bg-[center_right_0.5em]"
-                      value={playerCount || ""}
-                      onChange={(e) => setPlayerCount(Number(e.target.value))}
-                    >
-                      <option value="" className="bg-gray-900">
-                        Sélectionnez
-                      </option>
-                      {[
-                        ...Array(
-                          GAME_CONFIG.MAX_PLAYERS - GAME_CONFIG.MIN_PLAYERS + 1
-                        ),
-                      ].map((_, i) => (
-                        <option
-                          key={i + GAME_CONFIG.MIN_PLAYERS}
-                          value={i + GAME_CONFIG.MIN_PLAYERS}
-                          className="bg-gray-900"
-                        >
-                          {i + GAME_CONFIG.MIN_PLAYERS} Joueurs
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-blue-100 mb-2">
-                      Jetons par joueur
-                    </label>
-                    <select
-                      className="w-full p-3 bg-white/10 border-2 border-white/30 rounded-xl text-white 
-                      backdrop-blur-sm transition-all duration-200
-                      hover:bg-white/20 hover:border-white/40
-                      focus:outline-none focus:ring-2 focus:ring-yellow-400/50
-                      appearance-none cursor-pointer
-                      bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik03LjQxIDguNTlMMTIgMTMuMTdsNC41OS00LjU4TDE4IDEwbC02IDYtNi02IDEuNDEtMS40MXoiLz48L3N2Zz4=')] 
-                      bg-no-repeat bg-[length:1.5em] bg-[center_right_0.5em]"
-                      value={tokenCount || ""}
-                      onChange={(e) => setTokenCount(Number(e.target.value))}
-                    >
-                      <option value="" className="bg-gray-900">
-                        Sélectionnez
-                      </option>
-                      {[
-                        ...Array(
-                          GAME_CONFIG.MAX_TOKENS - GAME_CONFIG.MIN_TOKENS + 1
-                        ),
-                      ].map((_, i) => (
-                        <option
-                          key={i + GAME_CONFIG.MIN_TOKENS}
-                          value={i + GAME_CONFIG.MIN_TOKENS}
-                          className="bg-gray-900"
-                        >
-                          {i + GAME_CONFIG.MIN_TOKENS} Jetons
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
+                {/* Mode Local - Simplifié */}
                 <button
-                  onClick={handleStartGame}
-                  className={`
-                    w-full py-4 px-6 rounded-xl text-lg font-bold mb-4
-                    transition-all duration-200 transform
-                    ${
-                      isConfigValid
-                        ? "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
-                        : "bg-gray-500/50 text-gray-300 cursor-not-allowed"
-                    }
-                    flex items-center justify-center space-x-2
-                  `}
-                  disabled={!isConfigValid}
+                  onClick={() => setGameMode("local")}
+                  className="w-full py-4 px-6 rounded-xl text-lg font-bold
+                    bg-gradient-to-r from-purple-600 to-blue-600 
+                    hover:from-purple-700 hover:to-blue-700
+                    text-white shadow-lg
+                    transform transition-all duration-200 
+                    hover:-translate-y-0.5 active:translate-y-0
+                    flex items-center justify-center space-x-2"
                 >
-                  <span>🎮</span>
                   <span>Partie locale</span>
                   <span>🎲</span>
                 </button>
 
-                {/* Mode Multi */}
-                <div className="relative">
+                {/* Mode Multi - Inchangé */}
+                <div className="relative mt-4">
                   <ComingSoonRibbon />
                   <button
                     className="relative w-full py-4 px-6 rounded-xl text-lg font-bold
@@ -241,101 +186,164 @@ const App = () => {
 
   // Configuration du mode local
   const renderLocalSetup = () => (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md space-y-6">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Mode Local</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20">
+        <h2 className="text-3xl font-bold text-white mb-8 text-center">
+          Configuration de la partie
+        </h2>
+
+        {/* Sélection du nombre de joueurs */}
+        <div className="mb-8">
+          <label className="block text-lg font-medium text-blue-100 mb-4">
+            Nombre de joueurs
+          </label>
+          <select
+            className="w-full p-3 bg-white/10 border-2 border-white/30 rounded-xl text-white 
+              backdrop-blur-sm transition-all duration-200
+              hover:bg-white/20 hover:border-white/40
+              focus:outline-none focus:ring-2 focus:ring-yellow-400/50
+              appearance-none cursor-pointer
+              bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik03LjQxIDguNTlMMTIgMTMuMTdsNC41OS00LjU4TDE4IDEwbC02IDYtNi02IDEuNDEtMS40MXoiLz48L3N2Zz4=')] 
+              bg-no-repeat bg-[length:1.5em] bg-[center_right_0.5em]"
+            value={playerCount || ""}
+            onChange={(e) => {
+              const count = Number(e.target.value);
+              setPlayerCount(count);
+              // Initialiser un tableau de noms vides pour chaque joueur
+              setPlayerNames(Array(count).fill(""));
+            }}
+          >
+            <option value="" className="bg-gray-900">
+              Sélectionnez
+            </option>
+            {[
+              ...Array(GAME_CONFIG.MAX_PLAYERS - GAME_CONFIG.MIN_PLAYERS + 1),
+            ].map((_, i) => (
+              <option
+                key={i + GAME_CONFIG.MIN_PLAYERS}
+                value={i + GAME_CONFIG.MIN_PLAYERS}
+                className="bg-gray-900"
+              >
+                {i + GAME_CONFIG.MIN_PLAYERS} Joueurs
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nombre de joueurs
-            </label>
-            <select
-              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              value={playerCount || ""}
-              onChange={(e) => setPlayerCount(Number(e.target.value))}
-            >
-              <option value="">Sélectionnez</option>
-              {[
-                ...Array(GAME_CONFIG.MAX_PLAYERS - GAME_CONFIG.MIN_PLAYERS + 1),
-              ].map((_, i) => (
-                <option
-                  key={i + GAME_CONFIG.MIN_PLAYERS}
-                  value={i + GAME_CONFIG.MIN_PLAYERS}
-                >
-                  {i + GAME_CONFIG.MIN_PLAYERS} Joueurs
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Jetons par joueur
-            </label>
-            <select
-              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              value={tokenCount || ""}
-              onChange={(e) => setTokenCount(Number(e.target.value))}
-            >
-              <option value="">Sélectionnez</option>
-              {[
-                ...Array(GAME_CONFIG.MAX_TOKENS - GAME_CONFIG.MIN_TOKENS + 1),
-              ].map((_, i) => (
-                <option
-                  key={i + GAME_CONFIG.MIN_TOKENS}
-                  value={i + GAME_CONFIG.MIN_TOKENS}
-                >
-                  {i + GAME_CONFIG.MIN_TOKENS} Jetons
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex space-x-4">
-            <button
-              className="flex-1 bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700"
-              onClick={() => setGameMode(null)}
-            >
-              Retour
-            </button>
-            <button
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
-              disabled={!playerCount || !tokenCount}
-              onClick={() => setGameStarted(true)}
-            >
-              Commencer
-            </button>
-          </div>
-        </div>
-
-        {gameHistory.length > 0 && (
-          <div className="mt-8 pt-6 border-t">
-            <h2 className="text-xl font-semibold mb-4">
-              Historique des parties
-            </h2>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {gameHistory.map((game, index) => (
-                <div key={index} className="p-3 bg-gray-50 rounded text-sm">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">
-                      {game.playerCount} joueurs - {game.tokenCount} jetons
+        {/* Saisie des noms des joueurs */}
+        {playerCount > 0 && (
+          <div className="space-y-4 mb-8">
+            <h3 className="text-lg font-medium text-blue-100">
+              Noms des joueurs
+            </h3>
+            <div className="grid gap-4 md:grid-cols-2">
+              {playerNames.map((name, index) => (
+                <div key={index} className="relative group">
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => {
+                      const newNames = [...playerNames];
+                      newNames[index] = e.target.value;
+                      setPlayerNames(newNames);
+                    }}
+                    placeholder={`Joueur ${index + 1}`}
+                    className="w-full p-3 bg-white/10 border-2 border-white/30 rounded-xl text-white 
+                      backdrop-blur-sm transition-all duration-200
+                      hover:bg-white/20 hover:border-white/40
+                      focus:outline-none focus:ring-2 focus:ring-yellow-400/50
+                      placeholder-white/50"
+                  />
+                  <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                    <span className="text-white/50 group-hover:text-white/70">
+                      👤
                     </span>
-                    <span className="text-gray-600">
-                      {new Date(game.date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="text-gray-600 mt-1">
-                    Gagnant{game.winners.length > 1 ? "s" : ""} :{" "}
-                    {game.winners.join(", ")}
                   </div>
                 </div>
               ))}
             </div>
           </div>
         )}
+
+        {/* Sélection du nombre de jetons */}
+        {playerCount > 0 && (
+          <div className="mb-8">
+            <label className="block text-lg font-medium text-blue-100 mb-4">
+              Jetons par joueur
+            </label>
+            <select
+              className="w-full p-3 bg-white/10 border-2 border-white/30 rounded-xl text-white 
+                backdrop-blur-sm transition-all duration-200
+                hover:bg-white/20 hover:border-white/40
+                focus:outline-none focus:ring-2 focus:ring-yellow-400/50
+                appearance-none cursor-pointer
+                bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik03LjQxIDguNTlMMTIgMTMuMTdsNC41OS00LjU4TDE4IDEwbC02IDYtNi02IDEuNDEtMS40MXoiLz48L3N2Zz4=')] 
+                bg-no-repeat bg-[length:1.5em] bg-[center_right_0.5em]"
+              value={tokenCount || ""}
+              onChange={(e) => setTokenCount(Number(e.target.value))}
+            >
+              <option value="" className="bg-gray-900">
+                Sélectionnez
+              </option>
+              {[
+                ...Array(GAME_CONFIG.MAX_TOKENS - GAME_CONFIG.MIN_TOKENS + 1),
+              ].map((_, i) => (
+                <option
+                  key={i + GAME_CONFIG.MIN_TOKENS}
+                  value={i + GAME_CONFIG.MIN_TOKENS}
+                  className="bg-gray-900"
+                >
+                  {i + GAME_CONFIG.MIN_TOKENS} Jetons
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Boutons de navigation */}
+        <div className="flex space-x-4">
+          <button
+            onClick={() => {
+              setGameMode(null);
+              setPlayerCount(null);
+              setTokenCount(null);
+              setPlayerNames([]);
+            }}
+            className="flex-1 py-3 px-6 rounded-xl text-lg font-bold
+              bg-white/10 text-white
+              hover:bg-white/20 transition-all duration-200"
+          >
+            Retour
+          </button>
+          <button
+            onClick={() => {
+              if (playerNames.every((name) => name.trim() !== "")) {
+                setGameStarted(true);
+              }
+            }}
+            disabled={
+              !isConfigValid || !playerNames.every((name) => name.trim() !== "")
+            }
+            className="flex-1 py-3 px-6 rounded-xl text-lg font-bold
+              bg-gradient-to-r from-purple-600 to-blue-600 
+              hover:from-purple-700 hover:to-blue-700
+              text-white shadow-lg
+              transform transition-all duration-200 
+              hover:-translate-y-0.5 active:translate-y-0
+              disabled:opacity-50 disabled:cursor-not-allowed
+              disabled:hover:transform-none"
+          >
+            Commencer la partie
+          </button>
+        </div>
+
+        {/* Message d'erreur si des noms sont manquants */}
+        {playerCount > 0 &&
+          !playerNames.every((name) => name.trim() !== "") && (
+            <p className="mt-4 text-red-400 text-center">
+              Veuillez saisir un nom pour chaque joueur
+            </p>
+          )}
       </div>
     </div>
   );
@@ -443,6 +451,7 @@ const App = () => {
         key={gameKey}
         playerCount={playerCount}
         tokenCount={tokenCount}
+        playerNames={playerNames}
         onGameEnd={handleGameEnd}
       />
     );

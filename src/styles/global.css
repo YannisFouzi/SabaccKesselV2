@@ -1,0 +1,24 @@
+/* Ajout des styles pour les inputs de noms */
+.player-name-input:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.player-name-input.error {
+  border-color: rgb(239, 68, 68);
+}
+
+/* Animation pour les messages d'erreur */
+.error-message {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -134,3 +134,11 @@ export const GAME_STATES = {
   END_ROUND: "END_ROUND",
   GAME_OVER: "GAME_OVER",
 };
+
+export const GAME_CONFIG = {
+  MIN_PLAYERS: 2,
+  MAX_PLAYERS: 4,
+  MIN_TOKENS: 3,
+  MAX_TOKENS: 10,
+  MAX_NAME_LENGTH: 20,
+};

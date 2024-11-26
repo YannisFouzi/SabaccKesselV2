@@ -10,14 +10,14 @@ import calculateHandValue from "./calculateHandValue";
 import initializeGameFn from "./initializeGame";
 import { createGameActions } from "./useGameActions";
 
-const useGameState = (initialPlayerCount, initialTokenCount) => {
+const useGameState = (initialPlayerCount, initialTokenCount, playerNames) => {
   const [gameState, setGameState] = useState(GAME_STATES.JOKER_SELECTION);
   const [players, setPlayers] = useState(
     Array(initialPlayerCount)
       .fill(null)
       .map((_, index) => ({
         id: index + 1,
-        name: `Joueur ${index + 1}`,
+        name: playerNames[index] || `Joueur ${index + 1}`,
         tokens: initialTokenCount,
         hand: [],
       }))
@@ -112,8 +112,17 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
   });
 
   const initializeGame = useCallback(() => {
+    const newPlayers = Array(initialPlayerCount)
+      .fill(null)
+      .map((_, index) => ({
+        id: index + 1,
+        name: playerNames[index] || `Joueur ${index + 1}`,
+        tokens: initialTokenCount,
+        hand: [],
+      }));
+
     const result = initializeGameFn({
-      players,
+      players: newPlayers,
       initialPlayerCount,
       initialTokenCount,
       playerOrder,
@@ -136,9 +145,9 @@ const useGameState = (initialPlayerCount, initialTokenCount) => {
     setActionHistory([]);
     return result;
   }, [
-    players,
     initialPlayerCount,
     initialTokenCount,
+    playerNames,
     playerOrder,
     round,
     roundStartPlayer,
