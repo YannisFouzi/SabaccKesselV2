@@ -31,6 +31,9 @@ const TokenSelector = ({ value, onChange }) => {
 
   const isValid = value && value >= MIN_TOKENS && value <= MAX_TOKENS;
 
+  // On utilise directement la valeur saisie pour le nombre de jetons
+  const tokensToShow = value || 0;
+
   return (
     <div className="flex flex-col items-center space-y-4">
       <div className="text-center">
@@ -43,16 +46,15 @@ const TokenSelector = ({ value, onChange }) => {
 
       <div className="flex flex-col items-center gap-4">
         <div className="relative flex-shrink-0">
-          <div className="relative w-16 h-16">
-            {[...Array(3)].map((_, index) => (
+          <div className="relative w-[400px] h-20 flex items-center justify-center">
+            {[...Array(tokensToShow)].map((_, index) => (
               <img
                 key={index}
                 src={isValid ? jeton : jetonKo}
                 alt=""
                 className="absolute w-14 h-14 object-contain transition-all duration-200"
                 style={{
-                  top: `${index * -4}px`,
-                  left: `${index * 2}px`,
+                  left: `${(index - tokensToShow / 2) * 30 + 200}px`,
                   zIndex: index,
                 }}
               />
@@ -68,7 +70,7 @@ const TokenSelector = ({ value, onChange }) => {
               max={MAX_TOKENS}
               value={inputValue}
               onChange={handleInputChange}
-              placeholder={"Jetons par joueur"}
+              placeholder={"Jetons (min.4)"}
               className="w-full bg-white/10 border-2 border-white/20 rounded-xl 
                 px-4 py-2 text-white placeholder-white/50 text-center
                 focus:outline-none focus:border-white/40

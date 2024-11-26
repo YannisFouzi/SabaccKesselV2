@@ -34,12 +34,11 @@ const PlayerNameInput = ({
                 className="w-full h-full object-contain rounded-lg p-1"
               />
             ) : (
-              <span className="text-white/50 text-3xl">👤</span>
+              <span className="text-xs text-white/70 text-center w-full">
+                Choisir un avatar
+              </span>
             )}
           </button>
-          {!avatar && (
-            <span className="text-xs text-white/70">Choisir avatar</span>
-          )}
         </div>
 
         <input
