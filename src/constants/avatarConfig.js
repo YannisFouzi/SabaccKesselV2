@@ -52,17 +52,17 @@ export const AVATAR_LIST = [
   },
   {
     id: "darth-maul",
-    name: "Darth Maul",
+    name: "Dark Maul",
     image: darthMaul,
   },
   {
     id: "darth-vader",
-    name: "Darth Vader",
+    name: "Dark Vador",
     image: darthVader,
   },
   {
     id: "emperor-palpatine",
-    name: "Emperor Palpatine",
+    name: "Empereur Palpatine",
     image: emperorPalpatine,
   },
   {
@@ -82,7 +82,7 @@ export const AVATAR_LIST = [
   },
   {
     id: "jabba-the-hutt",
-    name: "Jabba the Hutt",
+    name: "Jabba le Hutt",
     image: jabbaTheHutt,
   },
   {
@@ -142,7 +142,7 @@ export const AVATAR_LIST = [
   },
   {
     id: "tusken-raider",
-    name: "Tusken Raider",
+    name: "Tusken",
     image: tuskenRaider,
   },
   {
