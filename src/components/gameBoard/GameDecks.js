@@ -77,11 +77,9 @@ const GameDecks = ({
       <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/30 backdrop-blur-sm px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-white/10 shadow-lg">
         <div className="flex items-center space-x-4 sm:space-x-8 text-white/90 text-sm sm:text-base">
           <div className="flex items-center">
-            <span className="text-yellow-400 mr-2">🎯</span>
             <span className="font-bold">Manche {round}</span>
           </div>
           <div className="flex items-center">
-            <span className="text-yellow-400 mr-2">🎲</span>
             <span className="font-bold">Tour {turn}/3</span>
           </div>
           {consecutivePasses > 0 && (
