@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GAME_STATES } from "../constants/gameConstants";
 import useGameState from "../hooks/useGameState";
 import GameOverScreen from "./gameBoard/GameOverScreen";
 import InitialCardDraw from "./gameBoard/InitialCardDraw";
+import RoundTurnAnnouncement from "./gameBoard/RoundTurnAnnouncement";
 import GameBoardMain from "./GameBoardMain";
 import JokerSelection from "./JokerSelection";
 
@@ -63,6 +64,25 @@ const GameBoard = ({
     setPlayerOrder,
   } = useGameState(playerCount, tokenCount, playerNames, playerAvatars);
 
+  // Ajout d'un état pour gérer l'affichage de l'annonce
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
+  const [announcementKey, setAnnouncementKey] = useState(0);
+
+  // Effet pour déclencher l'animation à chaque changement de tour
+  useEffect(() => {
+    if (gameState === GAME_STATES.PLAYER_TURN) {
+      setShowAnnouncement(true);
+      setAnnouncementKey((prev) => prev + 1);
+
+      // Masquer l'annonce après l'animation
+      const timer = setTimeout(() => {
+        setShowAnnouncement(false);
+      }, 2500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [round, turn, gameState]);
+
   // Ajout d'un debug pour vérifier les données
   useEffect(() => {
     console.log("Players with avatars:", players);
@@ -113,45 +133,56 @@ const GameBoard = ({
   }
 
   return (
-    <GameBoardMain
-      gameState={gameState}
-      players={players}
-      currentPlayerIndex={currentPlayerIndex}
-      round={round}
-      turn={turn}
-      consecutivePasses={consecutivePasses}
-      diceResults={diceResults}
-      pendingDrawnCard={pendingDrawnCard}
-      sandDecks={sandDecks}
-      bloodDecks={bloodDecks}
-      pendingImpostors={pendingImpostors}
-      handleImpostorValue={handleImpostorValue}
-      currentImpostorIndex={currentImpostorIndex}
-      drawCard={drawCard}
-      handleDiscard={handleDiscard}
-      passTurn={passTurn}
-      rollDice={rollDice}
-      selectImpostorValue={selectImpostorValue}
-      compareHands={compareHands}
-      calculateHandValue={calculateHandValue}
-      getHandValue={getHandValue}
-      HAND_TYPES={HAND_TYPES}
-      startingTokens={startingTokens}
-      setGameState={setGameState}
-      GAME_STATES={GAME_STATES}
-      isTransitioning={isTransitioning}
-      confirmTransition={confirmTransition}
-      getHistorySinceLastTurn={getHistorySinceLastTurn}
-      playerOrder={playerOrder}
-      roundStartPlayer={roundStartPlayer}
-      endRound={endRound}
-      setDiceResults={setDiceResults}
-      lastPlayerBeforeReveal={lastPlayerBeforeReveal}
-      selectedJokers={selectedJokers}
-      usedJokersThisRound={usedJokersThisRound}
-      useJoker={useJoker}
-      jokerEUsed={jokerEUsed}
-    />
+    <div className="relative">
+      {/* Afficher l'annonce si showAnnouncement est true */}
+      {showAnnouncement && (
+        <RoundTurnAnnouncement
+          key={announcementKey}
+          round={round}
+          turn={turn}
+        />
+      )}
+
+      <GameBoardMain
+        gameState={gameState}
+        players={players}
+        currentPlayerIndex={currentPlayerIndex}
+        round={round}
+        turn={turn}
+        consecutivePasses={consecutivePasses}
+        diceResults={diceResults}
+        pendingDrawnCard={pendingDrawnCard}
+        sandDecks={sandDecks}
+        bloodDecks={bloodDecks}
+        pendingImpostors={pendingImpostors}
+        handleImpostorValue={handleImpostorValue}
+        currentImpostorIndex={currentImpostorIndex}
+        drawCard={drawCard}
+        handleDiscard={handleDiscard}
+        passTurn={passTurn}
+        rollDice={rollDice}
+        selectImpostorValue={selectImpostorValue}
+        compareHands={compareHands}
+        calculateHandValue={calculateHandValue}
+        getHandValue={getHandValue}
+        HAND_TYPES={HAND_TYPES}
+        startingTokens={startingTokens}
+        setGameState={setGameState}
+        GAME_STATES={GAME_STATES}
+        isTransitioning={isTransitioning}
+        confirmTransition={confirmTransition}
+        getHistorySinceLastTurn={getHistorySinceLastTurn}
+        playerOrder={playerOrder}
+        roundStartPlayer={roundStartPlayer}
+        endRound={endRound}
+        setDiceResults={setDiceResults}
+        lastPlayerBeforeReveal={lastPlayerBeforeReveal}
+        selectedJokers={selectedJokers}
+        usedJokersThisRound={usedJokersThisRound}
+        useJoker={useJoker}
+        jokerEUsed={jokerEUsed}
+      />
+    </div>
   );
 };
 
