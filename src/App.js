@@ -229,14 +229,14 @@ const App = () => {
   const renderLocalSetup = () => (
     <div className="min-h-screen h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 overflow-y-auto">
       <div className="flex items-center justify-center p-4 min-h-full">
-        <div className="w-full max-w-2xl bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20 my-8">
-          <h2 className="text-3xl font-bold text-white mb-8 text-center">
+        <div className="w-full max-w-2xl bg-white/10 backdrop-blur-md p-4 sm:p-8 rounded-2xl shadow-xl border border-white/20 my-4 sm:my-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6 sm:mb-8 text-center">
             Configuration de la partie
           </h2>
 
           {/* Section des joueurs */}
-          <div className="space-y-6 mb-8">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-6 mb-6 sm:mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Liste des joueurs */}
               {Array(playerCount || GAME_CONFIG.MIN_PLAYERS)
                 .fill(null)
@@ -285,15 +285,15 @@ const App = () => {
           </div>
 
           {/* Sélection du nombre de jetons */}
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <TokenSelector
               value={tokenCount}
               onChange={(value) => setTokenCount(value)}
             />
           </div>
 
-          {/* Boutons de navigation */}
-          <div className="flex space-x-4">
+          {/* Boutons de navigation - Adapter pour mobile */}
+          <div className="flex flex-col sm:flex-row gap-4 sm:space-x-4">
             <button
               onClick={() => {
                 setGameMode(null);
@@ -302,7 +302,7 @@ const App = () => {
                 setPlayerNames(Array(GAME_CONFIG.MIN_PLAYERS).fill(""));
                 setPlayerAvatars(Array(GAME_CONFIG.MIN_PLAYERS).fill(null));
               }}
-              className="flex-1 py-3 px-6 rounded-xl text-lg font-bold
+              className="w-full sm:flex-1 py-3 px-6 rounded-xl text-lg font-bold
                 bg-white/10 text-white
                 hover:bg-white/20 transition-all duration-200"
             >
@@ -316,7 +316,7 @@ const App = () => {
                 }
               }}
               disabled={!isConfigValid}
-              className="flex-1 py-3 px-6 rounded-xl text-lg font-bold
+              className="w-full sm:flex-1 py-3 px-6 rounded-xl text-lg font-bold
                 bg-gradient-to-r from-purple-600 to-blue-600 
                 hover:from-purple-700 hover:to-blue-700
                 text-white shadow-lg
@@ -330,12 +330,14 @@ const App = () => {
           </div>
 
           {/* Messages de validation */}
-          <ValidationMessages
-            playerNames={playerNames}
-            playerCount={playerCount || GAME_CONFIG.MIN_PLAYERS}
-            playerAvatars={playerAvatars}
-            showErrors={hasAttemptedStart}
-          />
+          <div className="mt-4">
+            <ValidationMessages
+              playerNames={playerNames}
+              playerCount={playerCount || GAME_CONFIG.MIN_PLAYERS}
+              playerAvatars={playerAvatars}
+              showErrors={hasAttemptedStart}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -75,12 +75,15 @@ const InitialCardDraw = ({
       (player) => drawnCards[player.id]?.type === CARD_TYPES.SYLOP
     );
 
-    setWinner(winningPlayer);
+    // Vérification de sécurité - si aucun gagnant n'est trouvé, prendre le premier joueur
+    const winner = winningPlayer || players[0];
+    setWinner(winner);
 
     // Déterminer l'ordre de jeu à partir du gagnant
-    const winnerIndex = players.findIndex((p) => p.id === winningPlayer.id);
+    const winnerIndex = players.findIndex((p) => p.id === winner.id);
     const order = [];
 
+    // Créer l'ordre de jeu en commençant par le gagnant
     for (let i = 0; i < players.length; i++) {
       const index = (winnerIndex + i) % players.length;
       order.push(players[index].id);
@@ -89,7 +92,7 @@ const InitialCardDraw = ({
     setGameOrder(order);
     setPlayerOrder(order);
 
-    // Au lieu de passer directement à SETUP, on affiche le bouton
+    // Afficher le bouton après un délai
     setTimeout(() => {
       setShowStartButton(true);
     }, 2000);
