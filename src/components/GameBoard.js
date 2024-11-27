@@ -63,7 +63,13 @@ const GameBoard = ({
     useJoker,
     jokerEUsed,
     setPlayerOrder,
-  } = useGameState(playerCount, tokenCount, playerNames, playerAvatars);
+  } = useGameState(
+    playerCount,
+    tokenCount,
+    playerNames,
+    playerAvatars,
+    withoutJokers
+  );
 
   // Ajout d'un état pour gérer l'affichage de l'annonce
   const [showAnnouncement, setShowAnnouncement] = useState(false);

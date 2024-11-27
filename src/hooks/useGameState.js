@@ -14,7 +14,8 @@ const useGameState = (
   initialPlayerCount,
   initialTokenCount,
   playerNames,
-  playerAvatars
+  playerAvatars,
+  withoutJokers
 ) => {
   useEffect(() => {
     console.log("Initial avatars:", playerAvatars);
@@ -23,14 +24,16 @@ const useGameState = (
   const safePlayerNames = playerNames || Array(initialPlayerCount).fill("");
   const safePlayerAvatars = playerAvatars || Array(initialPlayerCount).fill(1);
 
-  const [gameState, setGameState] = useState(GAME_STATES.JOKER_SELECTION);
-  const [players, setPlayers] = useState(
+  const [gameState, setGameState] = useState(
+    withoutJokers ? GAME_STATES.INITIAL_DICE_ROLL : GAME_STATES.JOKER_SELECTION
+  );
+  const [players, setPlayers] = useState(() =>
     Array(initialPlayerCount)
       .fill(null)
       .map((_, index) => ({
         id: index + 1,
-        name: safePlayerNames[index] || `Joueur ${index + 1}`,
-        avatar: safePlayerAvatars[index],
+        name: playerNames?.[index] || `Joueur ${index + 1}`,
+        avatar: playerAvatars?.[index],
         tokens: initialTokenCount,
         hand: [],
       }))
@@ -124,19 +127,35 @@ const useGameState = (
     setters,
   });
 
-  const initializeGame = useCallback(() => {
-    const newPlayers = Array(initialPlayerCount)
-      .fill(null)
-      .map((_, index) => ({
-        id: index + 1,
-        name: safePlayerNames[index] || `Joueur ${index + 1}`,
-        avatar: safePlayerAvatars[index],
-        tokens: initialTokenCount,
-        hand: [],
-      }));
+  const updateTokensForNewRound = useCallback(() => {
+    const newStartingTokens = {};
+    players.forEach((player) => {
+      newStartingTokens[player.id] = player.tokens;
+    });
+    setStartingTokens(newStartingTokens);
+  }, [players]);
 
+  const initializeGame = useCallback(() => {
+    // Réinitialiser tous les états nécessaires
+    setDiceResults(null);
+    setPendingDrawnCard(null);
+    setPendingImpostors([]);
+    setConsecutivePasses(0);
+    setCurrentImpostorIndex(0);
+    setActionHistory([]);
+    setLastPlayerBeforeReveal(null);
+    setIsTransitioning(false);
+    setJokerEUsed(false);
+
+    // Créer une copie des joueurs avec leurs mains vidées
+    const updatedPlayers = players.map((player) => ({
+      ...player,
+      hand: [], // Vider la main de chaque joueur
+    }));
+
+    // Initialiser les decks et distribuer les cartes
     const result = initializeGameFn({
-      players: newPlayers,
+      players: updatedPlayers, // Utiliser les joueurs mis à jour
       initialPlayerCount,
       initialTokenCount,
       playerOrder,
@@ -156,24 +175,64 @@ const useGameState = (
       drawCardFromDeck: gameActions.drawCardFromDeck,
       roundStartPlayer,
     });
-    setActionHistory([]);
+
+    // Si ce n'est pas la première manche, mettre à jour les jetons
+    if (round > 1) {
+      updateTokensForNewRound();
+    }
+
     return result;
   }, [
+    players,
     initialPlayerCount,
     initialTokenCount,
-    safePlayerNames,
-    safePlayerAvatars,
     playerOrder,
     round,
     roundStartPlayer,
     gameActions.drawCardFromDeck,
+    updateTokensForNewRound,
   ]);
 
   useEffect(() => {
     if (gameState === GAME_STATES.SETUP) {
+      // Réinitialiser les decks
+      setSandDecks({
+        visible: [],
+        hidden: [],
+      });
+      setBloodDecks({
+        visible: [],
+        hidden: [],
+      });
+
       initializeGame();
     }
   }, [gameState, initializeGame]);
+
+  useEffect(() => {
+    if (gameState === GAME_STATES.INITIAL_DICE_ROLL && !playerOrder.length) {
+      // Si on est au lancer de dés initial et qu'il n'y a pas d'ordre des joueurs
+      setInitialDiceState(INITIAL_DICE_STATES.WAITING);
+    } else if (gameState === GAME_STATES.JOKER_SELECTION && round === 1) {
+      // Si on est à la sélection des jokers pour la première manche
+      setCurrentJokerSelectionPlayer(0);
+      setSelectedJokers({});
+    } else if (
+      gameState === GAME_STATES.JOKER_SELECTION &&
+      playerOrder.length > 0
+    ) {
+      // Une fois que les jokers sont sélectionnés, passer à SETUP
+      setGameState(GAME_STATES.SETUP);
+    }
+  }, [gameState, playerOrder, round]);
+
+  useEffect(() => {
+    if (withoutJokers && gameState === GAME_STATES.JOKER_SELECTION) {
+      // Si withoutJokers est activé et qu'on est sur la sélection des jokers,
+      // passer directement au lancer de dés
+      setGameState(GAME_STATES.INITIAL_DICE_ROLL);
+    }
+  }, [withoutJokers, gameState]);
 
   const addToHistory = useCallback(
     (action) => {
