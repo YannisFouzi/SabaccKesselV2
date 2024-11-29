@@ -2,7 +2,9 @@ import React from "react";
 import PlayerNameInput from "../../components/PlayerNameInput";
 import TokenSelector from "../../components/TokenSelector";
 import ValidationMessages from "../../components/ValidationMessages";
+import { AVATAR_LIST } from "../../constants/avatarConfig";
 import { GAME_CONFIG } from "../../constants/gameConstants";
+import { generateRandomName } from "../../utils/nameGenerator";
 
 const LocalSetup = ({
   playerCount,
@@ -34,6 +36,48 @@ const LocalSetup = ({
           </h2>
 
           <div className="space-y-6 mb-6 sm:mb-8">
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={() => {
+                  const newNames = [...playerNames];
+                  const newAvatars = [...playerAvatars];
+                  const usedAvatars = new Set();
+
+                  for (let i = 0; i < playerCount; i++) {
+                    // Générer un nom aléatoire s'il n'est pas déjà défini
+                    if (!newNames[i]) {
+                      newNames[i] = generateRandomName();
+                    }
+
+                    // Choisir un avatar aléatoire non utilisé
+                    let availableAvatars = AVATAR_LIST.filter(
+                      (avatar) => !usedAvatars.has(avatar.id)
+                    );
+                    if (availableAvatars.length === 0) {
+                      availableAvatars = AVATAR_LIST;
+                    }
+                    const randomAvatar =
+                      availableAvatars[
+                        Math.floor(Math.random() * availableAvatars.length)
+                      ];
+                    newAvatars[i] = randomAvatar.id;
+                    usedAvatars.add(randomAvatar.id);
+                  }
+
+                  setPlayerNames(newNames);
+                  setPlayerAvatars(newAvatars);
+                }}
+                className="px-4 py-2 rounded-lg text-sm font-medium
+                  bg-gradient-to-r from-amber-500 to-orange-500 
+                  hover:from-amber-600 hover:to-orange-600
+                  text-white shadow-md
+                  transform transition-all duration-200 
+                  hover:-translate-y-0.5 active:translate-y-0"
+              >
+                🎲 Aléatoire
+              </button>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {Array(playerCount || GAME_CONFIG.MIN_PLAYERS)
                 .fill(null)
