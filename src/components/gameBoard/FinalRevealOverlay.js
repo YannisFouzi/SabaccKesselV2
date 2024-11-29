@@ -114,8 +114,8 @@ const FinalRevealOverlay = ({
 
             return (
               <div key={player.id}>
-                <div className="flex justify-between items-center mb-2">
-                  <div className="font-medium flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-36 font-medium flex items-center gap-2">
                     <img
                       src={
                         AVATAR_LIST.find(
@@ -125,17 +125,17 @@ const FinalRevealOverlay = ({
                       alt={`Avatar de ${player.name}`}
                       className="w-8 h-8 rounded-full"
                     />
-                    {player.name}
-                    {isWinner && currentRevealIndex >= players.length && (
-                      <span className="text-green-600 text-sm font-bold">
-                        Gagnant
-                      </span>
-                    )}
+                    <div className="flex flex-col truncate">
+                      <span className="truncate">{player.name}</span>
+                      {isWinner && currentRevealIndex >= players.length && (
+                        <span className="text-green-600 text-sm font-bold truncate">
+                          Gagnant
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div>Jetons: {player.tokens}</div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex gap-2">
+
+                  <div className="flex gap-1">
                     {player.hand.map((card) => (
                       <div
                         key={card.id}
@@ -163,18 +163,24 @@ const FinalRevealOverlay = ({
                       </div>
                     ))}
                   </div>
-                  <div
-                    className={`text-sm ${
-                      isWinner && currentRevealIndex >= players.length
-                        ? "text-green-600 font-bold"
-                        : ""
-                    }`}
-                  >
-                    {calculateHandValue(player.hand) === 0
-                      ? "Sabacc!"
-                      : calculateHandValue(player.hand) === null
-                      ? ""
-                      : `Différence: ${calculateHandValue(player.hand)}`}
+
+                  <div className="flex items-center gap-2 ml-2">
+                    <div
+                      className={`text-sm ${
+                        isWinner && currentRevealIndex >= players.length
+                          ? "text-green-600 font-bold"
+                          : ""
+                      }`}
+                    >
+                      {calculateHandValue(player.hand) === 0
+                        ? "Sabacc!"
+                        : calculateHandValue(player.hand) === null
+                        ? ""
+                        : `Différence: ${calculateHandValue(player.hand)}`}
+                    </div>
+                    <div className="text-sm min-w-[80px]">
+                      Jetons: {player.tokens}
+                    </div>
                   </div>
                 </div>
               </div>
