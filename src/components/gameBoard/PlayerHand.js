@@ -20,7 +20,6 @@ const PlayerHand = ({
   isTransitioning,
   startingTokens,
   onPass,
-  currentPlayerTokens,
   players,
   consecutivePasses,
   selectedJokers = {},

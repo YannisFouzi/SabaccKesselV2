@@ -11,7 +11,6 @@ const GameDecks = ({
   round,
   turn,
   consecutivePasses,
-  players,
 }) => {
   const canDrawCard =
     isCurrentPlayerTurn && (currentPlayerTokens > 0 || hasUsedJokerA);
