@@ -170,6 +170,7 @@ const GameBoardMain = ({
           endRound={endRound}
           GAME_STATES={GAME_STATES}
           roundStartPlayer={roundStartPlayer}
+          playerOrder={playerOrder}
         />
       )}
     </div>

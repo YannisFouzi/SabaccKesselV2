@@ -1,7 +1,10 @@
 import React from "react";
 import { CARD_TYPES } from "../../constants/cardDefinitions";
 import { getCardImage } from "../../constants/cardImages";
-import { calculateRoundResults } from "../../hooks/endRound";
+import {
+  calculateRoundResults,
+  getNextRoundStarter,
+} from "../../hooks/endRound";
 import PlayerIdentity from "../PlayerIdentity";
 
 const EndRoundOverlay = ({
@@ -12,6 +15,7 @@ const EndRoundOverlay = ({
   roundStartPlayer,
   getHandValue,
   compareHands,
+  playerOrder,
 }) => {
   const roundResults = calculateRoundResults(
     players,
@@ -19,6 +23,14 @@ const EndRoundOverlay = ({
     getHandValue,
     compareHands
   );
+
+  const remainingPlayers = roundResults.filter((p) => p.tokens > 0);
+  const { nextStarter } = getNextRoundStarter(
+    playerOrder,
+    roundStartPlayer,
+    remainingPlayers
+  );
+  const nextStarterPlayer = players.find((p) => p?.id === nextStarter);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -134,11 +146,9 @@ const EndRoundOverlay = ({
           )}
         </div>
 
-        {players.length > 1 && (
+        {players.length > 1 && nextStarterPlayer && (
           <div className="mt-4 text-center text-blue-600">
-            {`${
-              players.find((p) => p?.id === roundStartPlayer)?.name
-            } commencera la prochaine manche`}
+            {`${nextStarterPlayer.name} commencera la prochaine manche`}
           </div>
         )}
 
