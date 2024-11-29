@@ -18,7 +18,7 @@ const ValidationMessages = ({
       errors.push(`Le nom du joueur ${index + 1} est requis`);
     } else if (name.length > GAME_CONFIG.MAX_NAME_LENGTH) {
       errors.push(`Le nom du joueur ${index + 1} est trop long`);
-    } else if (!/^[a-zA-Z0-9\s-_]+$/.test(name)) {
+    } else if (!/^[a-zA-ZÀ-ÿ0-9\s-_]+$/.test(name)) {
       errors.push(
         `Le nom du joueur ${index + 1} contient des caractères invalides`
       );

@@ -26,7 +26,7 @@ const App = () => {
     return (
       name.trim() !== "" &&
       name.length <= GAME_CONFIG.MAX_NAME_LENGTH &&
-      /^[a-zA-Z0-9\s-_]+$/.test(name)
+      /^[a-zA-ZÀ-ÿ0-9\s-_]+$/.test(name)
     );
   };
 
