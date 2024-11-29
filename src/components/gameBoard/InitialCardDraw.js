@@ -19,7 +19,6 @@ const InitialCardDraw = ({
 
   // Initialisation des cartes et du premier joueur
   useEffect(() => {
-    // Création du deck initial avec 1 Sylop et (playerCount-1) cartes normales
     const initialDeck = [
       {
         id: "sylop",
@@ -39,7 +38,6 @@ const InitialCardDraw = ({
 
     setAvailableCards(initialDeck);
 
-    // Sélection aléatoire du premier joueur
     const randomStartIndex = Math.floor(Math.random() * players.length);
     setCurrentPlayerIndex(randomStartIndex);
   }, [players]);
@@ -48,43 +46,42 @@ const InitialCardDraw = ({
     const selectedCard = availableCards[cardIndex];
     const currentPlayer = players[currentPlayerIndex];
 
-    // Ajout de la carte tirée aux cartes du joueur
-    setDrawnCards((prev) => ({
-      ...prev,
+    // Créer le nouvel état des cartes tirées
+    const newDrawnCards = {
+      ...drawnCards,
       [currentPlayer.id]: selectedCard,
-    }));
+    };
+    setDrawnCards(newDrawnCards);
 
-    // Retrait de la carte des cartes disponibles
-    setAvailableCards((prev) => prev.filter((_, index) => index !== cardIndex));
+    // Mettre à jour les cartes disponibles
+    const remaining = availableCards.filter((_, index) => index !== cardIndex);
+    setAvailableCards(remaining);
 
-    // Passage au joueur suivant
     const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
 
-    // Si tous les joueurs ont tiré
-    if (Object.keys(drawnCards).length + 1 === players.length) {
-      determineWinnerAndOrder();
+    // Vérifier si c'était le dernier joueur
+    if (Object.keys(newDrawnCards).length === players.length) {
+      determineWinnerAndOrder(newDrawnCards); // Passer les cartes mises à jour
     } else {
       setCurrentPlayerIndex(nextPlayerIndex);
     }
   };
 
-  const determineWinnerAndOrder = () => {
+  const determineWinnerAndOrder = (finalDrawnCards) => {
     setRevealCards(true);
 
-    // Trouver le joueur qui a le Sylop
+    // Trouver le joueur avec le Sylop
     const winningPlayer = players.find(
-      (player) => drawnCards[player.id]?.type === CARD_TYPES.SYLOP
+      (player) => finalDrawnCards[player.id]?.type === CARD_TYPES.SYLOP
     );
 
     // Vérification de sécurité - si aucun gagnant n'est trouvé, prendre le premier joueur
     const winner = winningPlayer || players[0];
     setWinner(winner);
 
-    // Déterminer l'ordre de jeu à partir du gagnant
     const winnerIndex = players.findIndex((p) => p.id === winner.id);
     const order = [];
 
-    // Créer l'ordre de jeu en commençant par le gagnant
     for (let i = 0; i < players.length; i++) {
       const index = (winnerIndex + i) % players.length;
       order.push(players[index].id);
@@ -93,7 +90,6 @@ const InitialCardDraw = ({
     setGameOrder(order);
     setPlayerOrder(order);
 
-    // Afficher le bouton après un délai
     setTimeout(() => {
       setShowStartButton(true);
     }, 2000);
