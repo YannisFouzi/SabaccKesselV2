@@ -1,55 +1,11 @@
 import React from "react";
-import jetonImage from "../assets/img/jeton.png";
-import jetonKoImage from "../assets/img/jeton_ko.png";
 import EndRoundOverlay from "./gameBoard/EndRoundOverlay";
 import FinalRevealOverlay from "./gameBoard/FinalRevealOverlay";
 import GameDecks from "./gameBoard/GameDecks";
 import PlayerHand from "./gameBoard/PlayerHand";
-import PlayerJokers from "./gameBoard/PlayerJokers";
 import PlayerTransitionScreen from "./gameBoard/PlayerTransitionScreen";
+import RemainingPlayers from "./gameBoard/RemainingPlayers";
 import DiscardChoice from "./gameTurn/DiscardChoice";
-
-const TokenDisplay = ({ count, type = "available" }) => {
-  return (
-    <div className="flex items-center gap-1">
-      <img
-        src={type === "available" ? jetonImage : jetonImage}
-        alt="Jeton"
-        className="w-4 h-4 sm:w-5 sm:h-5"
-      />
-      <span className="text-xs sm:text-sm">{count}</span>
-    </div>
-  );
-};
-
-const TokensRow = ({ availableTokens, betTokens }) => {
-  return (
-    <div className="flex items-center gap-2">
-      <div className="flex items-center gap-1">
-        {[...Array(availableTokens)].map((_, index) => (
-          <img
-            key={index}
-            src={jetonImage}
-            alt="Jeton disponible"
-            className="w-4 h-4 sm:w-5 sm:h-5"
-          />
-        ))}
-      </div>
-      {betTokens > 0 && (
-        <div className="flex items-center gap-1">
-          {[...Array(betTokens)].map((_, index) => (
-            <img
-              key={index}
-              src={jetonKoImage}
-              alt="Jeton misé"
-              className="w-4 h-4 sm:w-5 sm:h-5"
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
 
 const GameBoardMain = ({
   gameState,
@@ -101,32 +57,9 @@ const GameBoardMain = ({
   if (!currentPlayer) return null;
 
   return (
-    <div className="relative w-full min-h-screen bg-gray-100 flex flex-col justify-between overflow-hidden">
-      {/* Zone d'information du tour */}
-      {/* <div className="w-full px-4 py-2">
-        <div className="mx-auto max-w-md">
-          <GameTurn
-            gameState={gameState}
-            currentPlayer={currentPlayer}
-            players={players}
-            roundNumber={round}
-            turnNumber={turn}
-            consecutivePasses={consecutivePasses}
-            isCurrentPlayerTurn={gameState === GAME_STATES.PLAYER_TURN}
-            pendingDrawnCard={pendingDrawnCard}
-            onPass={passTurn}
-            onChooseDiscard={handleDiscard}
-            diceResults={diceResults}
-            onRollDice={rollDice}
-            currentPlayerTokens={currentPlayer.tokens}
-            playerOrder={playerOrder}
-            roundStartPlayer={roundStartPlayer}
-          />
-        </div>
-      </div>
-*/}
+    <div className="relative w-full min-h-screen bg-gray-100 flex flex-col overflow-hidden">
       {/* Zone du centre avec les pioches */}
-      <div className="flex-1 flex items-center justify-center px-4">
+      <div className="flex-shrink-0 flex items-center justify-center px-4 py-4">
         <GameDecks
           visibleSandCard={sandDecks.visible[sandDecks.visible.length - 1]}
           visibleBloodCard={bloodDecks.visible[bloodDecks.visible.length - 1]}
@@ -156,11 +89,12 @@ const GameBoardMain = ({
         </div>
       )}
 
-      {/* Zone du bas avec la main du joueur et les joueurs restants */}
-      <div className="w-full px-4 py-2">
-        <div className="flex flex-row items-start justify-center gap-4">
-          <div className="flex-shrink-0 max-w-[80%]">
-            <div className="flex flex-col gap-2">
+      {/* Zone du bas avec la main du joueur et les informations */}
+      <div className="flex-1 px-4 py-2 overflow-y-auto">
+        <div className="max-w-[800px] mx-auto">
+          <div className="flex flex-col md:flex-row items-start gap-6 mb-4">
+            {/* Main du joueur avec jokers intégrés */}
+            <div className="flex-1 w-full md:w-auto">
               <PlayerHand
                 player={currentPlayer}
                 isCurrentPlayer={true}
@@ -175,52 +109,23 @@ const GameBoardMain = ({
                 currentPlayerTokens={currentPlayer.tokens}
                 players={players}
                 consecutivePasses={consecutivePasses}
-              />
-              <PlayerJokers
-                player={currentPlayer}
                 selectedJokers={selectedJokers}
-                isCurrentPlayer={true}
                 onUseJoker={useJoker}
                 usedJokersThisRound={usedJokersThisRound}
               />
             </div>
-          </div>
 
-          <div className="flex-shrink-0 w-[20%] min-w-[100px] max-w-[150px] bg-white p-2 sm:p-3 rounded-lg shadow-lg">
-            <h3 className="font-bold mb-2 text-xs sm:text-sm">
-              Joueurs restants
-            </h3>
-            <ul className="space-y-2">
-              {players
-                .filter((player, index) => index !== currentPlayerIndex)
-                .map((player) => {
-                  const tokensBet = startingTokens[player.id] - player.tokens;
-                  return (
-                    <li key={player.id} className="flex flex-col gap-1">
-                      <span className="font-semibold text-xs sm:text-sm">
-                        {player.name}
-                      </span>
-                      <TokensRow
-                        availableTokens={player.tokens}
-                        betTokens={tokensBet}
-                      />
-                      {tokensBet > 0 && (
-                        <div className="flex items-center gap-1 text-amber-600">
-                          <TokenDisplay count={tokensBet} type="bet" />
-                          <span className="text-xs">misés</span>
-                        </div>
-                      )}
-                      <PlayerJokers
-                        player={player}
-                        selectedJokers={selectedJokers}
-                        isCurrentPlayer={false}
-                        onUseJoker={useJoker}
-                        usedJokersThisRound={usedJokersThisRound}
-                      />
-                    </li>
-                  );
-                })}
-            </ul>
+            {/* Joueurs restants */}
+            <div className="w-full md:w-[180px] flex-shrink-0 order-first md:order-last">
+              <RemainingPlayers
+                players={players}
+                currentPlayerIndex={currentPlayerIndex}
+                startingTokens={startingTokens}
+                selectedJokers={selectedJokers}
+                onUseJoker={useJoker}
+                usedJokersThisRound={usedJokersThisRound}
+              />
+            </div>
           </div>
         </div>
       </div>

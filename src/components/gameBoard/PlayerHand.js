@@ -1,13 +1,8 @@
 import React from "react";
 import { getCardBack, getCardImage } from "../../constants/cardImages";
-import { CARD_TYPES, JOKERS } from "../../constants/gameConstants";
+import { CARD_TYPES } from "../../constants/gameConstants";
 import PlayerIdentity from "../PlayerIdentity";
-
-// Importation dynamique des images des jokers
-const jokerImages = {};
-Object.keys(JOKERS).forEach((key) => {
-  jokerImages[key] = require(`../../assets/img/jokers/joker-${key}.png`);
-});
+import PlayerJokers from "./PlayerJokers";
 
 const PlayerHand = ({
   player,
@@ -22,22 +17,15 @@ const PlayerHand = ({
   onPass,
   players,
   consecutivePasses,
-  selectedJokers = {},
+  selectedJokers,
   onUseJoker,
-  hasUsedJokerThisRound,
+  usedJokersThisRound,
 }) => {
   if (!player) {
     return null;
   }
 
   const hand = player.hand || [];
-  const playerJokers = selectedJokers[player.id] || [];
-
-  const handleJokerClick = (jokerId, index) => {
-    if (!hasUsedJokerThisRound && isCurrentPlayer) {
-      onUseJoker(player.id, jokerId, index);
-    }
-  };
 
   // Composant pour une carte
   const Card = ({ card }) => {
@@ -123,10 +111,21 @@ const PlayerHand = ({
         </div>
       )}
 
-      {/* Nouvelle disposition en deux colonnes */}
-      <div className="flex justify-between items-center w-full">
-        {/* Colonne de gauche - Cartes du joueur */}
-        <div className="flex-1 flex items-center justify-center">
+      {/* Zone principale avec jokers et cartes */}
+      <div className="flex gap-6 items-start">
+        {/* Jokers à gauche */}
+        <div className="w-[180px] flex-shrink-0">
+          <PlayerJokers
+            player={player}
+            selectedJokers={selectedJokers}
+            isCurrentPlayer={isCurrentPlayer}
+            onUseJoker={onUseJoker}
+            usedJokersThisRound={usedJokersThisRound}
+          />
+        </div>
+
+        {/* Cartes au centre */}
+        <div className="flex-1 flex justify-center min-w-0">
           <div className="relative flex -space-x-4 transform rotate-2">
             {hand.map((card, index) => (
               <div
@@ -138,45 +137,6 @@ const PlayerHand = ({
                 `}
               >
                 <Card card={card} />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Colonne de droite - Jokers */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="relative flex -space-x-2 transform -rotate-2">
-            {playerJokers.map((jokerId, index) => (
-              <div
-                key={`${jokerId}-${index}`}
-                className={`
-                  relative transform 
-                  ${
-                    index === 0
-                      ? "-rotate-3"
-                      : index === 1
-                      ? "rotate-0"
-                      : "rotate-3"
-                  }
-                  hover:translate-y-[-1rem] transition-transform duration-200
-                `}
-              >
-                <button
-                  onClick={() => handleJokerClick(jokerId, index)}
-                  disabled={hasUsedJokerThisRound}
-                  className={`
-                    w-16 h-24 rounded-lg overflow-hidden
-                    ${hasUsedJokerThisRound ? "opacity-50" : "hover:opacity-75"}
-                    transition-all duration-200
-                    ${isCurrentPlayer ? "ring-2 ring-blue-500" : ""}
-                  `}
-                >
-                  <img
-                    src={jokerImages[jokerId]}
-                    alt={JOKERS[jokerId].title}
-                    className="w-full h-full object-contain"
-                  />
-                </button>
               </div>
             ))}
           </div>

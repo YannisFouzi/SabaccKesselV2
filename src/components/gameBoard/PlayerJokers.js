@@ -87,9 +87,9 @@ const PlayerJokers = ({
   };
 
   return (
-    <div className="mt-2 relative">
-      <div className="text-sm font-medium mb-2">Jetons d'action :</div>
-      <div className="flex flex-wrap gap-2">
+    <div className="bg-white p-2 sm:p-3 rounded-lg shadow-lg h-full">
+      <div className="text-sm font-bold mb-3">Jetons d'action</div>
+      <div className="grid grid-cols-2 gap-2">
         {playerJokers.map((jokerId, index) => {
           const joker = JOKERS[jokerId];
           const instanceId = `${jokerId}-${index}`;
@@ -100,10 +100,13 @@ const PlayerJokers = ({
               <button
                 onClick={() => handleJokerClick(jokerId, index)}
                 disabled={hasUsedJokerThisRound}
-                className={`w-10 h-10 rounded-lg overflow-hidden 
+                className={`
+                  w-full aspect-[3/4] rounded-lg overflow-hidden
                   ${hasUsedJokerThisRound ? "opacity-50" : "hover:opacity-75"} 
                   transition-all duration-200
-                  ${isSelected ? "ring-2 ring-blue-500" : ""}`}
+                  ${isSelected ? "ring-2 ring-blue-500" : ""}
+                  hover:scale-105
+                `}
               >
                 <img
                   src={jokerImages[jokerId]}
@@ -125,8 +128,8 @@ const PlayerJokers = ({
       </div>
 
       {hasUsedJokerThisRound && (
-        <div className="mt-2 text-sm text-amber-600">
-          Vous avez déjà utilisé un jeton d'action ce tour-ci
+        <div className="mt-3 text-sm text-amber-600 text-center">
+          Jeton d'action déjà utilisé ce tour
         </div>
       )}
     </div>
