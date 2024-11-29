@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { AVATAR_LIST } from "../../constants/avatarConfig";
 import { getCardBack, getCardImage } from "../../constants/cardImages";
 import { CARD_FAMILIES, CARD_TYPES } from "../../constants/gameConstants";
+import { useInitialCardDraw } from "../../hooks/useInitialCardDraw";
 
 const InitialCardDraw = ({
   players,
@@ -9,95 +10,17 @@ const InitialCardDraw = ({
   GAME_STATES,
   setPlayerOrder,
 }) => {
-  const [availableCards, setAvailableCards] = useState([]);
-  const [drawnCards, setDrawnCards] = useState({});
-  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(null);
-  const [revealCards, setRevealCards] = useState(false);
-  const [winner, setWinner] = useState(null);
-  const [gameOrder, setGameOrder] = useState([]);
-  const [showStartButton, setShowStartButton] = useState(false);
-
-  // Initialisation des cartes et du premier joueur
-  useEffect(() => {
-    const initialDeck = [
-      {
-        id: "sylop",
-        type: CARD_TYPES.SYLOP,
-        family: CARD_FAMILIES.SAND,
-        value: null,
-      },
-      ...Array(players.length - 1)
-        .fill()
-        .map((_, index) => ({
-          id: `normal-${index}`,
-          type: CARD_TYPES.NORMAL,
-          family: CARD_FAMILIES.SAND,
-          value: index + 1,
-        })),
-    ].sort(() => Math.random() - 0.5);
-
-    setAvailableCards(initialDeck);
-
-    const randomStartIndex = Math.floor(Math.random() * players.length);
-    setCurrentPlayerIndex(randomStartIndex);
-  }, [players]);
-
-  const handleCardSelect = (cardIndex) => {
-    const selectedCard = availableCards[cardIndex];
-    const currentPlayer = players[currentPlayerIndex];
-
-    // Créer le nouvel état des cartes tirées
-    const newDrawnCards = {
-      ...drawnCards,
-      [currentPlayer.id]: selectedCard,
-    };
-    setDrawnCards(newDrawnCards);
-
-    // Mettre à jour les cartes disponibles
-    const remaining = availableCards.filter((_, index) => index !== cardIndex);
-    setAvailableCards(remaining);
-
-    const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
-
-    // Vérifier si c'était le dernier joueur
-    if (Object.keys(newDrawnCards).length === players.length) {
-      determineWinnerAndOrder(newDrawnCards); // Passer les cartes mises à jour
-    } else {
-      setCurrentPlayerIndex(nextPlayerIndex);
-    }
-  };
-
-  const determineWinnerAndOrder = (finalDrawnCards) => {
-    setRevealCards(true);
-
-    // Trouver le joueur avec le Sylop
-    const winningPlayer = players.find(
-      (player) => finalDrawnCards[player.id]?.type === CARD_TYPES.SYLOP
-    );
-
-    // Vérification de sécurité - si aucun gagnant n'est trouvé, prendre le premier joueur
-    const winner = winningPlayer || players[0];
-    setWinner(winner);
-
-    const winnerIndex = players.findIndex((p) => p.id === winner.id);
-    const order = [];
-
-    for (let i = 0; i < players.length; i++) {
-      const index = (winnerIndex + i) % players.length;
-      order.push(players[index].id);
-    }
-
-    setGameOrder(order);
-    setPlayerOrder(order);
-
-    setTimeout(() => {
-      setShowStartButton(true);
-    }, 2000);
-  };
-
-  const handleStartGame = () => {
-    setGameState(GAME_STATES.SETUP);
-  };
+  const {
+    availableCards,
+    drawnCards,
+    currentPlayerIndex,
+    revealCards,
+    winner,
+    gameOrder,
+    showStartButton,
+    handleCardSelect,
+    handleStartGame,
+  } = useInitialCardDraw(players, setGameState, GAME_STATES, setPlayerOrder);
 
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center overflow-y-auto">
