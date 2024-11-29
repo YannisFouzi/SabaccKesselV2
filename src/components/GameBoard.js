@@ -85,11 +85,6 @@ const GameBoard = ({
     }
   }, [round, turn, gameState]);
 
-  // Ajout d'un debug pour vérifier les données
-  useEffect(() => {
-    console.log("Players with avatars:", players);
-  }, [players]);
-
   // Vérification que le jeu est correctement initialisé
   if (!players || players.length === 0) {
     return <div>Chargement du jeu...</div>;

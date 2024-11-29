@@ -133,6 +133,7 @@ export const GAME_STATES = {
   REVEAL: "REVEAL",
   END_ROUND: "END_ROUND",
   GAME_OVER: "GAME_OVER",
+  USE_JOKER: "USE_JOKER",
 };
 
 export const GAME_CONFIG = {
