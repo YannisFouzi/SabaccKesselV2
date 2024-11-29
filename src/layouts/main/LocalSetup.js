@@ -46,6 +46,7 @@ const LocalSetup = ({
                       onChange={handleNameChange}
                       onAvatarChange={handleAvatarChange}
                       placeholder={`Joueur ${index + 1}`}
+                      playerAvatars={playerAvatars}
                     />
                     {index >= GAME_CONFIG.MIN_PLAYERS && (
                       <button
