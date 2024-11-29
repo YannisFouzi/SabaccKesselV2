@@ -21,9 +21,6 @@ const useGameState = (
     console.log("Initial avatars:", playerAvatars);
   }, [playerAvatars]);
 
-  const safePlayerNames = playerNames || Array(initialPlayerCount).fill("");
-  const safePlayerAvatars = playerAvatars || Array(initialPlayerCount).fill(1);
-
   const [gameState, setGameState] = useState(
     withoutJokers ? GAME_STATES.INITIAL_DICE_ROLL : GAME_STATES.JOKER_SELECTION
   );
