@@ -79,12 +79,25 @@ const JokerSelection = ({
                           : "bg-blue-100"
                       }`}
                     >
-                      <div className="w-20 h-20 mx-auto mb-2">
-                        <img
-                          src={jokerImages[key]}
-                          alt={`Joker ${key}`}
-                          className="w-full h-full object-contain"
-                        />
+                      <div className="w-20 h-20 mx-auto mb-2 relative">
+                        {[...Array(joker.quantity)].map((_, index) => (
+                          <img
+                            key={index}
+                            src={jokerImages[key]}
+                            alt={`Joker ${key}`}
+                            className={`w-full h-full object-contain absolute top-0 left-0 origin-bottom transition-opacity duration-300`}
+                            style={{
+                              transform: `rotate(${
+                                -30 + (index * 60) / (joker.quantity - 1)
+                              }deg)`,
+                              zIndex: index,
+                              opacity:
+                                index >= joker.quantity - selectedCount
+                                  ? 0.3
+                                  : 1,
+                            }}
+                          />
+                        ))}
                       </div>
                       <div className="font-bold text-center text-sm mb-1">
                         {joker.title || `Joker ${key}`}
@@ -93,12 +106,7 @@ const JokerSelection = ({
                         {joker.description}
                       </div>
                       <div className="flex items-center justify-between bg-white rounded-lg p-2 shadow-md">
-                        <div className="flex items-center space-x-1">
-                          <span className="text-xs font-semibold bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
-                            Stock: {joker.quantity}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-3 w-full">
                           <button
                             onClick={() => {
                               const newSelection = [...currentSelection];
@@ -110,10 +118,10 @@ const JokerSelection = ({
                             }}
                             disabled={!canRemove}
                             className={`
-                              w-7 h-7 rounded-full 
+                              flex-1 h-10 rounded-lg
                               flex items-center justify-center 
                               transform transition-all duration-200
-                              text-sm font-bold
+                              text-base font-bold
                               ${
                                 canRemove
                                   ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
@@ -121,11 +129,8 @@ const JokerSelection = ({
                               }
                             `}
                           >
-                            -
+                            Retirer
                           </button>
-                          <span className="w-5 h-5 flex items-center justify-center text-sm font-bold bg-white rounded-full shadow-inner">
-                            {selectedCount}
-                          </span>
                           <button
                             onClick={() => {
                               if (canAdd) {
@@ -134,10 +139,10 @@ const JokerSelection = ({
                             }}
                             disabled={!canAdd}
                             className={`
-                              w-7 h-7 rounded-full 
+                              flex-1 h-10 rounded-lg
                               flex items-center justify-center 
                               transform transition-all duration-200
-                              text-sm font-bold
+                              text-base font-bold
                               ${
                                 canAdd
                                   ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
@@ -145,7 +150,7 @@ const JokerSelection = ({
                               }
                             `}
                           >
-                            +
+                            Ajouter
                           </button>
                         </div>
                       </div>
@@ -190,9 +195,7 @@ const JokerSelection = ({
             <div className="relative z-10 flex items-center justify-center">
               {currentSelection.length === 3 ? (
                 <>
-                  <span className="mr-2">🎮</span>
                   <span>Confirmer la sélection</span>
-                  <span className="ml-2">✨</span>
                 </>
               ) : (
                 <>
