@@ -41,31 +41,33 @@ const PlayerNameInput = ({
 
   return (
     <div className="relative">
-      <div className="flex gap-2">
-        <button
-          onClick={() => setShowAvatarSelect(!showAvatarSelect)}
-          className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 
-            hover:border-white/40 transition-all duration-200 flex items-center justify-center
-            bg-white/10"
-          title="Choisir un avatar"
-        >
-          {avatar ? (
-            <img
-              src={AVATAR_LIST.find((a) => a.id === avatar)?.image}
-              alt={AVATAR_LIST.find((a) => a.id === avatar)?.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-white/60">👤</span>
-          )}
-        </button>
+      <div className="flex gap-2 items-center">
+        <div className="flex-shrink-0">
+          <button
+            onClick={() => setShowAvatarSelect(!showAvatarSelect)}
+            className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 
+              hover:border-white/40 transition-all duration-200 flex items-center justify-center
+              bg-white/10"
+            title="Choisir un avatar"
+          >
+            {avatar ? (
+              <img
+                src={AVATAR_LIST.find((a) => a.id === avatar)?.image}
+                alt={AVATAR_LIST.find((a) => a.id === avatar)?.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-white/60">👤</span>
+            )}
+          </button>
+        </div>
 
         <input
           type="text"
           value={name}
           onChange={(e) => onChange(index, e.target.value)}
           placeholder={placeholder}
-          className="player-name-input flex-1 bg-white/10 border border-white/20 
+          className="player-name-input w-full bg-white/10 border border-white/20 
             rounded-xl px-4 py-2 text-white placeholder-white/40 outline-none
             focus:border-white/40 transition-all duration-200"
         />
