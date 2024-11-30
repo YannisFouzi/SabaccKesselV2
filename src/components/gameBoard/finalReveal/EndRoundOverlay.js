@@ -1,11 +1,11 @@
 import React from "react";
-import { CARD_TYPES } from "../../constants/cardDefinitions";
-import { getCardImage } from "../../constants/cardImages";
+import { CARD_TYPES } from "../../../constants/cardDefinitions";
+import { getCardImage } from "../../../constants/cardImages";
 import {
   calculateRoundResults,
   getNextRoundStarter,
-} from "../../hooks/endRound";
-import PlayerIdentity from "../PlayerIdentity";
+} from "../../../hooks/endRound";
+import PlayerIdentity from "../../PlayerIdentity";
 
 const EndRoundOverlay = ({
   round,

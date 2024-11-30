@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import { AVATAR_LIST } from "../../constants/avatarConfig";
-import { CARD_TYPES } from "../../constants/cardDefinitions";
-import { getCardImage } from "../../constants/cardImages";
+import { AVATAR_LIST } from "../../../constants/avatarConfig";
+import { CARD_TYPES } from "../../../constants/cardDefinitions";
+import { getCardImage } from "../../../constants/cardImages";
 import { useFinalReveal } from "./useFinalReveal";
 
 const FinalRevealOverlay = ({
