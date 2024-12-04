@@ -49,6 +49,11 @@ export const useInitialCardDraw = (
     };
     setDrawnCards(newDrawnCards);
 
+    // Si c'est un Sylop
+    if (selectedCard.type === CARD_TYPES.SYLOP) {
+      setWinner(currentPlayer);
+    }
+
     const remaining = availableCards.filter((_, index) => index !== cardIndex);
     setAvailableCards(remaining);
 
