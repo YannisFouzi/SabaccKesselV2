@@ -45,14 +45,26 @@ const GameBoardMain = ({
   hasUsedJokerA,
   jokerEUsed,
 }) => {
+  const currentPlayer = players?.[currentPlayerIndex];
+
   const getNextPlayer = () => {
-    if (!players || players.length === 0) return null;
-    const nextIndex = (currentPlayerIndex + 1) % players.length;
-    return players[nextIndex];
+    if (
+      !players ||
+      players.length === 0 ||
+      !playerOrder ||
+      playerOrder.length === 0 ||
+      !currentPlayer
+    )
+      return null;
+
+    const currentPlayerIdIndex = playerOrder.findIndex(
+      (id) => id === currentPlayer.id
+    );
+    const nextPlayerIdIndex = (currentPlayerIdIndex + 1) % playerOrder.length;
+    return players.find((p) => p.id === playerOrder[nextPlayerIdIndex]);
   };
 
   const nextPlayer = getNextPlayer();
-  const currentPlayer = players?.[currentPlayerIndex];
 
   if (!currentPlayer) return null;
 

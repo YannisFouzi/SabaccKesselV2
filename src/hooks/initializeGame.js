@@ -75,14 +75,16 @@ const initializeGame = ({
 
   if (round > 1) {
     // Utiliser le roundStartPlayer défini dans la manche précédente
-    const startingPlayerIndex = newPlayers.findIndex(
+    const startingPlayerIndex = players.findIndex(
       (p) => p.id === roundStartPlayer
     );
     setCurrentPlayerIndex(startingPlayerIndex);
   } else {
-    // Première manche : le joueur ayant obtenu le score le plus bas commence
-    setCurrentPlayerIndex(0);
-    setRoundStartPlayer(playerOrder[0]);
+    // Première manche : utiliser le premier joueur de playerOrder
+    const firstPlayerId = playerOrder[0];
+    const firstPlayerIndex = players.findIndex((p) => p.id === firstPlayerId);
+    setCurrentPlayerIndex(firstPlayerIndex);
+    setRoundStartPlayer(firstPlayerId);
   }
 
   // Réinitialisation des états

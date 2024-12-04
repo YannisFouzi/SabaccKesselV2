@@ -134,34 +134,82 @@ export const createGameActions = ({
       return;
     }
 
-    const nextIndex = (currentPlayerIndex + 1) % players.length;
+    console.log("--- nextPlayer ---");
+    console.log("Tour actuel:", turn);
+    console.log("Joueur actuel:", players[currentPlayerIndex].name);
 
-    if (nextIndex === 0 && turn >= 3) {
-      setters.setLastPlayerBeforeReveal(currentPlayerIndex);
-      checkForImpostors();
-      setters.setGameState(GAME_STATES.REVEAL);
-      return;
+    const currentPlayerIdIndex = playerOrder.findIndex(
+      (id) => players[currentPlayerIndex].id === id
+    );
+    const nextPlayerIdIndex = (currentPlayerIdIndex + 1) % playerOrder.length;
+
+    console.log("Index joueur actuel dans playerOrder:", currentPlayerIdIndex);
+    console.log("Index prochain joueur dans playerOrder:", nextPlayerIdIndex);
+    console.log(
+      "Index du roundStartPlayer:",
+      playerOrder.findIndex((id) => id === roundStartPlayer)
+    );
+
+    // Si on revient au joueur qui a commencé la manche
+    if (
+      nextPlayerIdIndex ===
+      playerOrder.findIndex((id) => id === roundStartPlayer)
+    ) {
+      console.log("On revient au joueur de départ !");
+      if (turn >= 3) {
+        console.log("Fin des 3 tours, passage en phase REVEAL");
+        setters.setLastPlayerBeforeReveal(players[currentPlayerIndex].id);
+        checkForImpostors();
+        setters.setGameState(GAME_STATES.REVEAL);
+        return;
+      }
     }
 
     setters.setIsTransitioning(true);
   };
 
   const confirmTransition = () => {
-    const nextIndex = (currentPlayerIndex + 1) % players.length;
+    console.log("--- confirmTransition ---");
+    console.log("Tour actuel:", turn);
 
-    if (nextIndex === 0) {
-      if (turn >= 3) {
+    const currentPlayerIdIndex = playerOrder.findIndex(
+      (id) => players[currentPlayerIndex].id === id
+    );
+    const nextPlayerIdIndex = (currentPlayerIdIndex + 1) % playerOrder.length;
+    const nextPlayerId = playerOrder[nextPlayerIdIndex];
+    const nextPlayerIndex = players.findIndex((p) => p.id === nextPlayerId);
+
+    console.log("Index joueur actuel dans playerOrder:", currentPlayerIdIndex);
+    console.log("Index prochain joueur dans playerOrder:", nextPlayerIdIndex);
+    console.log(
+      "Index du roundStartPlayer:",
+      playerOrder.findIndex((id) => id === roundStartPlayer)
+    );
+
+    // Si on revient au joueur qui a commencé la manche
+    if (
+      nextPlayerIdIndex ===
+      playerOrder.findIndex((id) => id === roundStartPlayer)
+    ) {
+      console.log("On revient au joueur de départ !");
+      const currentTurnNumber = turn;
+      console.log("Tour actuel avant incrémentation:", currentTurnNumber);
+
+      if (currentTurnNumber < 3) {
+        const nextTurnNumber = currentTurnNumber + 1;
+        console.log("Passage au tour suivant:", nextTurnNumber);
+        setters.setTurn(nextTurnNumber);
+      } else {
+        console.log("Fin des 3 tours, vérification des imposteurs");
         if (checkForImpostors()) {
           setters.setIsTransitioning(false);
           return;
         }
         setters.setGameState(GAME_STATES.REVEAL);
-      } else {
-        setters.setTurn((prevTurn) => prevTurn + 1);
       }
     }
 
-    setters.setCurrentPlayerIndex(nextIndex);
+    setters.setCurrentPlayerIndex(nextPlayerIndex);
     setters.setIsTransitioning(false);
   };
 

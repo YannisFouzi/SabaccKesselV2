@@ -99,6 +99,25 @@ const useGameState = (
     setCurrentJokerSelectionPlayer,
   };
 
+  const nextTurn = useCallback(() => {
+    const currentPlayerIdIndex = playerOrder.findIndex(
+      (id) => id === players[currentPlayerIndex].id
+    );
+    const nextPlayerIdIndex = (currentPlayerIdIndex + 1) % playerOrder.length;
+    const nextPlayerId = playerOrder[nextPlayerIdIndex];
+    const nextPlayerIndex = players.findIndex((p) => p.id === nextPlayerId);
+
+    // Si on revient au joueur qui a commencé le tour, on passe au tour suivant
+    if (
+      nextPlayerIdIndex ===
+      playerOrder.findIndex((id) => id === players[roundStartPlayer].id)
+    ) {
+      setTurn((prevTurn) => prevTurn + 1);
+    }
+
+    setCurrentPlayerIndex(nextPlayerIndex);
+  }, [players, currentPlayerIndex, playerOrder, roundStartPlayer]);
+
   const gameActions = createGameActions({
     gameState,
     players,
@@ -119,6 +138,7 @@ const useGameState = (
     playerOrder,
     actionHistory,
     setters,
+    nextTurn,
   });
 
   const updateTokensForNewRound = useCallback(() => {
