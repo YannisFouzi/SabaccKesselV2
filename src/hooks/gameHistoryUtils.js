@@ -17,28 +17,56 @@ export const getHistorySinceLastTurn = (
     return history.filter((action) => action.playerId !== playerId);
   }
 
-  // Pour les autres tours
-  const currentPlayerActions = history.filter(
-    (action) => action.playerId === playerId
-  );
+  // Trouver l'index du joueur actuel dans l'ordre des joueurs
+  const currentPlayerIndex = players.findIndex((p) => p.id === playerId);
 
-  // Si le joueur n'a pas encore joué
-  if (currentPlayerActions.length === 0) {
-    return history.filter((action) => action.playerId !== playerId);
+  // Calculer les indices des N-1 joueurs précédents
+  let previousPlayerIndices = [];
+  for (let i = 1; i <= players.length - 1; i++) {
+    const index = (currentPlayerIndex - i + players.length) % players.length;
+    previousPlayerIndices.push(index);
+  }
+  previousPlayerIndices.reverse(); // Pour avoir les actions dans l'ordre du tour
+
+  // Tableau pour stocker les actions des joueurs précédents
+  let lastTurnActions = [];
+
+  // Pour chaque joueur précédent
+  for (const prevIndex of previousPlayerIndices) {
+    const prevPlayer = players[prevIndex];
+    let playerActions = [];
+    let isCollectingActions = false;
+    let foundPreviousPlayer = false;
+
+    // Parcourir l'historique à l'envers
+    for (let i = history.length - 1; i >= 0; i--) {
+      const action = history[i];
+
+      // Si on trouve une action du joueur qu'on cherche
+      if (action.playerId === prevPlayer.id) {
+        if (!foundPreviousPlayer) {
+          // On commence à collecter les actions
+          isCollectingActions = true;
+          foundPreviousPlayer = true;
+        }
+
+        if (isCollectingActions) {
+          playerActions.unshift(action);
+        }
+      }
+      // Si on trouve une action d'un autre joueur après avoir commencé à collecter
+      else if (foundPreviousPlayer && isCollectingActions) {
+        // C'est la fin du tour du joueur précédent
+        isCollectingActions = false;
+        break;
+      }
+    }
+
+    // Ajouter les actions de ce joueur à la liste
+    if (playerActions.length > 0) {
+      lastTurnActions = [...lastTurnActions, ...playerActions];
+    }
   }
 
-  // Trouve le dernier index où le joueur a joué
-  const lastActionIndex = history.findIndex(
-    (action) => action.playerId === playerId
-  );
-
-  // Si on ne trouve pas d'action précédente du joueur, retourner tout l'historique sauf ses actions
-  if (lastActionIndex === -1) {
-    return history.filter((action) => action.playerId !== playerId);
-  }
-
-  // Retourne toutes les actions depuis la dernière action du joueur, en excluant ses propres actions
-  return history
-    .slice(lastActionIndex + 1)
-    .filter((action) => action.playerId !== playerId);
+  return lastTurnActions;
 };
