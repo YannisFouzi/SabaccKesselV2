@@ -157,7 +157,7 @@ const PlayerHand = ({
         <div className="flex-1 flex justify-center min-w-0">
           <div
             className="relative flex -space-x-4 transform rotate-2"
-            style={{ zIndex: 9999 }}
+            style={{ zIndex: 10 }}
           >
             {hand.map((card, index) => (
               <div
@@ -167,7 +167,7 @@ const PlayerHand = ({
                   ${index === 0 ? "-rotate-6" : "rotate-6"}
                   hover:translate-y-[-1rem] transition-transform duration-200
                 `}
-                style={{ zIndex: 9999 }}
+                style={{ zIndex: 10 }}
               >
                 <Card card={card} />
               </div>
