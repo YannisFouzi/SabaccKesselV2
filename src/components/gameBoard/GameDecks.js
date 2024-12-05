@@ -11,6 +11,7 @@ const GameDecks = ({
   round,
   turn,
   consecutivePasses,
+  jokerEUsed,
 }) => {
   const canDrawCard =
     isCurrentPlayerTurn && (currentPlayerTokens > 0 || hasUsedJokerA);
@@ -88,6 +89,11 @@ const GameDecks = ({
                 {consecutivePasses}{" "}
                 {consecutivePasses === 1 ? "passe" : "passes"}
               </span>
+            </div>
+          )}
+          {jokerEUsed && (
+            <div className="flex items-center">
+              <span className="font-bold text-yellow-400">imposteur = 6</span>
             </div>
           )}
         </div>

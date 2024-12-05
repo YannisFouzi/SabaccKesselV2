@@ -56,6 +56,19 @@ const FinalRevealOverlay = ({
           Révélation des mains
         </h2>
 
+        {jokerEUsed && (
+          <div className="mb-6 p-4 bg-yellow-100 border-2 border-yellow-500 rounded-lg">
+            <div className="text-lg flex items-center justify-center gap-2">
+              <span>
+                <span className="font-bold text-yellow-600">
+                  "Fraude Majeure" actif :
+                </span>{" "}
+                Tous les imposteurs prennent automatiquement la valeur 6
+              </span>
+            </div>
+          </div>
+        )}
+
         {currentPlayerHasImpostor() && currentPlayer && !jokerEUsed && (
           <div className="mb-6 p-4 bg-yellow-50 rounded-lg">
             <div className="text-lg mb-4">
@@ -98,10 +111,17 @@ const FinalRevealOverlay = ({
         )}
 
         {currentPlayerHasImpostor() && currentPlayer && jokerEUsed && (
-          <div className="mb-6 p-4 bg-yellow-50 rounded-lg">
-            <div className="text-lg">
-              {currentPlayer.name} : L'imposteur prend automatiquement la valeur
-              6 (Effet du Joker E)
+          <div className="mb-6 p-4 bg-yellow-100 border-2 border-yellow-500 rounded-lg">
+            <div className="text-lg flex items-center gap-2">
+              <span className="text-2xl">🎭</span>
+              <span>
+                {currentPlayer.name} : L'imposteur prend automatiquement la
+                valeur 6
+                <span className="font-bold text-yellow-600">
+                  {" "}
+                  (Effet du Joker "Fraude Majeure" actif)
+                </span>
+              </span>
             </div>
           </div>
         )}

@@ -85,6 +85,7 @@ const GameBoardMain = ({
           turn={turn}
           consecutivePasses={consecutivePasses}
           players={players}
+          jokerEUsed={jokerEUsed}
         />
       </div>
 
