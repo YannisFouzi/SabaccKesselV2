@@ -186,7 +186,7 @@ const LocalSetup = ({
                 disabled:hover:transform-none"
             >
               {(() => {
-                if (isConfigValid) return "Commencer la partie";
+                if (isConfigValid) return "Étape suivante";
 
                 // Vérifier d'abord les noms manquants
                 const missingNames = playerNames
@@ -213,7 +213,7 @@ const LocalSetup = ({
                   return "Définir le nombre de jetons";
                 }
 
-                return "Commencer la partie";
+                return "Étape suivante";
               })()}
             </button>
           </div>
