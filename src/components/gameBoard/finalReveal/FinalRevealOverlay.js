@@ -159,27 +159,58 @@ const FinalRevealOverlay = ({
                     {player.hand.map((card) => (
                       <div
                         key={card.id}
-                        className="w-[80px] sm:w-[90px] md:w-[100px] aspect-[2/3]"
+                        className="w-[80px] sm:w-[90px] md:w-[100px] aspect-[2/3] relative"
                       >
-                        <img
-                          src={getCardImage(
-                            card.family,
-                            card.type === CARD_TYPES.IMPOSTOR && card.value
-                              ? CARD_TYPES.NORMAL
-                              : card.type,
-                            card.type === CARD_TYPES.IMPOSTOR && card.value
-                              ? card.value
-                              : card.type === CARD_TYPES.NORMAL
-                              ? card.value
-                              : null
-                          )}
-                          alt={`${card.type} ${card.value || ""}`}
-                          className={`w-full h-full object-cover rounded-lg ${
-                            isWinner && currentRevealIndex >= players.length
-                              ? "ring-2 ring-green-500"
-                              : ""
-                          }`}
-                        />
+                        {card.type === CARD_TYPES.IMPOSTOR && jokerEUsed ? (
+                          <>
+                            <img
+                              src={getCardImage(
+                                card.family,
+                                CARD_TYPES.IMPOSTOR,
+                                null
+                              )}
+                              alt="Imposteur"
+                              className={`w-full h-full object-cover rounded-lg absolute inset-0 animate-flip-out ${
+                                isWinner && currentRevealIndex >= players.length
+                                  ? "ring-2 ring-green-500"
+                                  : ""
+                              }`}
+                            />
+                            <img
+                              src={getCardImage(
+                                card.family,
+                                CARD_TYPES.NORMAL,
+                                6
+                              )}
+                              alt="Carte 6"
+                              className={`w-full h-full object-cover rounded-lg absolute inset-0 animate-flip-in ${
+                                isWinner && currentRevealIndex >= players.length
+                                  ? "ring-2 ring-green-500"
+                                  : ""
+                              }`}
+                            />
+                          </>
+                        ) : (
+                          <img
+                            src={getCardImage(
+                              card.family,
+                              card.type === CARD_TYPES.IMPOSTOR && card.value
+                                ? CARD_TYPES.NORMAL
+                                : card.type,
+                              card.type === CARD_TYPES.IMPOSTOR && card.value
+                                ? card.value
+                                : card.type === CARD_TYPES.NORMAL
+                                ? card.value
+                                : null
+                            )}
+                            alt={`${card.type} ${card.value || ""}`}
+                            className={`w-full h-full object-cover rounded-lg ${
+                              isWinner && currentRevealIndex >= players.length
+                                ? "ring-2 ring-green-500"
+                                : ""
+                            }`}
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
@@ -249,6 +280,41 @@ const FinalRevealOverlay = ({
           )}
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes flip-out {
+          0% {
+            transform: perspective(1000px) rotateY(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: perspective(1000px) rotateY(90deg);
+            opacity: 0;
+          }
+        }
+
+        @keyframes flip-in {
+          0% {
+            transform: perspective(1000px) rotateY(-90deg);
+            opacity: 0;
+          }
+          100% {
+            transform: perspective(1000px) rotateY(0deg);
+            opacity: 1;
+          }
+        }
+
+        .animate-flip-out {
+          animation: flip-out 1s ease-in forwards;
+          backface-visibility: hidden;
+        }
+
+        .animate-flip-in {
+          animation: flip-in 1s ease-out 1s forwards;
+          backface-visibility: hidden;
+          opacity: 0;
+        }
+      `}</style>
     </div>
   );
 };
