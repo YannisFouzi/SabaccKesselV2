@@ -45,9 +45,11 @@ const PlayerNameInput = ({
         <div className="flex-shrink-0">
           <button
             onClick={() => setShowAvatarSelect(!showAvatarSelect)}
-            className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 
+            className={`w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 
               hover:border-white/40 transition-all duration-200 flex items-center justify-center
-              bg-white/10"
+              bg-white/10 ${
+                !avatar ? "animate-glowPulse" : "hover:animate-wiggle"
+              }`}
             title="Choisir un avatar"
           >
             {avatar ? (
@@ -57,7 +59,7 @@ const PlayerNameInput = ({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-white/60">👤</span>
+              <span className="text-white/60 text-xl">👤</span>
             )}
           </button>
         </div>
@@ -77,7 +79,8 @@ const PlayerNameInput = ({
         <div
           ref={avatarSelectRef}
           className="absolute top-full left-0 mt-2 p-2 bg-gray-800/95 
-          backdrop-blur-sm rounded-xl border border-white/20 grid grid-cols-4 gap-2 z-10"
+          backdrop-blur-sm rounded-xl border border-white/20 grid grid-cols-4 gap-2 z-10
+          animate-fadeIn shadow-lg shadow-black/20"
         >
           {availableAvatars.map((avatarOption) => (
             <button
@@ -86,12 +89,12 @@ const PlayerNameInput = ({
                 onAvatarChange(index, avatarOption.id);
                 setShowAvatarSelect(false);
               }}
-              className={`flex flex-col items-center gap-1 
+              className={`flex flex-col items-center gap-1 p-2 rounded-lg
                 ${
                   avatar === avatarOption.id
-                    ? "border-blue-500"
-                    : "border-transparent hover:border-white/40"
-                } transition-all duration-200`}
+                    ? "border-blue-500 bg-blue-500/20"
+                    : "border-transparent hover:border-white/40 hover:bg-white/5"
+                } transition-all duration-200 hover:scale-105`}
             >
               <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20">
                 <img
