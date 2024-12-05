@@ -7,11 +7,8 @@ Object.keys(JOKERS).forEach((key) => {
   jokerImages[key] = require(`../../assets/img/jokers/joker-${key}.png`);
 });
 
-const JokerBubble = ({ joker, onClose, onUse, position }) => (
-  <div
-    className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 z-50"
-    style={{ ...position }}
-  >
+const JokerBubble = ({ joker, onClose, onUse }) => (
+  <div className="absolute left-1/2 top-full mt-2 w-64 -translate-x-1/2 z-[9999]">
     <div className="bg-gray-900/95 rounded-xl p-3 shadow-xl backdrop-blur-sm">
       <div className="flex items-center gap-3 mb-2">
         <img
@@ -39,7 +36,7 @@ const JokerBubble = ({ joker, onClose, onUse, position }) => (
         </button>
       </div>
 
-      <div className="absolute bottom-0 left-1/2 w-3 h-3 -mb-1.5 -translate-x-1/2 rotate-45 bg-gray-900"></div>
+      <div className="absolute top-0 left-1/2 w-3 h-3 -mt-1.5 -translate-x-1/2 rotate-45 bg-gray-900"></div>
     </div>
   </div>
 );

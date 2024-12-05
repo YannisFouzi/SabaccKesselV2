@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { getCardBack, getCardImage } from "../../constants/cardImages";
 import { CARD_TYPES } from "../../constants/gameConstants";
 import PlayerIdentity from "../PlayerIdentity";
@@ -21,6 +21,8 @@ const PlayerHand = ({
   onUseJoker,
   usedJokersThisRound,
 }) => {
+  const [selectPosition, setSelectPosition] = useState(null);
+
   if (!player) {
     return null;
   }
@@ -29,19 +31,34 @@ const PlayerHand = ({
 
   // Composant pour une carte
   const Card = ({ card }) => {
-    // On ne peut interagir avec une carte que si :
-    // - C'est le joueur actif
-    // - Une carte a été piochée
-    // - La carte est de la même famille que la carte piochée
     const canInteract =
       isCurrentPlayer &&
       pendingDrawnCard &&
       card.family === pendingDrawnCard.family;
 
+    const handleCardClick = (event) => {
+      if (canInteract) {
+        onChooseDiscard(card);
+      }
+      if (
+        card.type === CARD_TYPES.IMPOSTOR &&
+        isRevealPhase &&
+        !selectedDiceValue &&
+        isCurrentPlayer
+      ) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        setSelectPosition({
+          x: rect.left + rect.width / 2,
+          y: rect.top - 10,
+        });
+      }
+    };
+
     return (
       <div
+        style={{ position: "relative", zIndex: 9999 }}
         className={`
-          relative w-[100px] sm:w-[120px] md:w-[140px]
+          w-[100px] sm:w-[120px] md:w-[140px]
           aspect-[2/3]
           cursor-pointer 
           transition-transform 
@@ -53,7 +70,7 @@ const PlayerHand = ({
               : ""
           }
         `}
-        onClick={() => (canInteract ? onChooseDiscard(card) : null)}
+        onClick={handleCardClick}
       >
         {(!isRevealPhase && !isCurrentPlayer) || isTransitioning ? (
           <img
@@ -77,22 +94,34 @@ const PlayerHand = ({
         {card.type === CARD_TYPES.IMPOSTOR &&
           isRevealPhase &&
           !selectedDiceValue &&
-          isCurrentPlayer && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-              <select
-                className="bg-white p-1 text-sm"
-                onChange={(e) =>
-                  onSelectDiceValue(card.id, parseInt(e.target.value))
-                }
-                value=""
-              >
-                <option value="">Choisir</option>
-                {[1, 2, 3, 4, 5, 6].map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
+          isCurrentPlayer &&
+          selectPosition && (
+            <div
+              className="fixed z-[9999]"
+              style={{
+                left: selectPosition.x,
+                top: selectPosition.y,
+                transform: "translate(-50%, -100%)",
+              }}
+            >
+              <div className="bg-gray-900/95 rounded-xl p-3 shadow-xl backdrop-blur-sm">
+                <select
+                  className="bg-white p-2 rounded text-sm min-w-[100px]"
+                  onChange={(e) => {
+                    onSelectDiceValue(card.id, parseInt(e.target.value));
+                    setSelectPosition(null);
+                  }}
+                  value=""
+                >
+                  <option value="">Choisir</option>
+                  {[1, 2, 3, 4, 5, 6].map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute bottom-0 left-1/2 w-3 h-3 -mb-1.5 -translate-x-1/2 rotate-45 bg-gray-900"></div>
+              </div>
             </div>
           )}
       </div>
@@ -126,7 +155,10 @@ const PlayerHand = ({
 
         {/* Cartes au centre */}
         <div className="flex-1 flex justify-center min-w-0">
-          <div className="relative flex -space-x-4 transform rotate-2">
+          <div
+            className="relative flex -space-x-4 transform rotate-2"
+            style={{ zIndex: 9999 }}
+          >
             {hand.map((card, index) => (
               <div
                 key={card.id}
@@ -135,6 +167,7 @@ const PlayerHand = ({
                   ${index === 0 ? "-rotate-6" : "rotate-6"}
                   hover:translate-y-[-1rem] transition-transform duration-200
                 `}
+                style={{ zIndex: 9999 }}
               >
                 <Card card={card} />
               </div>
@@ -172,6 +205,15 @@ const PlayerHand = ({
           </button>
         )}
       </div>
+
+      {/* Style global pour permettre le débordement */}
+      <style jsx global>{`
+        #root,
+        body,
+        .overflow-y-auto {
+          overflow: visible !important;
+        }
+      `}</style>
     </div>
   );
 };
