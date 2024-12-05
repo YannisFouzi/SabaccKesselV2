@@ -185,7 +185,36 @@ const LocalSetup = ({
                 disabled:opacity-50 disabled:cursor-not-allowed
                 disabled:hover:transform-none"
             >
-              Étape suivante
+              {(() => {
+                if (isConfigValid) return "Commencer la partie";
+
+                // Vérifier d'abord les noms manquants
+                const missingNames = playerNames
+                  .slice(0, playerCount)
+                  .filter((name) => !name.trim()).length;
+                if (missingNames > 0) {
+                  return `Remplir ${missingNames} nom${
+                    missingNames > 1 ? "s" : ""
+                  } manquant${missingNames > 1 ? "s" : ""}`;
+                }
+
+                // Ensuite, vérifier les avatars
+                const missingAvatars = playerAvatars
+                  .slice(0, playerCount)
+                  .filter((avatar) => !avatar).length;
+                if (missingAvatars > 0) {
+                  return `Choisir ${missingAvatars} avatar${
+                    missingAvatars > 1 ? "s" : ""
+                  } manquant${missingAvatars > 1 ? "s" : ""}`;
+                }
+
+                // Enfin, vérifier les jetons
+                if (!tokenCount) {
+                  return "Définir le nombre de jetons";
+                }
+
+                return "Commencer la partie";
+              })()}
             </button>
           </div>
 
