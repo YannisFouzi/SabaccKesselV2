@@ -49,88 +49,89 @@ const ActionHistory = ({ actions, usedJokers, players }) => {
     }
   };
 
+  const renderPlayerActions = (playerName, playerActions) => {
+    const hasUsedJoker = playerActions.some(
+      (action) => action.type === "USE_JOKER"
+    );
+    const jokerAction = playerActions.find(
+      (action) => action.type === "USE_JOKER"
+    );
+    const drawAction = playerActions.find((action) =>
+      action.type.includes("DRAW")
+    );
+    const discardAction = playerActions.find(
+      (action) => action.type === "DISCARD"
+    );
+
+    if (hasUsedJoker) {
+      return (
+        <div className="space-y-4">
+          {/* Première ligne: image + nom */}
+          <div className="flex items-center gap-2">
+            <img
+              src={getPlayerAvatar(playerName)}
+              alt={`Avatar de ${playerName}`}
+              className="w-8 h-8 rounded-full object-cover"
+            />
+            <span className="font-bold">{playerName}</span>
+          </div>
+
+          {/* Deuxième ligne: joker + description */}
+          {jokerAction && (
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <img
+                  src={require(`../../assets/img/jokers/joker-${jokerAction.jokerId}.png`)}
+                  alt={`Joker ${jokerAction.jokerId}`}
+                  className="w-6 h-6 object-contain"
+                />
+                <span className="text-purple-400">
+                  {JOKERS[jokerAction.jokerId].title}
+                </span>
+              </div>
+              <div className="text-sm text-gray-400 ml-8">
+                {getJokerDescription(jokerAction.jokerId)}
+              </div>
+            </div>
+          )}
+
+          {/* Troisième ligne: pioche + défausse */}
+          <div className="flex items-center gap-2">
+            {drawAction && (
+              <span>Pioche: {renderCardImage(drawAction.card)}</span>
+            )}
+            {discardAction && (
+              <span>Défausse: {renderCardImage(discardAction.card)}</span>
+            )}
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center gap-4">
+          <img
+            src={getPlayerAvatar(playerName)}
+            alt={`Avatar de ${playerName}`}
+            className="w-8 h-8 rounded-full object-cover"
+          />
+          <span className="font-bold">{playerName}</span>
+          {drawAction && (
+            <span>Pioche: {renderCardImage(drawAction.card)}</span>
+          )}
+          {discardAction && (
+            <span>Défausse: {renderCardImage(discardAction.card)}</span>
+          )}
+        </div>
+      );
+    }
+  };
+
   // Regrouper les actions par joueur
   const groupedActions = actions.reduce((acc, action) => {
     if (!acc[action.playerName]) {
       acc[action.playerName] = [];
     }
-
-    // On regarde si l'action précédente est une pioche et que l'action actuelle est une défausse
-    const lastAction =
-      acc[action.playerName][acc[action.playerName].length - 1];
-    const isLastActionDraw =
-      lastAction &&
-      action.type === "DISCARD" &&
-      (actions[actions.indexOf(action) - 1]?.type === "DRAW_VISIBLE" ||
-        actions[actions.indexOf(action) - 1]?.type === "DRAW_HIDDEN");
-
-    if (isLastActionDraw) {
-      // On combine la pioche et la défausse sur une même ligne
-      const combinedAction = (
-        <span className="font-bold">
-          {lastAction} puis défaussé{" "}
-          {renderCardImage({ ...action.card, isHidden: false })}
-        </span>
-      );
-      acc[action.playerName].pop();
-      acc[action.playerName].push(combinedAction);
-    } else {
-      let description = "";
-      if (action.type === "DRAW_VISIBLE") {
-        description = (
-          <>
-            <strong>{action.playerName}</strong> a pioché{" "}
-            {renderCardImage({ ...action.card, isHidden: false })}
-          </>
-        );
-      } else if (action.type === "DRAW_HIDDEN") {
-        description = (
-          <>
-            <strong>{action.playerName}</strong> a pioché{" "}
-            {renderCardImage({ ...action.card, isHidden: true })}
-          </>
-        );
-      } else if (action.type === "DISCARD") {
-        description = (
-          <>
-            <strong>{action.playerName}</strong> a défaussé{" "}
-            {renderCardImage({ ...action.card, isHidden: false })}
-          </>
-        );
-      } else if (action.type === "PASS") {
-        description = (
-          <>
-            <strong>{action.playerName}</strong> a passé son tour
-          </>
-        );
-      } else if (action.type === "USE_JOKER") {
-        description = (
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <img
-                src={require(`../../assets/img/jokers/joker-${action.jokerId}.png`)}
-                alt={`Joker ${action.jokerId}`}
-                className="w-6 h-6 object-contain"
-              />
-              <span className="text-purple-400">
-                <strong>{action.playerName}</strong> a utilisé{" "}
-                {JOKERS[action.jokerId].title}
-              </span>
-            </div>
-            <div className="text-sm text-gray-400 ml-8">
-              {getJokerDescription(action.jokerId)}
-              {action.targetPlayerName && (
-                <span className="text-amber-400">
-                  {" "}
-                  sur <strong>{action.targetPlayerName}</strong>
-                </span>
-              )}
-            </div>
-          </div>
-        );
-      }
-      acc[action.playerName].push(description);
-    }
+    acc[action.playerName].push(action);
     return acc;
   }, {});
 
@@ -138,20 +139,7 @@ const ActionHistory = ({ actions, usedJokers, players }) => {
     <div className="space-y-4">
       {Object.entries(groupedActions).map(([playerName, actions]) => (
         <div key={playerName} className="rounded-lg p-4">
-          <div className="space-y-2 font-bold">
-            {actions.map((action, index) => (
-              <div key={index} className="flex items-center gap-2">
-                {players && getPlayerAvatar(playerName) && (
-                  <img
-                    src={getPlayerAvatar(playerName)}
-                    alt={`Avatar de ${playerName}`}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                )}
-                <div>{action}</div>
-              </div>
-            ))}
-          </div>
+          {renderPlayerActions(playerName, actions)}
         </div>
       ))}
     </div>
