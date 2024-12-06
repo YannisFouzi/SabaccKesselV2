@@ -151,6 +151,7 @@ const GameBoardMain = ({
           onReady={confirmTransition}
           actionHistory={getHistorySinceLastTurn(getNextPlayer()?.id)}
           usedJokers={usedJokersThisRound}
+          players={players}
         />
       )}
 
