@@ -27,24 +27,106 @@ const GameDecks = ({
 
   const renderCard = (card, family, type, onClick) => (
     <div className="relative w-[90px] sm:w-[110px] md:w-[130px] lg:w-[150px] transform hover:scale-105 transition-all duration-300">
+      {card && (
+        <>
+          <div
+            className={`absolute inset-0 ${
+              family === "SAND" ? "bg-amber-500" : "bg-red-500"
+            } opacity-20 blur-lg ${glowEffect ? "animate-pulse" : ""}`}
+            style={{
+              maskImage: `url(${
+                type === "VISIBLE"
+                  ? getCardImage(
+                      family,
+                      card.type,
+                      card.type === "NORMAL" ? card.value : null
+                    )
+                  : getCardBack(family)
+              })`,
+              WebkitMaskImage: `url(${
+                type === "VISIBLE"
+                  ? getCardImage(
+                      family,
+                      card.type,
+                      card.type === "NORMAL" ? card.value : null
+                    )
+                  : getCardBack(family)
+              })`,
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              maskRepeat: "no-repeat",
+              WebkitMaskRepeat: "no-repeat",
+              maskPosition: "center",
+              WebkitMaskPosition: "center",
+            }}
+          />
+          <div
+            className={`absolute inset-0 bg-black/40 blur-sm transform translate-y-2 ${
+              canDrawCard ? "hover:translate-y-1" : ""
+            } transition-all duration-200`}
+            style={{
+              maskImage: `url(${
+                type === "VISIBLE"
+                  ? getCardImage(
+                      family,
+                      card.type,
+                      card.type === "NORMAL" ? card.value : null
+                    )
+                  : getCardBack(family)
+              })`,
+              WebkitMaskImage: `url(${
+                type === "VISIBLE"
+                  ? getCardImage(
+                      family,
+                      card.type,
+                      card.type === "NORMAL" ? card.value : null
+                    )
+                  : getCardBack(family)
+              })`,
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              maskRepeat: "no-repeat",
+              WebkitMaskRepeat: "no-repeat",
+              maskPosition: "center",
+              WebkitMaskPosition: "center",
+            }}
+          />
+        </>
+      )}
       <div
-        className={`absolute inset-0 rounded-lg ${
-          family === "SAND" ? "bg-amber-500" : "bg-red-500"
-        } opacity-20 blur-lg ${glowEffect ? "animate-pulse" : ""}`}
-      />
-      <div
-        className={`absolute inset-0 rounded-lg bg-black/40 blur-sm transform translate-y-2 ${
-          canDrawCard ? "hover:translate-y-1" : ""
-        } transition-all duration-200`}
-      />
-      <div
-        className={`relative rounded-lg p-2 sm:p-3 ${
+        className={`relative p-2 sm:p-3 ${
           family === "SAND"
             ? "bg-gradient-to-br from-amber-900/80 to-amber-700/60"
             : "bg-gradient-to-br from-red-900/80 to-red-700/60"
         } backdrop-blur-xl border-2 ${
           family === "SAND" ? "border-amber-400/30" : "border-red-400/30"
         } shadow-2xl`}
+        style={{
+          maskImage: `url(${
+            type === "VISIBLE"
+              ? getCardImage(
+                  family,
+                  card.type,
+                  card.type === "NORMAL" ? card.value : null
+                )
+              : getCardBack(family)
+          })`,
+          WebkitMaskImage: `url(${
+            type === "VISIBLE"
+              ? getCardImage(
+                  family,
+                  card.type,
+                  card.type === "NORMAL" ? card.value : null
+                )
+              : getCardBack(family)
+          })`,
+          maskSize: "contain",
+          WebkitMaskSize: "contain",
+          maskRepeat: "no-repeat",
+          WebkitMaskRepeat: "no-repeat",
+          maskPosition: "center",
+          WebkitMaskPosition: "center",
+        }}
       >
         <button
           onClick={onClick}
@@ -54,15 +136,67 @@ const GameDecks = ({
               ? "hover:scale-105 hover:-translate-y-2 active:translate-y-0 hover:brightness-125"
               : "opacity-50 grayscale"
           }`}
+          style={{
+            maskImage: `url(${
+              type === "VISIBLE"
+                ? getCardImage(
+                    family,
+                    card.type,
+                    card.type === "NORMAL" ? card.value : null
+                  )
+                : getCardBack(family)
+            })`,
+            WebkitMaskImage: `url(${
+              type === "VISIBLE"
+                ? getCardImage(
+                    family,
+                    card.type,
+                    card.type === "NORMAL" ? card.value : null
+                  )
+                : getCardBack(family)
+            })`,
+            maskSize: "contain",
+            WebkitMaskSize: "contain",
+            maskRepeat: "no-repeat",
+            WebkitMaskRepeat: "no-repeat",
+            maskPosition: "center",
+            WebkitMaskPosition: "center",
+          }}
         >
           {card ? (
             <div className="w-full h-full relative group">
               <div
-                className={`absolute inset-0 rounded-lg ${
+                className={`absolute inset-0 ${
                   canDrawCard ? "group-hover:opacity-100" : "opacity-0"
                 } transition-opacity duration-300 ${
                   family === "SAND" ? "bg-amber-400" : "bg-red-400"
                 } opacity-0 blur-xl -z-10`}
+                style={{
+                  maskImage: `url(${
+                    type === "VISIBLE"
+                      ? getCardImage(
+                          family,
+                          card.type,
+                          card.type === "NORMAL" ? card.value : null
+                        )
+                      : getCardBack(family)
+                  })`,
+                  WebkitMaskImage: `url(${
+                    type === "VISIBLE"
+                      ? getCardImage(
+                          family,
+                          card.type,
+                          card.type === "NORMAL" ? card.value : null
+                        )
+                      : getCardBack(family)
+                  })`,
+                  maskSize: "contain",
+                  WebkitMaskSize: "contain",
+                  maskRepeat: "no-repeat",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskPosition: "center",
+                  WebkitMaskPosition: "center",
+                }}
               />
               <img
                 src={
@@ -77,14 +211,24 @@ const GameDecks = ({
                 alt={`${type === "VISIBLE" ? "Carte" : "Pioche"} ${
                   family === "SAND" ? "Sable" : "Sang"
                 }`}
-                className="w-full h-full object-cover rounded-lg shadow-lg"
+                className="w-full h-full object-contain"
               />
             </div>
           ) : (
             <div
-              className={`w-full h-full rounded-lg bg-opacity-20 shadow-inner ${
+              className={`w-full h-full bg-opacity-20 shadow-inner ${
                 family === "SAND" ? "bg-amber-900" : "bg-red-900"
               }`}
+              style={{
+                maskImage: `url(${getCardBack(family)})`,
+                WebkitMaskImage: `url(${getCardBack(family)})`,
+                maskSize: "contain",
+                WebkitMaskSize: "contain",
+                maskRepeat: "no-repeat",
+                WebkitMaskRepeat: "no-repeat",
+                maskPosition: "center",
+                WebkitMaskPosition: "center",
+              }}
             />
           )}
         </button>
