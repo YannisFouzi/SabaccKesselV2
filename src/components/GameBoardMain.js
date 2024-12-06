@@ -129,7 +129,7 @@ const GameBoardMain = ({
             </div>
 
             {/* Joueurs restants */}
-            <div className="w-full md:w-[180px] flex-shrink-0 order-first md:order-last">
+            <div className="w-full md:w-[350px] flex-shrink-0 order-first md:order-last">
               <RemainingPlayers
                 players={players}
                 currentPlayerIndex={currentPlayerIndex}

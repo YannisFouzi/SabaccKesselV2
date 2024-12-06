@@ -5,12 +5,16 @@ import jetonKoImage from "../../assets/img/jeton_ko.png";
 export const TokenDisplay = ({ count, type = "available" }) => {
   return (
     <div className="flex items-center gap-1">
-      <img
-        src={type === "available" ? jetonImage : jetonKoImage}
-        alt="Jeton"
-        className="w-4 h-4 sm:w-5 sm:h-5"
-      />
-      <span className="text-xs sm:text-sm">{count}</span>
+      <div className="flex items-center gap-1">
+        {[...Array(count)].map((_, index) => (
+          <img
+            key={index}
+            src={type === "available" ? jetonImage : jetonKoImage}
+            alt="Jeton"
+            className="w-4 h-4 sm:w-5 sm:h-5"
+          />
+        ))}
+      </div>
     </div>
   );
 };
