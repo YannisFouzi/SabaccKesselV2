@@ -140,15 +140,28 @@ const PlayerHand = ({
         </div>
       )}
 
-      {/* Zone principale avec jokers et cartes */}
-      <div
-        className={`flex ${
-          selectedJokers?.[player.id]?.length > 0 ? "gap-6" : ""
-        } items-start`}
-      >
-        {/* Jokers à gauche - ne les afficher que si le joueur a des jokers sélectionnés */}
-        {selectedJokers?.[player.id]?.length > 0 && (
-          <div className="w-[180px] flex-shrink-0">
+      {/* Cartes en haut */}
+      <div className="flex justify-center min-w-0">
+        <div className="relative flex -space-x-4 transform rotate-2">
+          {hand.map((card, index) => (
+            <div
+              key={card.id}
+              className={`
+                relative transform 
+                ${index === 0 ? "-rotate-6" : "rotate-6"}
+                hover:translate-y-[-1rem] transition-transform duration-200
+              `}
+            >
+              <Card card={card} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Jokers au milieu - ne les afficher que si le joueur a des jokers sélectionnés */}
+      {selectedJokers?.[player.id]?.length > 0 && (
+        <div className="w-full flex justify-center">
+          <div className="w-[180px]">
             <PlayerJokers
               player={player}
               selectedJokers={selectedJokers}
@@ -157,28 +170,10 @@ const PlayerHand = ({
               usedJokersThisRound={usedJokersThisRound}
             />
           </div>
-        )}
-
-        {/* Cartes au centre */}
-        <div className="flex-1 flex justify-center min-w-0">
-          <div className="relative flex -space-x-4 transform rotate-2">
-            {hand.map((card, index) => (
-              <div
-                key={card.id}
-                className={`
-                  relative transform 
-                  ${index === 0 ? "-rotate-6" : "rotate-6"}
-                  hover:translate-y-[-1rem] transition-transform duration-200
-                `}
-              >
-                <Card card={card} />
-              </div>
-            ))}
-          </div>
         </div>
-      </div>
+      )}
 
-      {/* Informations du joueur et boutons d'action */}
+      {/* Informations du joueur et boutons d'action en bas */}
       <div className="flex flex-col gap-2">
         {/* Infos joueur */}
         <div className="flex justify-between items-center">

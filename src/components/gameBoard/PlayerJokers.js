@@ -8,7 +8,7 @@ Object.keys(JOKERS).forEach((key) => {
 });
 
 const JokerBubble = ({ joker, onClose, onUse }) => (
-  <div className="absolute left-1/2 top-full mt-2 w-64 -translate-x-1/2 z-[9999]">
+  <div className="absolute left-1/2 bottom-full mb-2 w-64 -translate-x-1/2 z-[9999]">
     <div className="bg-gray-900/95 rounded-xl p-3 shadow-xl backdrop-blur-sm">
       <div className="flex items-center gap-3 mb-2">
         <img
@@ -36,7 +36,7 @@ const JokerBubble = ({ joker, onClose, onUse }) => (
         </button>
       </div>
 
-      <div className="absolute top-0 left-1/2 w-3 h-3 -mt-1.5 -translate-x-1/2 rotate-45 bg-gray-900"></div>
+      <div className="absolute bottom-0 left-1/2 w-3 h-3 mb-[-6px] -translate-x-1/2 rotate-45 bg-gray-900"></div>
     </div>
   </div>
 );
@@ -84,44 +84,55 @@ const PlayerJokers = ({
   };
 
   return (
-    <div className="bg-white p-2 sm:p-3 rounded-lg shadow-lg h-full">
-      <div className="text-sm font-bold mb-3">Jetons d'action</div>
-      <div className="grid grid-cols-2 gap-2">
-        {playerJokers.map((jokerId, index) => {
-          const joker = JOKERS[jokerId];
-          const instanceId = `${jokerId}-${index}`;
-          const isSelected = selectedJokerInstanceId === instanceId;
+    <div>
+      <div className="relative flex justify-center">
+        <div className="relative flex -space-x-4 transform">
+          {playerJokers.map((jokerId, index) => {
+            const joker = JOKERS[jokerId];
+            const instanceId = `${jokerId}-${index}`;
+            const isSelected = selectedJokerInstanceId === instanceId;
+            const rotation = index % 2 === 0 ? -6 : 6;
 
-          return (
-            <div key={instanceId} className="relative">
-              <button
-                onClick={() => handleJokerClick(jokerId, index)}
-                disabled={hasUsedJokerThisRound}
-                className={`
-                  w-full aspect-[3/4] rounded-lg overflow-hidden
-                  ${hasUsedJokerThisRound ? "opacity-50" : "hover:opacity-75"} 
-                  transition-all duration-200
-                  ${isSelected ? "ring-2 ring-blue-500" : ""}
-                  hover:scale-105
-                `}
+            return (
+              <div
+                key={instanceId}
+                className="relative"
+                style={{
+                  transform: `rotate(${rotation}deg)`,
+                  transition: "transform 0.2s",
+                }}
               >
-                <img
-                  src={jokerImages[jokerId]}
-                  alt={joker.title}
-                  className="w-full h-full object-contain"
-                />
-              </button>
+                <button
+                  onClick={() => handleJokerClick(jokerId, index)}
+                  disabled={hasUsedJokerThisRound}
+                  className={`
+                    w-[100px] aspect-[3/4] rounded-lg overflow-hidden
+                    ${
+                      hasUsedJokerThisRound ? "opacity-50" : "hover:opacity-75"
+                    } 
+                    transition-all duration-200
+                    ${isSelected ? "ring-2 ring-blue-500" : ""}
+                    hover:scale-105 hover:-translate-y-4
+                  `}
+                >
+                  <img
+                    src={jokerImages[jokerId]}
+                    alt={joker.title}
+                    className="w-full h-full object-contain"
+                  />
+                </button>
 
-              {isSelected && (
-                <JokerBubble
-                  joker={joker}
-                  onClose={() => setSelectedJokerInstanceId(null)}
-                  onUse={() => handleUseJoker(jokerId, index)}
-                />
-              )}
-            </div>
-          );
-        })}
+                {isSelected && (
+                  <JokerBubble
+                    joker={joker}
+                    onClose={() => setSelectedJokerInstanceId(null)}
+                    onUse={() => handleUseJoker(jokerId, index)}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {hasUsedJokerThisRound && (
