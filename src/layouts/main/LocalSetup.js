@@ -153,7 +153,7 @@ const LocalSetup = ({
             </label>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 sm:space-x-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-4 sm:space-x-4">
             <button
               onClick={() => {
                 setGameMode(null);
