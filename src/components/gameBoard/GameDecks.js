@@ -35,7 +35,7 @@ const GameDecks = ({
             } opacity-20 blur-lg ${glowEffect ? "animate-pulse" : ""}`}
             style={{
               maskImage: `url(${
-                type === "VISIBLE"
+                type === "VISIBLE" && card
                   ? getCardImage(
                       family,
                       card.type,
@@ -44,7 +44,7 @@ const GameDecks = ({
                   : getCardBack(family)
               })`,
               WebkitMaskImage: `url(${
-                type === "VISIBLE"
+                type === "VISIBLE" && card
                   ? getCardImage(
                       family,
                       card.type,
@@ -66,7 +66,7 @@ const GameDecks = ({
             } transition-all duration-200`}
             style={{
               maskImage: `url(${
-                type === "VISIBLE"
+                type === "VISIBLE" && card
                   ? getCardImage(
                       family,
                       card.type,
@@ -75,7 +75,7 @@ const GameDecks = ({
                   : getCardBack(family)
               })`,
               WebkitMaskImage: `url(${
-                type === "VISIBLE"
+                type === "VISIBLE" && card
                   ? getCardImage(
                       family,
                       card.type,
@@ -103,7 +103,7 @@ const GameDecks = ({
         } shadow-2xl`}
         style={{
           maskImage: `url(${
-            type === "VISIBLE"
+            type === "VISIBLE" && card
               ? getCardImage(
                   family,
                   card.type,
@@ -112,7 +112,7 @@ const GameDecks = ({
               : getCardBack(family)
           })`,
           WebkitMaskImage: `url(${
-            type === "VISIBLE"
+            type === "VISIBLE" && card
               ? getCardImage(
                   family,
                   card.type,
@@ -136,101 +136,22 @@ const GameDecks = ({
               ? "hover:scale-105 hover:-translate-y-2 active:translate-y-0 hover:brightness-125"
               : "opacity-50 grayscale"
           }`}
-          style={{
-            maskImage: `url(${
-              type === "VISIBLE"
-                ? getCardImage(
-                    family,
-                    card.type,
-                    card.type === "NORMAL" ? card.value : null
-                  )
-                : getCardBack(family)
-            })`,
-            WebkitMaskImage: `url(${
-              type === "VISIBLE"
-                ? getCardImage(
-                    family,
-                    card.type,
-                    card.type === "NORMAL" ? card.value : null
-                  )
-                : getCardBack(family)
-            })`,
-            maskSize: "contain",
-            WebkitMaskSize: "contain",
-            maskRepeat: "no-repeat",
-            WebkitMaskRepeat: "no-repeat",
-            maskPosition: "center",
-            WebkitMaskPosition: "center",
-          }}
         >
-          {card ? (
-            <div className="w-full h-full relative group">
-              <div
-                className={`absolute inset-0 ${
-                  canDrawCard ? "group-hover:opacity-100" : "opacity-0"
-                } transition-opacity duration-300 ${
-                  family === "SAND" ? "bg-amber-400" : "bg-red-400"
-                } opacity-0 blur-xl -z-10`}
-                style={{
-                  maskImage: `url(${
-                    type === "VISIBLE"
-                      ? getCardImage(
-                          family,
-                          card.type,
-                          card.type === "NORMAL" ? card.value : null
-                        )
-                      : getCardBack(family)
-                  })`,
-                  WebkitMaskImage: `url(${
-                    type === "VISIBLE"
-                      ? getCardImage(
-                          family,
-                          card.type,
-                          card.type === "NORMAL" ? card.value : null
-                        )
-                      : getCardBack(family)
-                  })`,
-                  maskSize: "contain",
-                  WebkitMaskSize: "contain",
-                  maskRepeat: "no-repeat",
-                  WebkitMaskRepeat: "no-repeat",
-                  maskPosition: "center",
-                  WebkitMaskPosition: "center",
-                }}
-              />
-              <img
-                src={
-                  type === "VISIBLE"
-                    ? getCardImage(
-                        family,
-                        card.type,
-                        card.type === "NORMAL" ? card.value : null
-                      )
-                    : getCardBack(family)
-                }
-                alt={`${type === "VISIBLE" ? "Carte" : "Pioche"} ${
-                  family === "SAND" ? "Sable" : "Sang"
-                }`}
-                className="w-full h-full object-contain"
-              />
-            </div>
-          ) : (
-            <div
-              className={`w-full h-full bg-opacity-20 shadow-inner ${
-                family === "SAND" ? "bg-amber-900" : "bg-red-900"
-              }`}
-              style={{
-                maskImage: `url(${getCardBack(family)})`,
-                WebkitMaskImage: `url(${getCardBack(family)})`,
-                maskSize: "contain",
-                WebkitMaskSize: "contain",
-                maskRepeat: "no-repeat",
-                WebkitMaskRepeat: "no-repeat",
-                maskPosition: "center",
-                WebkitMaskPosition: "center",
-              }}
-            />
-          )}
+          <img
+            src={
+              type === "VISIBLE" && card
+                ? getCardImage(
+                    family,
+                    card.type,
+                    card.type === "NORMAL" ? card.value : null
+                  )
+                : getCardBack(family)
+            }
+            alt={`${type === "VISIBLE" ? "Carte" : "Pioche"} ${
+              family === "SAND" ? "Sable" : "Sang"
+            }`}
+            className="w-full h-full object-contain"
+          />
         </button>
       </div>
     </div>

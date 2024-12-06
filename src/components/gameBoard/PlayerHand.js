@@ -141,17 +141,23 @@ const PlayerHand = ({
       )}
 
       {/* Zone principale avec jokers et cartes */}
-      <div className="flex gap-6 items-start">
-        {/* Jokers à gauche */}
-        <div className="w-[180px] flex-shrink-0">
-          <PlayerJokers
-            player={player}
-            selectedJokers={selectedJokers}
-            isCurrentPlayer={isCurrentPlayer}
-            onUseJoker={onUseJoker}
-            usedJokersThisRound={usedJokersThisRound}
-          />
-        </div>
+      <div
+        className={`flex ${
+          selectedJokers?.[player.id]?.length > 0 ? "gap-6" : ""
+        } items-start`}
+      >
+        {/* Jokers à gauche - ne les afficher que si le joueur a des jokers sélectionnés */}
+        {selectedJokers?.[player.id]?.length > 0 && (
+          <div className="w-[180px] flex-shrink-0">
+            <PlayerJokers
+              player={player}
+              selectedJokers={selectedJokers}
+              isCurrentPlayer={isCurrentPlayer}
+              onUseJoker={onUseJoker}
+              usedJokersThisRound={usedJokersThisRound}
+            />
+          </div>
+        )}
 
         {/* Cartes au centre */}
         <div className="flex-1 flex justify-center min-w-0">
