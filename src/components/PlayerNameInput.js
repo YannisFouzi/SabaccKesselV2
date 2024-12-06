@@ -79,8 +79,8 @@ const PlayerNameInput = ({
         <div
           ref={avatarSelectRef}
           className="absolute top-full left-0 mt-2 p-2 bg-gray-800/95 
-          backdrop-blur-sm rounded-xl border border-white/20 grid grid-cols-4 gap-2 z-10
-          animate-fadeIn shadow-lg shadow-black/20"
+          backdrop-blur-sm rounded-xl border border-white/20 grid grid-cols-5 gap-2 z-10
+          animate-fadeIn shadow-lg shadow-black/20 w-[400px]"
         >
           {availableAvatars.map((avatarOption) => (
             <button
