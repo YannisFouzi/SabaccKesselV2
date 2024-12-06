@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import EndRoundOverlay from "./gameBoard/finalReveal/EndRoundOverlay";
 import FinalRevealOverlay from "./gameBoard/finalReveal/FinalRevealOverlay";
 import GameDecks from "./gameBoard/GameDecks";
@@ -45,6 +45,7 @@ const GameBoardMain = ({
   hasUsedJokerA,
   jokerEUsed,
 }) => {
+  const [previewCardId, setPreviewCardId] = useState(null);
   const currentPlayer = players?.[currentPlayerIndex];
 
   const getNextPlayer = () => {
@@ -67,6 +68,10 @@ const GameBoardMain = ({
   const nextPlayer = getNextPlayer();
 
   if (!currentPlayer) return null;
+
+  const handlePreviewChange = (cardId, newCard) => {
+    setPreviewCardId(cardId);
+  };
 
   return (
     <div className="relative w-full min-h-screen bg-gray-100 flex flex-col overflow-hidden">
@@ -100,6 +105,7 @@ const GameBoardMain = ({
                   pendingDrawnCard={pendingDrawnCard}
                   currentPlayer={currentPlayer}
                   onChooseDiscard={handleDiscard}
+                  onPreviewChange={handlePreviewChange}
                 />
               )}
               <PlayerHand
@@ -119,6 +125,7 @@ const GameBoardMain = ({
                 selectedJokers={selectedJokers}
                 onUseJoker={useJoker}
                 usedJokersThisRound={usedJokersThisRound}
+                previewCardId={previewCardId}
               />
             </div>
 

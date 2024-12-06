@@ -20,6 +20,8 @@ const PlayerHand = ({
   selectedJokers,
   onUseJoker,
   usedJokersThisRound,
+  previewCardId,
+  previewCard,
 }) => {
   const [selectPosition, setSelectPosition] = useState(null);
 
@@ -30,15 +32,19 @@ const PlayerHand = ({
   const hand = player.hand || [];
 
   // Composant pour une carte
-  const Card = ({ card }) => {
+  const Card = ({ card: originalCard }) => {
+    // Si la carte est celle qui doit être prévisualisée, on utilise la carte de prévisualisation
+    const card =
+      previewCardId === originalCard.id ? pendingDrawnCard : originalCard;
+
     const canInteract =
       isCurrentPlayer &&
       pendingDrawnCard &&
-      card.family === pendingDrawnCard.family;
+      originalCard.family === pendingDrawnCard.family;
 
     const handleCardClick = (event) => {
       if (canInteract) {
-        onChooseDiscard(card);
+        onChooseDiscard(originalCard);
       }
       if (
         card.type === CARD_TYPES.IMPOSTOR &&
@@ -86,7 +92,7 @@ const PlayerHand = ({
               card.type === CARD_TYPES.NORMAL ? card.value : null
             )}
             alt={`${card.type} ${card.value || ""}`}
-            className="w-full h-full object-cover rounded-lg"
+            className={`w-full h-full object-cover rounded-lg transition-all duration-300`}
           />
         )}
 
