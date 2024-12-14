@@ -16,6 +16,7 @@ const JokerSelection = ({
   setCurrentJokerSelectionPlayer,
   setGameState,
   standalone = false,
+  jokers = JOKERS,
 }) => {
   const [currentSelection, setCurrentSelection] = useState([]);
   const currentPlayer = players[currentJokerSelectionPlayer];
@@ -62,7 +63,7 @@ const JokerSelection = ({
         <div className="flex-1 overflow-y-auto bg-white">
           <div className="p-4">
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
-              {Object.entries(JOKERS).map(([key, joker]) => {
+              {Object.entries(jokers).map(([key, joker]) => {
                 const selectedCount = currentSelection.filter(
                   (j) => j === key
                 ).length;
@@ -177,7 +178,7 @@ const JokerSelection = ({
                   key={i}
                   className="inline-block bg-blue-100 px-2 py-1 rounded"
                 >
-                  {JOKERS[j].title || `Joker ${j}`}
+                  {jokers[j].title || `Joker ${j}`}
                 </span>
               ))}
             </div>

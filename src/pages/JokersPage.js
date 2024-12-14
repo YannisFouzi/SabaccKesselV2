@@ -4,6 +4,15 @@ import PlayerNameInput from "../components/PlayerNameInput";
 import { AVATAR_LIST } from "../constants/avatarConfig";
 import { GAME_CONFIG, JOKERS } from "../constants/gameConstants";
 
+// Créer une version des jokers avec tous les jetons activés
+const AVAILABLE_JOKERS = Object.entries(JOKERS).reduce((acc, [key, joker]) => {
+  acc[key] = {
+    ...joker,
+    enabled: true, // Forcer tous les jokers à être activés
+  };
+  return acc;
+}, {});
+
 const PlayerSetup = ({ onComplete }) => {
   const [playerName, setPlayerName] = useState("");
   const [playerAvatar, setPlayerAvatar] = useState(null);
@@ -72,7 +81,7 @@ const PlayerActiveJokers = ({ jokers, onUseJoker, player }) => {
 
   const handleConfirmUse = () => {
     if (jokerToConfirm !== null) {
-      const joker = JOKERS[jokers[jokerToConfirm]];
+      const joker = AVAILABLE_JOKERS[jokers[jokerToConfirm]]; // Utiliser AVAILABLE_JOKERS au lieu de JOKERS
       setDisplayedJoker({
         id: jokers[jokerToConfirm],
         title: joker.title,
@@ -171,7 +180,7 @@ const PlayerActiveJokers = ({ jokers, onUseJoker, player }) => {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {jokers.map((jokerId, index) => {
-            const joker = JOKERS[jokerId];
+            const joker = AVAILABLE_JOKERS[jokerId]; // Utiliser AVAILABLE_JOKERS au lieu de JOKERS
             const isConfirming = jokerToConfirm === index;
 
             return (
@@ -277,7 +286,7 @@ const JokersPage = ({ setGameMode }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col">
         <div className="text-white text-right mb-4">
           Heure d'arrivée: {arrivalTime}
         </div>
@@ -292,16 +301,17 @@ const JokersPage = ({ setGameMode }) => {
             setCurrentJokerSelectionPlayer={() => {}}
             setGameState={() => {}}
             standalone={true}
+            jokers={AVAILABLE_JOKERS} // Passer les jokers activés au composant JokerSelection
           />
         ) : (
-          <div className="space-y-6">
+          <div className="flex-1 flex flex-col space-y-6 overflow-y-auto">
             <PlayerActiveJokers
               jokers={selectedJokers}
               onUseJoker={handleUseJoker}
               player={player}
             />
 
-            <div className="flex justify-center">
+            <div className="flex justify-center pb-6">
               <button
                 onClick={handleBack}
                 className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
@@ -312,6 +322,16 @@ const JokersPage = ({ setGameMode }) => {
           </div>
         )}
       </div>
+
+      <style jsx global>{`
+        body {
+          overflow-y: auto !important;
+        }
+        #root {
+          min-height: 100vh;
+          overflow-y: auto !important;
+        }
+      `}</style>
     </div>
   );
 };
