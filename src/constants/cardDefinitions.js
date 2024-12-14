@@ -17,12 +17,12 @@ export const HAND_TYPES = {
 
 export const DECK_STRUCTURE = {
   [CARD_FAMILIES.SAND]: {
-    normalCards: [1, 2, 3, 4, 5, 6],
+    normalCards: [1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6],
     sylopCount: 1,
     impostorCount: 3,
   },
   [CARD_FAMILIES.BLOOD]: {
-    normalCards: [1, 2, 3, 4, 5, 6],
+    normalCards: [1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6],
     sylopCount: 1,
     impostorCount: 3,
   },
