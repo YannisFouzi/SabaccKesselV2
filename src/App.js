@@ -4,6 +4,7 @@ import { GAME_CONFIG } from "./constants/gameConstants";
 import LocalSetup from "./layouts/main/LocalSetup";
 import MainMenu from "./layouts/main/MainMenu";
 import Rules from "./layouts/main/Rules";
+import JokersPage from "./pages/JokersPage";
 
 const App = () => {
   const [gameMode, setGameMode] = useState(null);
@@ -141,6 +142,10 @@ const App = () => {
         withoutJokers={withoutJokers}
       />
     );
+  }
+
+  if (gameMode === "jokers") {
+    return <JokersPage setGameMode={setGameMode} />;
   }
 
   return null;

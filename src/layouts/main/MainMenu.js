@@ -53,6 +53,21 @@ const MainMenu = ({ setGameMode }) => {
                     <span>🎮</span>
                   </button>
                 </div>
+
+                <button
+                  onClick={() => setGameMode("jokers")}
+                  className="w-full mt-4 py-4 px-6 rounded-xl text-lg font-bold
+                    bg-gradient-to-r from-green-600 to-teal-600 
+                    hover:from-green-700 hover:to-teal-700
+                    text-white shadow-lg
+                    transform transition-all duration-200 
+                    hover:-translate-y-0.5 active:translate-y-0
+                    flex items-center justify-center space-x-2"
+                >
+                  <span>✨</span>
+                  <span>Jetons d'action</span>
+                  <span>🎴</span>
+                </button>
               </div>
             </div>
 

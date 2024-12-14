@@ -15,6 +15,7 @@ const JokerSelection = ({
   setSelectedJokers,
   setCurrentJokerSelectionPlayer,
   setGameState,
+  standalone = false,
 }) => {
   const [currentSelection, setCurrentSelection] = useState([]);
   const currentPlayer = players[currentJokerSelectionPlayer];
@@ -22,16 +23,20 @@ const JokerSelection = ({
   const handleConfirmSelection = () => {
     if (currentSelection.length !== 3) return;
 
-    setSelectedJokers((prev) => ({
-      ...prev,
-      [currentPlayer.id]: currentSelection,
-    }));
-
-    if (currentJokerSelectionPlayer === players.length - 1) {
-      setGameState(GAME_STATES.INITIAL_DICE_ROLL);
+    if (standalone) {
+      setSelectedJokers(currentSelection);
     } else {
-      setCurrentJokerSelectionPlayer(currentJokerSelectionPlayer + 1);
-      setCurrentSelection([]);
+      setSelectedJokers((prev) => ({
+        ...prev,
+        [currentPlayer.id]: currentSelection,
+      }));
+
+      if (currentJokerSelectionPlayer === players.length - 1) {
+        setGameState(GAME_STATES.INITIAL_DICE_ROLL);
+      } else {
+        setCurrentJokerSelectionPlayer(currentJokerSelectionPlayer + 1);
+        setCurrentSelection([]);
+      }
     }
   };
 
