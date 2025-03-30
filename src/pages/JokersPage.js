@@ -284,12 +284,18 @@ const JokersPage = ({ setGameMode }) => {
     setGameMode(null);
   };
 
+  const handleBackToSelection = () => {
+    setSelectedJokers(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900">
       <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col">
-        <div className="text-white text-right mb-4">
-          Heure d'arrivée: {arrivalTime}
-        </div>
+        {selectedJokers && (
+          <div className="text-white text-right mb-4">
+            Heure d'arrivée: {arrivalTime}
+          </div>
+        )}
 
         {!player ? (
           <PlayerSetup onComplete={handlePlayerSetup} />
@@ -311,7 +317,13 @@ const JokersPage = ({ setGameMode }) => {
               player={player}
             />
 
-            <div className="flex justify-center pb-6">
+            <div className="flex justify-center gap-4 pb-6">
+              <button
+                onClick={handleBackToSelection}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Retour à la sélection
+              </button>
               <button
                 onClick={handleBack}
                 className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
