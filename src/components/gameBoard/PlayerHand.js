@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { getCardBack, getCardImage } from "../../constants/cardImages";
+import React, { useCallback, useMemo, useState } from "react";
+import { getCardBack } from "../../constants/cardImages";
 import { CARD_TYPES } from "../../constants/gameConstants";
+import LazyImage from "../LazyImage";
 import PlayerIdentity from "../PlayerIdentity";
 import PlayerJokers from "./PlayerJokers";
 
@@ -25,27 +26,45 @@ const PlayerHand = ({
 }) => {
   const [selectPosition, setSelectPosition] = useState(null);
 
-  if (!player) {
-    return null;
-  }
+  // Mémoriser les calculs coûteux
+  const hand = useMemo(() => player?.hand || [], [player?.hand]);
 
-  const hand = player.hand || [];
+  const playerTokensInfo = useMemo(
+    () => ({
+      current: player?.tokens || 0,
+      starting: startingTokens[player?.id],
+      lost:
+        typeof startingTokens[player?.id] !== "undefined"
+          ? startingTokens[player?.id] - (player?.tokens || 0)
+          : 0,
+    }),
+    [player?.tokens, startingTokens, player?.id]
+  );
 
-  // Composant pour une carte
-  const Card = ({ card: originalCard }) => {
-    // Si la carte est celle qui doit être prévisualisée, on utilise la carte de prévisualisation
-    const card =
-      previewCardId === originalCard.id ? pendingDrawnCard : originalCard;
+  const shouldShowWarning = useMemo(
+    () => players?.length > 0 && consecutivePasses === players.length - 1,
+    [players?.length, consecutivePasses]
+  );
 
-    const canInteract =
-      isCurrentPlayer &&
-      pendingDrawnCard &&
-      originalCard.family === pendingDrawnCard.family;
+  const hasJokers = useMemo(
+    () => selectedJokers?.[player?.id]?.length > 0,
+    [selectedJokers, player?.id]
+  );
 
-    const handleCardClick = (event) => {
+  // Optimiser les callbacks
+  const handleCardClick = useCallback(
+    (originalCard, event) => {
+      const card =
+        previewCardId === originalCard.id ? pendingDrawnCard : originalCard;
+      const canInteract =
+        isCurrentPlayer &&
+        pendingDrawnCard &&
+        originalCard.family === pendingDrawnCard.family;
+
       if (canInteract) {
         onChooseDiscard(originalCard);
       }
+
       if (
         card.type === CARD_TYPES.IMPOSTOR &&
         isRevealPhase &&
@@ -58,7 +77,42 @@ const PlayerHand = ({
           y: rect.top - 10,
         });
       }
-    };
+    },
+    [
+      isCurrentPlayer,
+      pendingDrawnCard,
+      previewCardId,
+      onChooseDiscard,
+      isRevealPhase,
+      selectedDiceValue,
+    ]
+  );
+
+  const handleDiceValueSelect = useCallback(
+    (cardId, value) => {
+      onSelectDiceValue(cardId, value);
+      setSelectPosition(null);
+    },
+    [onSelectDiceValue]
+  );
+
+  if (!player) {
+    return null;
+  }
+
+  // Composant pour une carte
+  const Card = React.memo(({ card: originalCard }) => {
+    // Si la carte est celle qui doit être prévisualisée, on utilise la carte de prévisualisation
+    const card =
+      previewCardId === originalCard.id ? pendingDrawnCard : originalCard;
+    const canInteract =
+      isCurrentPlayer &&
+      pendingDrawnCard &&
+      originalCard.family === pendingDrawnCard.family;
+
+    // Déterminer si la carte doit être cachée
+    const isCardHidden =
+      (!isRevealPhase && !isCurrentPlayer) || isTransitioning;
 
     return (
       <div
@@ -70,29 +124,24 @@ const PlayerHand = ({
           transition-transform 
           hover:scale-105
           ${canInteract ? "cursor-pointer hover:opacity-75" : "cursor-default"}
-          ${
-            (!isRevealPhase && !isCurrentPlayer) || isTransitioning
-              ? "transform rotate-180"
-              : ""
-          }
+          ${isCardHidden ? "transform rotate-180" : ""}
         `}
-        onClick={handleCardClick}
+        onClick={(event) => handleCardClick(originalCard, event)}
       >
-        {(!isRevealPhase && !isCurrentPlayer) || isTransitioning ? (
-          <img
-            src={getCardBack(card.family)}
+        {isCardHidden ? (
+          <LazyImage
+            loadImageFn={() => getCardBack(card.family)}
             alt="Carte cachée"
-            className="w-full h-full object-cover rounded-lg"
+            className="w-full h-full object-cover rounded-lg transition-all duration-300"
           />
         ) : (
-          <img
-            src={getCardImage(
-              card.family,
-              card.type,
-              card.type === CARD_TYPES.NORMAL ? card.value : null
-            )}
+          <LazyImage
+            family={card.family}
+            type={card.type}
+            value={card.type === CARD_TYPES.NORMAL ? card.value : null}
             alt={`${card.type} ${card.value || ""}`}
-            className={`w-full h-full object-cover rounded-lg transition-all duration-300`}
+            className="w-full h-full object-cover rounded-lg transition-all duration-300"
+            fallbackClassName="rounded-lg"
           />
         )}
 
@@ -113,10 +162,9 @@ const PlayerHand = ({
               <div className="bg-gray-900/95 rounded-xl p-3 shadow-xl backdrop-blur-sm">
                 <select
                   className="bg-white p-2 rounded text-sm min-w-[100px]"
-                  onChange={(e) => {
-                    onSelectDiceValue(card.id, parseInt(e.target.value));
-                    setSelectPosition(null);
-                  }}
+                  onChange={(e) =>
+                    handleDiceValueSelect(card.id, parseInt(e.target.value))
+                  }
                   value=""
                 >
                   <option value="">Choisir</option>
@@ -132,12 +180,12 @@ const PlayerHand = ({
           )}
       </div>
     );
-  };
+  });
 
   return (
     <div className="relative flex flex-col gap-4">
       {/* Alerte de révélation imminente */}
-      {players?.length > 0 && consecutivePasses === players.length - 1 && (
+      {shouldShowWarning && (
         <div className="w-full flex justify-center mb-4">
           <div className="bg-red-500/80 backdrop-blur-sm px-6 py-2 rounded-lg shadow-lg text-white font-bold flex items-center space-x-2 animate-pulse">
             <span>⚠️</span>
@@ -165,7 +213,7 @@ const PlayerHand = ({
       </div>
 
       {/* Jokers au milieu - ne les afficher que si le joueur a des jokers sélectionnés */}
-      {selectedJokers?.[player.id]?.length > 0 && (
+      {hasJokers && (
         <div className="w-full flex justify-center">
           <div className="w-[180px]">
             <PlayerJokers
@@ -188,13 +236,12 @@ const PlayerHand = ({
             className={`${isCurrentPlayer ? "text-yellow-400" : "text-white"}`}
           />
           <div className="text-sm">
-            {player.tokens} jetons
-            {typeof startingTokens[player.id] !== "undefined" &&
-              startingTokens[player.id] !== player.tokens && (
-                <span className="text-red-500 ml-1">
-                  (-{startingTokens[player.id] - player.tokens})
-                </span>
-              )}
+            {playerTokensInfo.current} jetons
+            {playerTokensInfo.lost > 0 && (
+              <span className="text-red-500 ml-1">
+                (-{playerTokensInfo.lost})
+              </span>
+            )}
           </div>
         </div>
 
@@ -221,4 +268,22 @@ const PlayerHand = ({
   );
 };
 
-export default PlayerHand;
+// Mémorisation avec fonction de comparaison optimisée
+export default React.memo(PlayerHand, (prevProps, nextProps) => {
+  // Comparer les props critiques pour éviter les re-renders inutiles
+  return (
+    prevProps.player?.id === nextProps.player?.id &&
+    prevProps.isCurrentPlayer === nextProps.isCurrentPlayer &&
+    prevProps.isRevealPhase === nextProps.isRevealPhase &&
+    prevProps.isTransitioning === nextProps.isTransitioning &&
+    prevProps.selectedDiceValue === nextProps.selectedDiceValue &&
+    prevProps.consecutivePasses === nextProps.consecutivePasses &&
+    prevProps.previewCardId === nextProps.previewCardId &&
+    JSON.stringify(prevProps.player?.hand) ===
+      JSON.stringify(nextProps.player?.hand) &&
+    JSON.stringify(prevProps.selectedJokers?.[prevProps.player?.id]) ===
+      JSON.stringify(nextProps.selectedJokers?.[nextProps.player?.id]) &&
+    JSON.stringify(prevProps.usedJokersThisRound) ===
+      JSON.stringify(nextProps.usedJokersThisRound)
+  );
+});

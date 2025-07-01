@@ -1,15 +1,15 @@
 import React from "react";
 import { AVATAR_LIST } from "../../constants/avatarConfig";
-import { getCardBack, getCardImage } from "../../constants/cardImages";
+import { getCardBack } from "../../constants/cardImages";
 import { CARD_FAMILIES, CARD_TYPES } from "../../constants/gameConstants";
+import { usePlayersInfo } from "../../contexts/GameContext";
 import { useInitialCardDraw } from "../../hooks/useInitialCardDraw";
+import LazyImage from "../LazyImage";
 
-const InitialCardDraw = ({
-  players,
-  setGameState,
-  GAME_STATES,
-  setPlayerOrder,
-}) => {
+const InitialCardDraw = ({ setGameState, GAME_STATES, setPlayerOrder }) => {
+  // Utilisation des hooks du Context API
+  const { players } = usePlayersInfo();
+
   const {
     availableCards,
     drawnCards,
@@ -95,8 +95,10 @@ const InitialCardDraw = ({
                           disabled={revealCards}
                         >
                           <div className="transform transition-all duration-200 hover:scale-110 hover:-translate-y-8 hover:brightness-110">
-                            <img
-                              src={getCardBack(CARD_FAMILIES.SAND)}
+                            <LazyImage
+                              loadImageFn={() =>
+                                getCardBack(CARD_FAMILIES.SAND)
+                              }
                               alt="Carte face cachée"
                               className="w-20 sm:w-28 rounded-lg shadow-lg hover:shadow-xl"
                             />
@@ -134,22 +136,27 @@ const InitialCardDraw = ({
                       </span>
                       {drawnCards[player.id] && (
                         <div className="w-20 sm:w-28">
-                          <img
-                            src={
-                              revealCards
-                                ? getCardImage(
-                                    drawnCards[player.id].family,
-                                    drawnCards[player.id].type,
-                                    drawnCards[player.id].type ===
-                                      CARD_TYPES.NORMAL
-                                      ? drawnCards[player.id].value
-                                      : null
-                                  )
-                                : getCardBack(CARD_FAMILIES.SAND)
-                            }
-                            alt="Carte tirée"
-                            className="w-full rounded-lg shadow-lg"
-                          />
+                          {revealCards ? (
+                            <LazyImage
+                              family={drawnCards[player.id].family}
+                              type={drawnCards[player.id].type}
+                              value={
+                                drawnCards[player.id].type === CARD_TYPES.NORMAL
+                                  ? drawnCards[player.id].value
+                                  : null
+                              }
+                              alt="Carte tirée"
+                              className="w-full rounded-lg shadow-lg"
+                            />
+                          ) : (
+                            <LazyImage
+                              loadImageFn={() =>
+                                getCardBack(CARD_FAMILIES.SAND)
+                              }
+                              alt="Carte tirée"
+                              className="w-full rounded-lg shadow-lg"
+                            />
+                          )}
                         </div>
                       )}
                     </div>

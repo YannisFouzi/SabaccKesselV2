@@ -1,13 +1,12 @@
 import React from "react";
+import { useGameInfo, usePlayersInfo } from "../../contexts/GameContext";
 import PlayerIdentity from "../PlayerIdentity";
 
-const GameOverScreen = ({
-  winners,
-  players,
-  playerOrder,
-  roundStartPlayer,
-  onGameEnd,
-}) => {
+const GameOverScreen = ({ winners, onGameEnd }) => {
+  // Utilisation des hooks du Context API
+  const { players, playerOrder } = usePlayersInfo();
+  const { roundStartPlayer } = useGameInfo();
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg max-w-md w-full text-center">
@@ -30,21 +29,22 @@ const GameOverScreen = ({
             Ordre de jeu de la partie :
           </p>
           <div className="flex justify-center space-x-2 flex-wrap">
-            {playerOrder.map((playerId, index) => {
-              const player = players.find((p) => p.id === playerId);
-              return (
-                <div key={playerId} className="flex items-center">
-                  {index > 0 && <span className="mx-1">→</span>}
-                  <span
-                    className={`font-medium ${
-                      playerId === roundStartPlayer ? "text-blue-600" : ""
-                    }`}
-                  >
-                    {player?.name}
-                  </span>
-                </div>
-              );
-            })}
+            {playerOrder &&
+              playerOrder.map((playerId, index) => {
+                const player = players.find((p) => p.id === playerId);
+                return (
+                  <div key={playerId} className="flex items-center">
+                    {index > 0 && <span className="mx-1">→</span>}
+                    <span
+                      className={`font-medium ${
+                        playerId === roundStartPlayer ? "text-blue-600" : ""
+                      }`}
+                    >
+                      {player?.name}
+                    </span>
+                  </div>
+                );
+              })}
           </div>
         </div>
 

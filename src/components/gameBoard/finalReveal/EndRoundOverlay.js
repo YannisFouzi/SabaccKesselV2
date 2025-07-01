@@ -1,10 +1,10 @@
 import React from "react";
 import { CARD_TYPES } from "../../../constants/cardDefinitions";
-import { getCardImage } from "../../../constants/cardImages";
 import {
   calculateRoundResults,
   getNextRoundStarter,
 } from "../../../hooks/endRound";
+import LazyImage from "../../LazyImage";
 import PlayerIdentity from "../../PlayerIdentity";
 
 const EndRoundOverlay = ({
@@ -81,18 +81,20 @@ const EndRoundOverlay = ({
                           key={card.id}
                           className="w-[55px] sm:w-[65px] md:w-[75px] aspect-[2/3]"
                         >
-                          <img
-                            src={getCardImage(
-                              card.family,
+                          <LazyImage
+                            family={card.family}
+                            type={
                               card.type === CARD_TYPES.IMPOSTOR && card.value
                                 ? CARD_TYPES.NORMAL
-                                : card.type,
+                                : card.type
+                            }
+                            value={
                               card.type === CARD_TYPES.IMPOSTOR && card.value
                                 ? card.value
                                 : card.type === CARD_TYPES.NORMAL
                                 ? card.value
                                 : null
-                            )}
+                            }
                             alt={`${card.type} ${card.value || ""}`}
                             className={`w-full h-full object-cover rounded-lg ${
                               player.isWinner ? "ring-2 ring-green-500" : ""

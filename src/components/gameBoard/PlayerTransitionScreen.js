@@ -1,7 +1,8 @@
 import React from "react";
 import { AVATAR_LIST } from "../../constants/avatarConfig";
-import { getCardBack, getCardImage } from "../../constants/cardImages";
+import { getCardBack } from "../../constants/cardImages";
 import { JOKERS } from "../../constants/gameConstants";
+import LazyImage from "../LazyImage";
 
 const ActionHistory = ({ actions, usedJokers, players }) => {
   const getPlayerAvatar = (playerName) => {
@@ -14,19 +15,23 @@ const ActionHistory = ({ actions, usedJokers, players }) => {
 
   const renderCardImage = (card) => {
     return (
-      <img
-        src={
-          card.isHidden
-            ? getCardBack(card.family)
-            : getCardImage(
-                card.family,
-                card.type,
-                card.type === "NORMAL" ? card.value : null
-              )
-        }
-        alt={`Carte ${card.family === "SAND" ? "Sable" : "Sang"}`}
-        className="inline-block w-8 h-12 mx-1 align-middle"
-      />
+      <div className="inline-block w-8 h-12 mx-1 align-middle">
+        {card.isHidden ? (
+          <LazyImage
+            loadImageFn={() => getCardBack(card.family)}
+            alt={`Carte ${card.family === "SAND" ? "Sable" : "Sang"}`}
+            className="w-full h-full"
+          />
+        ) : (
+          <LazyImage
+            family={card.family}
+            type={card.type}
+            value={card.type === "NORMAL" ? card.value : null}
+            alt={`Carte ${card.family === "SAND" ? "Sable" : "Sang"}`}
+            className="w-full h-full"
+          />
+        )}
+      </div>
     );
   };
 

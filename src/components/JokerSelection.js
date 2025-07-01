@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { AVATAR_LIST } from "../constants/avatarConfig";
 import { GAME_STATES, JOKERS } from "../constants/gameConstants";
+import {
+  useGameActions,
+  useJokersInfo,
+  usePlayersInfo,
+} from "../contexts/GameContext";
 import ComingSoonRibbon from "./ComingSoonRibbon";
 
 // Importation dynamique des images des jokers
@@ -10,15 +15,18 @@ Object.keys(JOKERS).forEach((key) => {
 });
 
 const JokerSelection = ({
-  players,
-  currentJokerSelectionPlayer,
-  setSelectedJokers,
-  setCurrentJokerSelectionPlayer,
   setGameState,
   standalone = false,
   jokers = JOKERS,
 }) => {
   const [currentSelection, setCurrentSelection] = useState([]);
+
+  // Utilisation des hooks du Context API
+  const { players } = usePlayersInfo();
+  const { currentJokerSelectionPlayer, selectedJokers } = useJokersInfo();
+  const { setSelectedJokers, setCurrentJokerSelectionPlayer } =
+    useGameActions();
+
   const currentPlayer = players[currentJokerSelectionPlayer];
 
   const handleConfirmSelection = () => {

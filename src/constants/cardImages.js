@@ -1,66 +1,100 @@
 import { CARD_FAMILIES, CARD_TYPES } from "./cardDefinitions";
 
-// Importons directement toutes les images
-import cardBackSand from "../assets/img/dos_sable.png";
-import cardBackBlood from "../assets/img/dos_sang.png";
+// Cache pour les images chargées
+const imageCache = new Map();
 
-// Import des cartes de sable
-import sable1 from "../assets/img/sable_1.png";
-import sable2 from "../assets/img/sable_2.png";
-import sable3 from "../assets/img/sable_3.png";
-import sable4 from "../assets/img/sable_4.png";
-import sable5 from "../assets/img/sable_5.png";
-import sable6 from "../assets/img/sable_6.png";
-import sableImposteur from "../assets/img/sable_imposteur.png";
-import sableSylop from "../assets/img/sable_sylop.png";
-
-// Import des cartes de sang
-import sang1 from "../assets/img/sang_1.png";
-import sang2 from "../assets/img/sang_2.png";
-import sang3 from "../assets/img/sang_3.png";
-import sang4 from "../assets/img/sang_4.png";
-import sang5 from "../assets/img/sang_5.png";
-import sang6 from "../assets/img/sang_6.png";
-import sangImposteur from "../assets/img/sang_imposteur.png";
-import sangSylop from "../assets/img/sang_sylop.png";
-
-export const CARD_IMAGES = {
-  [CARD_FAMILIES.SAND]: {
-    [CARD_TYPES.SYLOP]: sableSylop,
-    [CARD_TYPES.IMPOSTOR]: sableImposteur,
-    NORMAL: {
-      1: sable1,
-      2: sable2,
-      3: sable3,
-      4: sable4,
-      5: sable5,
-      6: sable6,
-    },
-    BACK: cardBackSand,
-  },
-  [CARD_FAMILIES.BLOOD]: {
-    [CARD_TYPES.SYLOP]: sangSylop,
-    [CARD_TYPES.IMPOSTOR]: sangImposteur,
-    NORMAL: {
-      1: sang1,
-      2: sang2,
-      3: sang3,
-      4: sang4,
-      5: sang5,
-      6: sang6,
-    },
-    BACK: cardBackBlood,
-  },
-};
-
-// Ajout des fonctions exportées
-export const getCardImage = (family, type, value = null) => {
-  if (type === CARD_TYPES.NORMAL) {
-    return CARD_IMAGES[family].NORMAL[value];
+// Fonction de lazy loading pour les images
+const loadImage = async (imagePath) => {
+  if (imageCache.has(imagePath)) {
+    return imageCache.get(imagePath);
   }
-  return CARD_IMAGES[family][type];
+
+  try {
+    const module = await import(`../assets/img/${imagePath}`);
+    const image = module.default;
+    imageCache.set(imagePath, image);
+    return image;
+  } catch (error) {
+    console.error(`Erreur lors du chargement de l'image: ${imagePath}`, error);
+    return null;
+  }
 };
 
-export const getCardBack = (family) => {
-  return CARD_IMAGES[family].BACK;
+// Fonction pour obtenir le chemin d'une carte
+const getCardPath = (family, type, value = null) => {
+  const familyPrefix = family === CARD_FAMILIES.SAND ? "sable" : "sang";
+
+  switch (type) {
+    case CARD_TYPES.SYLOP:
+      return `${familyPrefix}_sylop.png`;
+    case CARD_TYPES.IMPOSTOR:
+      return `${familyPrefix}_imposteur.png`;
+    case CARD_TYPES.NORMAL:
+      return `${familyPrefix}_${value}.png`;
+    default:
+      return null;
+  }
+};
+
+// Fonction pour obtenir le chemin du dos d'une carte
+const getCardBackPath = (family) => {
+  return family === CARD_FAMILIES.SAND ? "dos_sable.png" : "dos_sang.png";
+};
+
+// Fonction asynchrone pour obtenir l'image d'une carte
+export const getCardImage = async (family, type, value = null) => {
+  const path = getCardPath(family, type, value);
+  if (!path) return null;
+  return await loadImage(path);
+};
+
+// Fonction asynchrone pour obtenir le dos d'une carte
+export const getCardBack = async (family) => {
+  const path = getCardBackPath(family);
+  return await loadImage(path);
+};
+
+// Fonction pour précharger les images critiques (cartes actuellement visibles)
+export const preloadCriticalImages = async (criticalCards = []) => {
+  const preloadPromises = criticalCards.map(({ family, type, value }) =>
+    getCardImage(family, type, value)
+  );
+
+  // Précharger aussi les dos de cartes
+  preloadPromises.push(getCardBack(CARD_FAMILIES.SAND));
+  preloadPromises.push(getCardBack(CARD_FAMILIES.BLOOD));
+
+  try {
+    await Promise.all(preloadPromises);
+  } catch (error) {
+    console.error("Erreur lors du préchargement des images critiques:", error);
+  }
+};
+
+// Fonction pour vider le cache (utile pour les tests ou la gestion mémoire)
+export const clearImageCache = () => {
+  imageCache.clear();
+};
+
+// Export de compatibilité synchrone (fallback vers un placeholder)
+export const getCardImageSync = (family, type, value = null) => {
+  const path = getCardPath(family, type, value);
+  if (imageCache.has(path)) {
+    return imageCache.get(path);
+  }
+
+  // Retourner un placeholder ou déclencher le chargement en arrière-plan
+  getCardImage(family, type, value);
+  return null; // Le composant devra gérer ce cas avec un skeleton/placeholder
+};
+
+export const getCardBackSync = (family) => {
+  const path = getCardBackPath(family);
+  if (imageCache.has(path)) {
+    return imageCache.get(path);
+  }
+
+  // Retourner un placeholder ou déclencher le chargement en arrière-plan
+  getCardBack(family);
+  return null;
 };

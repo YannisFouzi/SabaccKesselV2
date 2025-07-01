@@ -1,4 +1,12 @@
 import React, { useState } from "react";
+import { GAME_STATES } from "../constants/gameConstants";
+import {
+  useCardsInfo,
+  useGameActions,
+  useGameInfo,
+  useJokersInfo,
+  usePlayersInfo,
+} from "../contexts/GameContext";
 import EndRoundOverlay from "./gameBoard/finalReveal/EndRoundOverlay";
 import FinalRevealOverlay from "./gameBoard/finalReveal/FinalRevealOverlay";
 import GameDecks from "./gameBoard/GameDecks";
@@ -7,45 +15,47 @@ import PlayerTransitionScreen from "./gameBoard/PlayerTransitionScreen";
 import RemainingPlayers from "./gameBoard/RemainingPlayers";
 import DiscardChoice from "./gameTurn/DiscardChoice";
 
-const GameBoardMain = ({
-  gameState,
-  players,
-  currentPlayerIndex,
-  round,
-  turn,
-  consecutivePasses,
-  diceResults,
-  pendingDrawnCard,
-  sandDecks,
-  bloodDecks,
-  handleImpostorValue,
-  drawCard,
-  handleDiscard,
-  passTurn,
-  rollDice,
-  selectImpostorValue,
-  compareHands,
-  calculateHandValue,
-  getHandValue,
-  HAND_TYPES,
-  startingTokens,
-  setGameState,
-  GAME_STATES,
-  isTransitioning,
-  confirmTransition,
-  getHistorySinceLastTurn,
-  playerOrder,
-  roundStartPlayer,
-  endRound,
-  setDiceResults,
-  lastPlayerBeforeReveal,
-  selectedJokers,
-  usedJokersThisRound,
-  useJoker,
-  hasUsedJokerA,
-  jokerEUsed,
-}) => {
+const GameBoardMain = () => {
   const [previewCardId, setPreviewCardId] = useState(null);
+
+  // Utiliser les hooks du context
+  const { gameState, round, turn, consecutivePasses, jokerEUsed } =
+    useGameInfo();
+  const {
+    players,
+    currentPlayerIndex,
+    playerOrder,
+    roundStartPlayer,
+    startingTokens,
+  } = usePlayersInfo();
+  const {
+    sandDecks,
+    bloodDecks,
+    pendingDrawnCard,
+    diceResults,
+    lastPlayerBeforeReveal,
+  } = useCardsInfo();
+  const { selectedJokers, usedJokersThisRound, hasUsedJokerA } =
+    useJokersInfo();
+  const {
+    drawCard,
+    handleDiscard,
+    passTurn,
+    rollDice,
+    selectImpostorValue,
+    handleImpostorValue,
+    compareHands,
+    calculateHandValue,
+    getHandValue,
+    setGameState,
+    setDiceResults,
+    endRound,
+    useJoker,
+    isTransitioning,
+    confirmTransition,
+    getHistorySinceLastTurn,
+  } = useGameActions();
+
   const currentPlayer = players?.[currentPlayerIndex];
 
   const getNextPlayer = () => {
@@ -159,6 +169,7 @@ const GameBoardMain = ({
       {gameState === GAME_STATES.REVEAL && (
         <FinalRevealOverlay
           players={players}
+          playerOrder={playerOrder}
           lastPlayerBeforeReveal={lastPlayerBeforeReveal}
           diceResults={diceResults}
           compareHands={compareHands}
@@ -180,7 +191,6 @@ const GameBoardMain = ({
           compareHands={compareHands}
           getHandValue={getHandValue}
           startingTokens={startingTokens}
-          HAND_TYPES={HAND_TYPES}
           setGameState={setGameState}
           endRound={endRound}
           GAME_STATES={GAME_STATES}
@@ -192,4 +202,4 @@ const GameBoardMain = ({
   );
 };
 
-export default GameBoardMain;
+export default React.memo(GameBoardMain);

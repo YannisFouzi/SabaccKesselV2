@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 export const useFinalReveal = ({
   players,
+  playerOrder,
   lastPlayerBeforeReveal,
   compareHands,
   handleImpostorValue,
@@ -13,31 +14,47 @@ export const useFinalReveal = ({
   const [, setRevealPhase] = useState("IMPOSTORS");
 
   const orderedPlayers = useMemo(() => {
-    if (!players || players.length === 0) return [];
+    if (
+      !players ||
+      players.length === 0 ||
+      !playerOrder ||
+      playerOrder.length === 0
+    )
+      return [];
 
-    const filteredPlayers = players.filter((p) => p);
-    if (lastPlayerBeforeReveal === null) return filteredPlayers;
+    if (lastPlayerBeforeReveal === null) {
+      // Utiliser l'ordre de jeu pour organiser les joueurs
+      return playerOrder
+        .map((playerId) => players.find((p) => p.id === playerId))
+        .filter(Boolean);
+    }
 
-    const nextPlayerId =
-      lastPlayerBeforeReveal === filteredPlayers.length
-        ? 1
-        : lastPlayerBeforeReveal + 1;
-
-    const startingPlayerIndex = filteredPlayers.findIndex(
-      (p) => p.id === nextPlayerId
+    // Trouver l'index du joueur qui a terminé le tour dans playerOrder
+    const lastPlayerIndex = playerOrder.findIndex(
+      (id) => id === lastPlayerBeforeReveal
     );
-    if (startingPlayerIndex === -1) return filteredPlayers;
+
+    if (lastPlayerIndex === -1) {
+      return playerOrder
+        .map((playerId) => players.find((p) => p.id === playerId))
+        .filter(Boolean);
+    }
+
+    // Le joueur suivant commence la révélation
+    const startingPlayerIndex = (lastPlayerIndex + 1) % playerOrder.length;
 
     const orderedPlayers = [];
-    let currentIndex = startingPlayerIndex;
-
-    for (let i = 0; i < filteredPlayers.length; i++) {
-      orderedPlayers.push(filteredPlayers[currentIndex]);
-      currentIndex = (currentIndex + 1) % filteredPlayers.length;
+    for (let i = 0; i < playerOrder.length; i++) {
+      const currentIndex = (startingPlayerIndex + i) % playerOrder.length;
+      const playerId = playerOrder[currentIndex];
+      const player = players.find((p) => p.id === playerId);
+      if (player) {
+        orderedPlayers.push(player);
+      }
     }
 
     return orderedPlayers;
-  }, [players, lastPlayerBeforeReveal]);
+  }, [players, playerOrder, lastPlayerBeforeReveal]);
 
   const getCurrentPlayerUnresolvedImpostors = useCallback(() => {
     if (currentRevealIndex >= orderedPlayers.length) return [];

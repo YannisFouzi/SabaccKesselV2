@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { getCardBack, getCardImage } from "../../constants/cardImages";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { getCardBack } from "../../constants/cardImages";
+import LazyImage from "../LazyImage";
 
 const GameDecks = ({
   visibleSandCard,
@@ -22,139 +23,98 @@ const GameDecks = ({
     return () => clearInterval(interval);
   }, []);
 
-  const canDrawCard =
-    isCurrentPlayerTurn && (currentPlayerTokens > 0 || hasUsedJokerA);
+  // Mémoriser les conditions
+  const canDrawCard = useMemo(
+    () => isCurrentPlayerTurn && (currentPlayerTokens > 0 || hasUsedJokerA),
+    [isCurrentPlayerTurn, currentPlayerTokens, hasUsedJokerA]
+  );
 
-  const renderCard = (card, family, type, onClick) => (
-    <div className="relative w-[90px] sm:w-[110px] md:w-[130px] lg:w-[150px] transform hover:scale-105 transition-all duration-300">
-      {card && (
-        <>
+  // Mémoriser les infos d'état du jeu
+  const gameInfo = useMemo(
+    () => ({
+      round,
+      turn,
+      consecutivePasses,
+      jokerEUsed,
+    }),
+    [round, turn, consecutivePasses, jokerEUsed]
+  );
+
+  // Optimiser les callbacks
+  const handleDrawSandVisible = useCallback(() => {
+    onDrawCard("SAND", "VISIBLE");
+  }, [onDrawCard]);
+
+  const handleDrawSandHidden = useCallback(() => {
+    onDrawCard("SAND", "HIDDEN");
+  }, [onDrawCard]);
+
+  const handleDrawBloodVisible = useCallback(() => {
+    onDrawCard("BLOOD", "VISIBLE");
+  }, [onDrawCard]);
+
+  const handleDrawBloodHidden = useCallback(() => {
+    onDrawCard("BLOOD", "HIDDEN");
+  }, [onDrawCard]);
+
+  const renderCard = useCallback(
+    (card, family, type, onClick) => {
+      return (
+        <div className="relative w-[90px] sm:w-[110px] md:w-[130px] lg:w-[150px] transform hover:scale-105 transition-all duration-300">
+          {card && (
+            <>
+              <div
+                className={`absolute inset-0 ${
+                  family === "SAND" ? "bg-amber-500" : "bg-red-500"
+                } opacity-20 blur-lg ${glowEffect ? "animate-pulse" : ""}`}
+              />
+              <div
+                className={`absolute inset-0 bg-black/40 blur-sm transform translate-y-2 ${
+                  canDrawCard ? "hover:translate-y-1" : ""
+                } transition-all duration-200`}
+              />
+            </>
+          )}
           <div
-            className={`absolute inset-0 ${
-              family === "SAND" ? "bg-amber-500" : "bg-red-500"
-            } opacity-20 blur-lg ${glowEffect ? "animate-pulse" : ""}`}
-            style={{
-              maskImage: `url(${
-                type === "VISIBLE" && card
-                  ? getCardImage(
-                      family,
-                      card.type,
-                      card.type === "NORMAL" ? card.value : null
-                    )
-                  : getCardBack(family)
-              })`,
-              WebkitMaskImage: `url(${
-                type === "VISIBLE" && card
-                  ? getCardImage(
-                      family,
-                      card.type,
-                      card.type === "NORMAL" ? card.value : null
-                    )
-                  : getCardBack(family)
-              })`,
-              maskSize: "contain",
-              WebkitMaskSize: "contain",
-              maskRepeat: "no-repeat",
-              WebkitMaskRepeat: "no-repeat",
-              maskPosition: "center",
-              WebkitMaskPosition: "center",
-            }}
-          />
-          <div
-            className={`absolute inset-0 bg-black/40 blur-sm transform translate-y-2 ${
-              canDrawCard ? "hover:translate-y-1" : ""
-            } transition-all duration-200`}
-            style={{
-              maskImage: `url(${
-                type === "VISIBLE" && card
-                  ? getCardImage(
-                      family,
-                      card.type,
-                      card.type === "NORMAL" ? card.value : null
-                    )
-                  : getCardBack(family)
-              })`,
-              WebkitMaskImage: `url(${
-                type === "VISIBLE" && card
-                  ? getCardImage(
-                      family,
-                      card.type,
-                      card.type === "NORMAL" ? card.value : null
-                    )
-                  : getCardBack(family)
-              })`,
-              maskSize: "contain",
-              WebkitMaskSize: "contain",
-              maskRepeat: "no-repeat",
-              WebkitMaskRepeat: "no-repeat",
-              maskPosition: "center",
-              WebkitMaskPosition: "center",
-            }}
-          />
-        </>
-      )}
-      <div
-        className={`relative p-2 sm:p-3 ${
-          family === "SAND"
-            ? "bg-gradient-to-br from-amber-900/80 to-amber-700/60"
-            : "bg-gradient-to-br from-red-900/80 to-red-700/60"
-        } backdrop-blur-xl border-2 ${
-          family === "SAND" ? "border-amber-400/30" : "border-red-400/30"
-        } shadow-2xl`}
-        style={{
-          maskImage: `url(${
-            type === "VISIBLE" && card
-              ? getCardImage(
-                  family,
-                  card.type,
-                  card.type === "NORMAL" ? card.value : null
-                )
-              : getCardBack(family)
-          })`,
-          WebkitMaskImage: `url(${
-            type === "VISIBLE" && card
-              ? getCardImage(
-                  family,
-                  card.type,
-                  card.type === "NORMAL" ? card.value : null
-                )
-              : getCardBack(family)
-          })`,
-          maskSize: "contain",
-          WebkitMaskSize: "contain",
-          maskRepeat: "no-repeat",
-          WebkitMaskRepeat: "no-repeat",
-          maskPosition: "center",
-          WebkitMaskPosition: "center",
-        }}
-      >
-        <button
-          onClick={onClick}
-          disabled={!canDrawCard}
-          className={`w-full aspect-[2/3] transform transition-all duration-300 ${
-            canDrawCard
-              ? "hover:scale-105 hover:-translate-y-2 active:translate-y-0 hover:brightness-125"
-              : "opacity-50 grayscale"
-          }`}
-        >
-          <img
-            src={
-              type === "VISIBLE" && card
-                ? getCardImage(
-                    family,
-                    card.type,
-                    card.type === "NORMAL" ? card.value : null
-                  )
-                : getCardBack(family)
-            }
-            alt={`${type === "VISIBLE" ? "Carte" : "Pioche"} ${
-              family === "SAND" ? "Sable" : "Sang"
-            }`}
-            className="w-full h-full object-contain"
-          />
-        </button>
-      </div>
-    </div>
+            className={`relative p-2 sm:p-3 ${
+              family === "SAND"
+                ? "bg-gradient-to-br from-amber-900/80 to-amber-700/60"
+                : "bg-gradient-to-br from-red-900/80 to-red-700/60"
+            } backdrop-blur-xl border-2 ${
+              family === "SAND" ? "border-amber-400/30" : "border-red-400/30"
+            } shadow-2xl rounded-xl`}
+          >
+            <button
+              onClick={onClick}
+              disabled={!canDrawCard}
+              className={`w-full aspect-[2/3] transform transition-all duration-300 ${
+                canDrawCard
+                  ? "hover:scale-105 hover:-translate-y-2 active:translate-y-0 hover:brightness-125"
+                  : "opacity-50 grayscale"
+              }`}
+            >
+              {type === "VISIBLE" && card ? (
+                <LazyImage
+                  family={family}
+                  type={card.type}
+                  value={card.type === "NORMAL" ? card.value : null}
+                  alt={`Carte ${family === "SAND" ? "Sable" : "Sang"}`}
+                  className="w-full h-full object-contain rounded-lg"
+                  fallbackClassName="rounded-lg"
+                />
+              ) : (
+                <LazyImage
+                  loadImageFn={() => getCardBack(family)}
+                  alt={`Pioche ${family === "SAND" ? "Sable" : "Sang"}`}
+                  className="w-full h-full object-contain rounded-lg"
+                />
+              )}
+            </button>
+          </div>
+        </div>
+      );
+    },
+    [canDrawCard, glowEffect]
   );
 
   return (
@@ -170,22 +130,22 @@ const GameDecks = ({
         <div className="flex items-center space-x-6 sm:space-x-10 text-white/90 text-sm sm:text-base">
           <div className="flex items-center space-x-2">
             <span className="text-cyan-400">◈</span>
-            <span className="font-bold">Manche {round}</span>
+            <span className="font-bold">Manche {gameInfo.round}</span>
           </div>
           <div className="flex items-center space-x-2">
             <span className="text-purple-400">◈</span>
-            <span className="font-bold">Tour {turn}/3</span>
+            <span className="font-bold">Tour {gameInfo.turn}/3</span>
           </div>
-          {consecutivePasses > 0 && (
+          {gameInfo.consecutivePasses > 0 && (
             <div className="flex items-center space-x-2">
               <span className="text-yellow-400">⚡</span>
               <span className="font-bold">
-                {consecutivePasses}{" "}
-                {consecutivePasses === 1 ? "passe" : "passes"}
+                {gameInfo.consecutivePasses}{" "}
+                {gameInfo.consecutivePasses === 1 ? "passe" : "passes"}
               </span>
             </div>
           )}
-          {jokerEUsed && (
+          {gameInfo.jokerEUsed && (
             <div className="flex items-center space-x-2">
               <span className="text-red-400">★</span>
               <span className="font-bold text-yellow-400">Imposteur = 6</span>
@@ -200,26 +160,15 @@ const GameDecks = ({
             visibleSandCard,
             "SAND",
             "VISIBLE",
-            () => canDrawCard && onDrawCard("SAND", "VISIBLE")
+            handleDrawSandVisible
           )}
-          {renderCard(
-            { type: "HIDDEN" },
-            "SAND",
-            "HIDDEN",
-            () => canDrawCard && onDrawCard("SAND", "HIDDEN")
-          )}
-
-          {renderCard(
-            { type: "HIDDEN" },
-            "BLOOD",
-            "HIDDEN",
-            () => canDrawCard && onDrawCard("BLOOD", "HIDDEN")
-          )}
+          {renderCard(null, "SAND", "HIDDEN", handleDrawSandHidden)}
+          {renderCard(null, "BLOOD", "HIDDEN", handleDrawBloodHidden)}
           {renderCard(
             visibleBloodCard,
             "BLOOD",
             "VISIBLE",
-            () => canDrawCard && onDrawCard("BLOOD", "VISIBLE")
+            handleDrawBloodVisible
           )}
         </div>
       </div>
@@ -227,4 +176,19 @@ const GameDecks = ({
   );
 };
 
-export default GameDecks;
+// Mémorisation avec fonction de comparaison optimisée
+export default React.memo(GameDecks, (prevProps, nextProps) => {
+  return (
+    prevProps.currentPlayerTokens === nextProps.currentPlayerTokens &&
+    prevProps.isCurrentPlayerTurn === nextProps.isCurrentPlayerTurn &&
+    prevProps.hasUsedJokerA === nextProps.hasUsedJokerA &&
+    prevProps.round === nextProps.round &&
+    prevProps.turn === nextProps.turn &&
+    prevProps.consecutivePasses === nextProps.consecutivePasses &&
+    prevProps.jokerEUsed === nextProps.jokerEUsed &&
+    JSON.stringify(prevProps.visibleSandCard) ===
+      JSON.stringify(nextProps.visibleSandCard) &&
+    JSON.stringify(prevProps.visibleBloodCard) ===
+      JSON.stringify(nextProps.visibleBloodCard)
+  );
+});

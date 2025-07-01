@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
 import { AVATAR_LIST } from "../../../constants/avatarConfig";
 import { CARD_TYPES } from "../../../constants/cardDefinitions";
-import { getCardImage } from "../../../constants/cardImages";
+import LazyImage from "../../LazyImage";
 import { useFinalReveal } from "./useFinalReveal";
 
 const FinalRevealOverlay = ({
   players,
+  playerOrder,
   lastPlayerBeforeReveal,
   diceResults,
   compareHands,
@@ -28,6 +29,7 @@ const FinalRevealOverlay = ({
     handleNextPlayer,
   } = useFinalReveal({
     players,
+    playerOrder,
     lastPlayerBeforeReveal,
     diceResults,
     compareHands,
@@ -163,46 +165,52 @@ const FinalRevealOverlay = ({
                       >
                         {card.type === CARD_TYPES.IMPOSTOR && jokerEUsed ? (
                           <>
-                            <img
-                              src={getCardImage(
-                                card.family,
-                                CARD_TYPES.IMPOSTOR,
-                                null
-                              )}
-                              alt="Imposteur"
-                              className={`w-full h-full object-cover rounded-lg absolute inset-0 animate-flip-out ${
+                            <div
+                              className={`w-full h-full absolute inset-0 animate-flip-out ${
                                 isWinner && currentRevealIndex >= players.length
                                   ? "ring-2 ring-green-500"
                                   : ""
                               }`}
-                            />
-                            <img
-                              src={getCardImage(
-                                card.family,
-                                CARD_TYPES.NORMAL,
-                                6
-                              )}
-                              alt="Carte 6"
-                              className={`w-full h-full object-cover rounded-lg absolute inset-0 animate-flip-in ${
+                            >
+                              <LazyImage
+                                family={card.family}
+                                type={CARD_TYPES.IMPOSTOR}
+                                value={null}
+                                alt="Imposteur"
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                            </div>
+                            <div
+                              className={`w-full h-full absolute inset-0 animate-flip-in ${
                                 isWinner && currentRevealIndex >= players.length
                                   ? "ring-2 ring-green-500"
                                   : ""
                               }`}
-                            />
+                            >
+                              <LazyImage
+                                family={card.family}
+                                type={CARD_TYPES.NORMAL}
+                                value={6}
+                                alt="Carte 6"
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                            </div>
                           </>
                         ) : (
-                          <img
-                            src={getCardImage(
-                              card.family,
+                          <LazyImage
+                            family={card.family}
+                            type={
                               card.type === CARD_TYPES.IMPOSTOR && card.value
                                 ? CARD_TYPES.NORMAL
-                                : card.type,
+                                : card.type
+                            }
+                            value={
                               card.type === CARD_TYPES.IMPOSTOR && card.value
                                 ? card.value
                                 : card.type === CARD_TYPES.NORMAL
                                 ? card.value
                                 : null
-                            )}
+                            }
                             alt={`${card.type} ${card.value || ""}`}
                             className={`w-full h-full object-cover rounded-lg ${
                               isWinner && currentRevealIndex >= players.length

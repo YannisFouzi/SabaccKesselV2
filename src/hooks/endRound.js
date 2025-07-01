@@ -122,6 +122,7 @@ const endRound = ({
   compareHands,
   playerOrder,
   roundStartPlayer,
+  setLastPlayerBeforeReveal,
 }) => {
   if (!Array.isArray(players) || !players.length) {
     console.error("Invalid players array:", players);
@@ -150,6 +151,8 @@ const endRound = ({
     setRoundStartPlayer(nextStarter);
     setPlayers(remainingPlayers);
     setRound((prev) => prev + 1);
+    // Réinitialiser lastPlayerBeforeReveal pour la nouvelle manche
+    setLastPlayerBeforeReveal(null);
     setGameState(GAME_STATES.SETUP);
   }
 

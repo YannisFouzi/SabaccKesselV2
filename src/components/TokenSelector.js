@@ -1,183 +1,188 @@
-import React, { useEffect, useState } from "react";
-import jeton from "../assets/img/jeton.png";
-import jetonKo from "../assets/img/jeton_ko.png";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { GAME_CONFIG } from "../constants/gameConstants";
+import LazyImage from "./LazyImage";
 
 const TokenSelector = ({ value, onChange }) => {
-  const MIN_TOKENS = 4;
-  const MAX_TOKENS = 12;
   const [inputValue, setInputValue] = useState(value || "");
 
-  const handleInputChange = (e) => {
-    const newValue = e.target.value;
-    if (newValue === "" || /^\d+$/.test(newValue)) {
-      const numValue = parseInt(newValue, 10);
+  // Fonctions de chargement d'images optimisées
+  const loadJetonImage = useCallback(
+    () => import("../assets/img/jeton.png").then((module) => module.default),
+    []
+  );
 
-      if (!isNaN(numValue)) {
-        if (numValue > MAX_TOKENS) {
-          setInputValue(MAX_TOKENS.toString());
-          onChange(MAX_TOKENS);
-          return;
-        }
-      }
+  const loadJetonKoImage = useCallback(
+    () => import("../assets/img/jeton_ko.png").then((module) => module.default),
+    []
+  );
 
+  // Mémoriser les validations
+  const isValidToken = useMemo(() => {
+    const num = parseInt(inputValue);
+    return (
+      !isNaN(num) &&
+      num >= GAME_CONFIG.MIN_TOKENS &&
+      num <= GAME_CONFIG.MAX_TOKENS
+    );
+  }, [inputValue]);
+
+  // Optimiser les callbacks
+  const handleInputChange = useCallback(
+    (e) => {
+      const newValue = e.target.value;
       setInputValue(newValue);
-      if (numValue >= MIN_TOKENS && numValue <= MAX_TOKENS) {
+
+      const numValue = parseInt(newValue);
+      if (
+        !isNaN(numValue) &&
+        numValue >= GAME_CONFIG.MIN_TOKENS &&
+        numValue <= GAME_CONFIG.MAX_TOKENS
+      ) {
         onChange(numValue);
-      } else {
-        onChange(null);
       }
+    },
+    [onChange]
+  );
+
+  const handlePresetClick = useCallback(
+    (presetValue) => {
+      setInputValue(presetValue.toString());
+      onChange(presetValue);
+    },
+    [onChange]
+  );
+
+  useEffect(() => {
+    if (value) {
+      setInputValue(value.toString());
     }
-  };
+  }, [value]);
 
-  const isValid = value && value >= MIN_TOKENS && value <= MAX_TOKENS;
+  // Mémoriser les jetons à afficher
+  const tokensToShow = useMemo(() => {
+    if (!value || value <= 0) return [];
+    const maxTokens = Math.min(value, 20);
+    return Array(maxTokens).fill(null);
+  }, [value]);
 
-  // On utilise directement la valeur saisie pour le nombre de jetons
-  const tokensToShow = value || 0;
-
-  // Gardez en mémoire le nombre précédent de jetons pour l'animation
   const [previousTokens, setPreviousTokens] = useState(tokensToShow);
 
   // Utilisez useEffect pour mettre à jour previousTokens après chaque changement
   useEffect(() => {
     const timer = setTimeout(() => {
       setPreviousTokens(tokensToShow);
-    }, 300); // Durée de l'animation
+    }, 300);
     return () => clearTimeout(timer);
   }, [tokensToShow]);
 
-  // Calculez le nombre maximum de jetons à afficher
-  const maxTokensToShow = Math.max(previousTokens, tokensToShow);
+  const renderTokens = useMemo(() => {
+    const maxDisplay = Math.max(tokensToShow.length, previousTokens.length);
 
-  return (
-    <div className="flex flex-col items-center space-y-4">
-      <div className="text-center">
-        <span className="text-blue-200">
-          {value && !isValid
-            ? `Entre ${MIN_TOKENS} et ${MAX_TOKENS} jetons`
-            : ""}
-        </span>
-      </div>
+    return Array(maxDisplay)
+      .fill(null)
+      .map((_, index) => {
+        const isActive = index < tokensToShow.length;
+        const wasActive = index < previousTokens.length;
+        const isChanging = isActive !== wasActive;
 
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative flex-shrink-0">
-          <div className="relative w-[400px] h-20 flex items-center justify-center">
-            {[...Array(maxTokensToShow)].map((_, index) => {
-              const shouldShow = index < tokensToShow;
-              const isExiting = index >= tokensToShow && index < previousTokens;
-              const exitDelay = isExiting
-                ? (previousTokens - index - 1) * 0.02 // Pour que ça parte de droite à gauche
-                : 0;
-
-              return (
-                <img
-                  key={index}
-                  src={isValid ? jeton : jetonKo}
-                  alt=""
-                  className={`absolute w-14 h-14 object-contain
-                    transition-all duration-200 ease-in-out
-                    hover:scale-110 ${isExiting ? "token-exit" : ""}`}
-                  style={{
-                    left: `${(index - maxTokensToShow / 2) * 30 + 200}px`,
-                    zIndex: index,
-                    opacity: shouldShow ? 0 : undefined,
-                    animation: shouldShow
-                      ? `fadeIn 0.3s ease-out ${index * 0.02}s forwards`
-                      : isExiting
-                      ? `fadeOut 0.3s ease-out ${exitDelay}s forwards`
-                      : undefined,
-                  }}
-                />
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center w-full max-w-[200px]">
-          <div className="relative w-full">
-            <input
-              type="number"
-              min={MIN_TOKENS}
-              max={MAX_TOKENS}
-              value={inputValue}
-              onChange={handleInputChange}
-              placeholder={"Jetons (min.4)"}
-              className="w-full bg-white/10 border-2 border-white/20 rounded-xl 
-                px-4 py-2 text-white placeholder-white/50 text-center
-                focus:outline-none focus:border-white/40
-                transition-all duration-200
-                [appearance:textfield]
-                [&::-webkit-outer-spin-button]:appearance-none
-                [&::-webkit-inner-spin-button]:appearance-none"
+        return (
+          <div
+            key={index}
+            className={`
+              w-4 h-4 transition-all duration-300 ease-in-out transform
+              ${isActive ? "scale-100 opacity-100" : "scale-75 opacity-30"}
+              ${isChanging ? "animate-pulse" : ""}
+            `}
+          >
+            <LazyImage
+              loadImageFn={isActive ? loadJetonImage : loadJetonKoImage}
+              alt="Jeton"
+              className="w-full h-full object-contain"
+              fallbackClassName="rounded-full bg-amber-300"
             />
           </div>
+        );
+      });
+  }, [tokensToShow, previousTokens, loadJetonImage, loadJetonKoImage]);
 
-          {value && !isValid && (
-            <p className="text-red-400 text-sm mt-2 text-center">
-              Entre {MIN_TOKENS} et {MAX_TOKENS} jetons
-            </p>
-          )}
+  const presetButtons = useMemo(() => [4, 8, 12, 16, 20], []);
 
-          {/* Suggestions rapides */}
-          <div className="flex justify-center flex-wrap gap-2 mt-3">
-            {[4, 6, 8, 10, 12].map((amount) => (
-              <button
-                key={amount}
-                onClick={() => {
-                  setInputValue(amount.toString());
-                  onChange(amount);
-                }}
-                className={`px-3 py-1 rounded-lg text-sm transition-all duration-200
-                  ${
-                    value === amount
-                      ? "bg-blue-500 text-white"
-                      : "bg-white/10 text-white/70 hover:bg-white/20"
-                  }`}
-              >
-                {amount}
-              </button>
-            ))}
+  return (
+    <div className="space-y-4">
+      <div className="text-center">
+        <label className="block text-white text-lg font-bold mb-2">
+          Nombre de jetons par joueur
+        </label>
+        <div className="flex items-center justify-center space-x-4">
+          <input
+            type="number"
+            min={GAME_CONFIG.MIN_TOKENS}
+            max={GAME_CONFIG.MAX_TOKENS}
+            value={inputValue}
+            onChange={handleInputChange}
+            className={`
+              w-20 p-2 text-center text-lg font-bold rounded-lg
+              border-2 transition-colors duration-200
+              ${
+                isValidToken
+                  ? "border-green-500 bg-white text-gray-800 focus:border-green-600"
+                  : "border-red-500 bg-red-100 text-red-800 focus:border-red-600"
+              }
+              focus:outline-none focus:ring-2 focus:ring-opacity-50
+              ${isValidToken ? "focus:ring-green-300" : "focus:ring-red-300"}
+            `}
+          />
+          <span className="text-white text-sm">
+            ({GAME_CONFIG.MIN_TOKENS}-{GAME_CONFIG.MAX_TOKENS})
+          </span>
+        </div>
+
+        {!isValidToken && inputValue && (
+          <p className="text-red-400 text-sm mt-1">
+            Choisissez entre {GAME_CONFIG.MIN_TOKENS} et{" "}
+            {GAME_CONFIG.MAX_TOKENS} jetons
+          </p>
+        )}
+      </div>
+
+      <div className="flex justify-center space-x-2">
+        {presetButtons.map((preset) => (
+          <button
+            key={preset}
+            onClick={() => handlePresetClick(preset)}
+            className={`
+              px-3 py-1 rounded text-sm font-medium transition-all duration-200
+              ${
+                value === preset
+                  ? "bg-purple-600 text-white shadow-lg transform scale-105"
+                  : "bg-white/20 text-white hover:bg-white/30 hover:scale-105"
+              }
+            `}
+          >
+            {preset}
+          </button>
+        ))}
+      </div>
+
+      {value > 0 && (
+        <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg">
+          <div className="text-center text-white text-sm mb-2">
+            Aperçu: {value} jetons
+          </div>
+          <div className="flex flex-wrap justify-center gap-1 max-h-24 overflow-hidden">
+            {renderTokens}
+            {value > 20 && (
+              <div className="text-white text-xs mt-1">
+                ... et {value - 20} de plus
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
 
-// Définition des styles d'animation
-const styles = `
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.3) translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
-
-  @keyframes fadeOut {
-    from {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-    to {
-      opacity: 0;
-      transform: scale(0.3) translateY(-20px);
-    }
-  }
-
-  .token-exit {
-    animation: fadeOut 0.3s ease-out forwards;
-  }
-`;
-
-// Export du composant wrapper avec les styles
-const TokenSelectorWithStyles = (props) => (
-  <>
-    <style>{styles}</style>
-    <TokenSelector {...props} />
-  </>
-);
-
-export default TokenSelectorWithStyles;
+export default React.memo(TokenSelector, (prevProps, nextProps) => {
+  return prevProps.value === nextProps.value;
+});

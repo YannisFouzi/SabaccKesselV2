@@ -314,6 +314,7 @@ export const createGameActions = ({
       compareHands,
       playerOrder,
       roundStartPlayer,
+      setLastPlayerBeforeReveal: setters.setLastPlayerBeforeReveal,
     });
 
   return {

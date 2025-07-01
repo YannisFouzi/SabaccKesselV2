@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { getCardImage } from "../../constants/cardImages";
 import { CARD_TYPES } from "../../constants/gameConstants";
+import LazyImage from "../LazyImage";
 
 const DiscardChoice = ({
   pendingDrawnCard,
@@ -51,14 +51,14 @@ const DiscardChoice = ({
       {isConfirming ? (
         <div className="flex flex-col items-center space-y-4">
           <div className="w-32 h-48 rounded-lg">
-            <img
-              src={getCardImage(
-                selectedCard.family,
-                selectedCard.type,
+            <LazyImage
+              family={selectedCard.family}
+              type={selectedCard.type}
+              value={
                 selectedCard.type === CARD_TYPES.NORMAL
                   ? selectedCard.value
                   : null
-              )}
+              }
               alt={`Carte à défausser ${selectedCard.type}`}
               className="w-full h-full rounded-lg opacity-50"
             />
@@ -87,14 +87,14 @@ const DiscardChoice = ({
               className="cursor-pointer transform hover:scale-105 transition-transform"
             >
               <div className="w-32 h-48 rounded-lg">
-                <img
-                  src={getCardImage(
-                    pendingDrawnCard.family,
-                    pendingDrawnCard.type,
+                <LazyImage
+                  family={pendingDrawnCard.family}
+                  type={pendingDrawnCard.type}
+                  value={
                     pendingDrawnCard.type === CARD_TYPES.NORMAL
                       ? pendingDrawnCard.value
                       : null
-                  )}
+                  }
                   alt={`Nouvelle carte ${pendingDrawnCard.type}`}
                   className="w-full h-full rounded-lg"
                 />
@@ -110,14 +110,14 @@ const DiscardChoice = ({
               className="cursor-pointer transform hover:scale-105 transition-transform"
             >
               <div className="w-32 h-48 rounded-lg">
-                <img
-                  src={getCardImage(
-                    sameTypeCard.family,
-                    sameTypeCard.type,
+                <LazyImage
+                  family={sameTypeCard.family}
+                  type={sameTypeCard.type}
+                  value={
                     sameTypeCard.type === CARD_TYPES.NORMAL
                       ? sameTypeCard.value
                       : null
-                  )}
+                  }
                   alt={`Carte actuelle ${sameTypeCard.type}`}
                   className="w-full h-full rounded-lg"
                 />
