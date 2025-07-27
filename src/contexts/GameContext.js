@@ -5,9 +5,9 @@ import useGameState from "../hooks/useGameState";
 const GameContext = createContext();
 
 // Hook pour utiliser le contexte
-export const useGameContext = () => {
+export const useGameContext = (allowNull = false) => {
   const context = useContext(GameContext);
-  if (!context) {
+  if (!context && !allowNull) {
     throw new Error("useGameContext doit être utilisé dans un GameProvider");
   }
   return context;
@@ -216,7 +216,19 @@ export const GameProvider = ({
 };
 
 // Hooks spécialisés pour des parties spécifiques du state
-export const useGameInfo = () => {
+export const useGameInfo = (allowNull = false) => {
+  const context = useGameContext(allowNull);
+  if (!context) {
+    return {
+      gameState: null,
+      round: 0,
+      turn: 0,
+      consecutivePasses: 0,
+      isGameOver: false,
+      winners: [],
+      jokerEUsed: false,
+    };
+  }
   const {
     gameState,
     round,
@@ -225,7 +237,7 @@ export const useGameInfo = () => {
     isGameOver,
     winners,
     jokerEUsed,
-  } = useGameContext();
+  } = context;
   return {
     gameState,
     round,
@@ -237,14 +249,24 @@ export const useGameInfo = () => {
   };
 };
 
-export const usePlayersInfo = () => {
+export const usePlayersInfo = (allowNull = false) => {
+  const context = useGameContext(allowNull);
+  if (!context) {
+    return {
+      players: [],
+      currentPlayerIndex: 0,
+      playerOrder: [],
+      roundStartPlayer: 0,
+      startingTokens: 0,
+    };
+  }
   const {
     players,
     currentPlayerIndex,
     playerOrder,
     roundStartPlayer,
     startingTokens,
-  } = useGameContext();
+  } = context;
   return {
     players,
     currentPlayerIndex,
@@ -254,7 +276,19 @@ export const usePlayersInfo = () => {
   };
 };
 
-export const useCardsInfo = () => {
+export const useCardsInfo = (allowNull = false) => {
+  const context = useGameContext(allowNull);
+  if (!context) {
+    return {
+      sandDecks: { visible: [], hidden: [] },
+      bloodDecks: { visible: [], hidden: [] },
+      pendingDrawnCard: null,
+      pendingImpostors: [],
+      currentImpostorIndex: 0,
+      diceResults: [],
+      lastPlayerBeforeReveal: null,
+    };
+  }
   const {
     sandDecks,
     bloodDecks,
@@ -263,7 +297,7 @@ export const useCardsInfo = () => {
     currentImpostorIndex,
     diceResults,
     lastPlayerBeforeReveal,
-  } = useGameContext();
+  } = context;
   return {
     sandDecks,
     bloodDecks,
@@ -275,7 +309,19 @@ export const useCardsInfo = () => {
   };
 };
 
-export const useJokersInfo = () => {
+export const useJokersInfo = (allowNull = false) => {
+  const context = useGameContext(allowNull);
+  if (!context) {
+    return {
+      selectedJokers: {},
+      currentJokerSelectionPlayer: 0,
+      usedJokersThisRound: [],
+      hasUsedJokerA: false,
+      hasUsedJokerB: false,
+      hasUsedJokerC: false,
+      hasUsedJokerD: false,
+    };
+  }
   const {
     selectedJokers,
     currentJokerSelectionPlayer,
@@ -284,7 +330,7 @@ export const useJokersInfo = () => {
     hasUsedJokerB,
     hasUsedJokerC,
     hasUsedJokerD,
-  } = useGameContext();
+  } = context;
   return {
     selectedJokers,
     currentJokerSelectionPlayer,
@@ -296,7 +342,32 @@ export const useJokersInfo = () => {
   };
 };
 
-export const useGameActions = () => {
+export const useGameActions = (allowNull = false) => {
+  const context = useGameContext(allowNull);
+  if (!context) {
+    return {
+      drawCard: () => {},
+      handleDiscard: () => {},
+      passTurn: () => {},
+      rollDice: () => {},
+      selectImpostorValue: () => {},
+      handleImpostorValue: () => {},
+      endRound: () => {},
+      useJoker: () => {},
+      setGameState: () => {},
+      setDiceResults: () => {},
+      setSelectedJokers: () => {},
+      setCurrentJokerSelectionPlayer: () => {},
+      setPlayerOrder: () => {},
+      calculateHandValue: () => 0,
+      compareHands: () => 0,
+      getHandValue: () => 0,
+      getHistorySinceLastTurn: () => [],
+      confirmTransition: () => {},
+      isTransitioning: false,
+      actionHistory: [],
+    };
+  }
   const {
     drawCard,
     handleDiscard,
@@ -318,7 +389,7 @@ export const useGameActions = () => {
     confirmTransition,
     isTransitioning,
     actionHistory,
-  } = useGameContext();
+  } = context;
 
   return {
     drawCard,

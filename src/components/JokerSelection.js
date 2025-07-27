@@ -15,17 +15,34 @@ Object.keys(JOKERS).forEach((key) => {
 });
 
 const JokerSelection = ({
+  // Props pour le mode standalone
+  players: propsPlayers,
+  currentJokerSelectionPlayer: propsCurrentJokerSelectionPlayer,
+  setSelectedJokers: propsSetSelectedJokers,
+  setCurrentJokerSelectionPlayer: propsSetCurrentJokerSelectionPlayer,
   setGameState,
   standalone = false,
   jokers = JOKERS,
 }) => {
   const [currentSelection, setCurrentSelection] = useState([]);
 
-  // Utilisation des hooks du Context API
-  const { players } = usePlayersInfo();
-  const { currentJokerSelectionPlayer, selectedJokers } = useJokersInfo();
-  const { setSelectedJokers, setCurrentJokerSelectionPlayer } =
-    useGameActions();
+  // Utiliser les hooks avec allowNull pour le mode standalone
+  const playersInfo = usePlayersInfo(standalone);
+  const jokersInfo = useJokersInfo(standalone);
+  const gameActions = useGameActions(standalone);
+
+  // Choisir entre Context et props selon le mode
+  const players = standalone ? propsPlayers : playersInfo.players;
+  const currentJokerSelectionPlayer = standalone
+    ? propsCurrentJokerSelectionPlayer
+    : jokersInfo.currentJokerSelectionPlayer;
+  const selectedJokers = standalone ? null : jokersInfo.selectedJokers;
+  const setSelectedJokers = standalone
+    ? propsSetSelectedJokers
+    : gameActions.setSelectedJokers;
+  const setCurrentJokerSelectionPlayer = standalone
+    ? propsSetCurrentJokerSelectionPlayer
+    : gameActions.setCurrentJokerSelectionPlayer;
 
   const currentPlayer = players[currentJokerSelectionPlayer];
 
